@@ -12,6 +12,11 @@
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio"
   },
+  "allowScripts": {
+  "@prisma/client": true,
+  "@prisma/engines": true,
+  "prisma": true
+},
   "engines": {
     "node": ">=20"
   },
