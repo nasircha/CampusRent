@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: campusrent-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: campusrent
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - campusrent_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d campusrent"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  campusrent_pgdata:

@@ -1,0 +1,1325 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CampusRent</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: sticky bar, compact hero with a calculator-screen readout, keypad-style category keys over a card grid; "My space" is a tabbed list view. Black and yellow, single look. */
+:root{
+  --bg:#0c0c09; --surface:#14140f; --surface-2:#1c1c15; --line:#2e2e24;
+  --fg:#f5f3e6; --muted:#a8a593;
+  --yellow:#ffd60a; --yellow-hi:#ffe24d; --ink:#141200;
+  --lcd-bg:#12120a; --lcd-line:#4a4200; --lcd-label:#c2b037;
+  --ok:#7fdc8f; --bad:#ff7a66;
+  --font-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --font-body:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 15px/1.5 var(--font-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+h1,h2,h3{font-family:var(--font-display);font-variation-settings:"wdth" 112;margin:0;line-height:1.1;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.muted{color:var(--muted)}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(12,12,9,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px;min-height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:1.2rem;font-variation-settings:"wdth" 118;letter-spacing:-.01em}
+.nav{display:flex;gap:4px}
+.nav a{padding:8px 10px;text-decoration:none;font-weight:600;color:var(--muted);border-bottom:2px solid transparent}
+.nav a[aria-current="page"]{color:var(--fg);border-bottom-color:var(--yellow)}
+.nav a:hover{color:var(--fg)}
+.auth{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.who{display:flex;align-items:center;gap:8px;font-weight:600}
+.avatar{width:30px;height:30px;border-radius:4px;background:var(--yellow);color:var(--ink);display:grid;place-items:center;font-weight:800}
+.who .nm{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:560px){.who .nm{display:none}}
+
+/* buttons and fields */
+.btn{font:700 14px/1 var(--font-body);padding:11px 16px;border-radius:4px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{border-color:var(--yellow)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.btn-primary:hover{background:var(--yellow-hi);border-color:var(--yellow-hi)}
+.btn-sm{padding:8px 12px;font-size:13px}
+.btn-danger{color:var(--bad)}
+.btn-danger:hover{border-color:var(--bad)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--yellow);text-decoration:underline;cursor:pointer}
+input,select,textarea{width:100%;font:400 16px/1.4 var(--font-body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px 12px}
+input::placeholder,textarea::placeholder{color:#6f6c5e}
+input:focus,select:focus,textarea:focus{border-color:var(--yellow)}
+textarea{min-height:84px;resize:vertical}
+.field{display:grid;gap:6px}
+.field label{font-weight:600;font-size:13px}
+.opt{color:var(--muted);font-weight:400}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.two{grid-template-columns:1fr}}
+.err{color:var(--bad);font-size:13px;min-height:1em}
+.hint{color:var(--muted);font-size:13px}
+
+/* hero */
+.hero{padding-top:40px;padding-bottom:28px}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:32px;align-items:center}
+@media(max-width:820px){.hero .wrap{grid-template-columns:minmax(0,1fr)}}
+.hero h1{font-size:clamp(2rem,5.2vw,3.5rem);font-weight:800;letter-spacing:-.02em;line-height:1.04}
+.hl{background:var(--yellow);color:var(--ink);padding:0 .16em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.hero .sub{margin-top:16px;max-width:52ch;color:var(--muted);font-size:1.05rem}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.readout{background:var(--lcd-bg);border:1px solid var(--lcd-line);border-radius:6px;padding:8px 16px}
+.readout .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px dashed #3a3400}
+.readout .row:last-child{border-bottom:0}
+.readout .k{font:600 11px/1.2 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--lcd-label)}
+.readout .v{font:600 2rem/1 var(--font-mono);color:var(--yellow);text-shadow:0 0 14px rgba(255,214,10,.35);font-variant-numeric:tabular-nums}
+
+/* filters */
+.tools{display:grid;gap:12px;padding-top:8px;padding-bottom:18px}
+.search{display:flex;gap:8px;flex-wrap:wrap}
+.search input{flex:1 1 240px;min-width:0}
+.search select{flex:0 0 auto;width:auto;min-width:170px}
+.keys{display:flex;flex-wrap:wrap;gap:8px}
+.key{font:600 13px/1 var(--font-body);padding:9px 12px;border:1px solid var(--line);border-bottom-width:3px;background:var(--surface);color:var(--fg);border-radius:4px;cursor:pointer}
+.key:hover{border-color:var(--yellow)}
+.key[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.key .n{font-family:var(--font-mono);font-size:12px;margin-left:6px;opacity:.7}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:14px}
+.sec-head h2{font-size:1.5rem;font-weight:800}
+
+/* grid */
+.grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.card{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:0;cursor:pointer;overflow:hidden}
+.card:hover{border-color:var(--yellow)}
+.card .img{display:block;aspect-ratio:4/3;background:var(--surface-2);position:relative;overflow:hidden}
+.card .img img{width:100%;height:100%;object-fit:cover;display:block}
+.ph{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--yellow)}
+.ph svg{width:56%;max-height:78%}
+.card .body{display:block;padding:12px 14px 14px}
+.card .t{display:block;font-weight:700;font-size:1rem;line-height:1.25}
+.card .m{display:block;margin-top:4px;color:var(--muted);font-size:13px}
+.card .foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;flex-wrap:wrap}
+.tag-ex{position:absolute;top:8px;left:8px;background:var(--bg);color:var(--yellow);border:1px solid var(--lcd-line);font:600 10px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;padding:4px 6px;border-radius:3px}
+.lcd{font:600 14px/1 var(--font-mono);background:var(--lcd-bg);color:var(--yellow);border:1px solid var(--lcd-line);border-radius:3px;padding:6px 8px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:3px 9px;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.pill.ok{color:var(--ok)}.pill.ok::before{background:var(--ok)}
+.pill.wait{color:var(--yellow)}.pill.wait::before{background:var(--yellow)}
+.pill.bad{color:var(--bad)}.pill.bad::before{background:var(--bad)}
+.empty{border:1px dashed var(--line);border-radius:6px;padding:28px 20px;text-align:center;color:var(--muted);display:grid;gap:12px;justify-items:center}
+
+/* how it works */
+.how{padding-top:56px;padding-bottom:48px}
+.how h2{font-size:1.5rem;font-weight:800;margin-bottom:18px}
+.how ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.how li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:start}
+.how .num{font:600 1.1rem/1 var(--font-mono);width:38px;height:38px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);border-bottom-width:3px;border-radius:4px;color:var(--yellow)}
+.how h3{font-size:1.05rem;font-weight:700;margin-bottom:4px}
+.how p{color:var(--muted)}
+
+footer{border-top:1px solid var(--line);padding-top:20px;padding-bottom:max(28px,env(safe-area-inset-bottom,0px));color:var(--muted);font-size:13px}
+footer .wrap{display:grid;gap:6px}
+
+/* my space */
+.space{padding-top:32px;padding-bottom:56px}
+.space h1{font-size:clamp(1.7rem,4vw,2.5rem);font-weight:800;letter-spacing:-.01em}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:20px 0 28px}
+.stats .readout{padding:6px 16px}
+.stats .row{border-bottom:0;flex-direction:column;align-items:flex-start;gap:8px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto}
+.tab{font:700 14px/1 var(--font-body);padding:12px 14px;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--yellow)}
+.tab .n{font-family:var(--font-mono);font-size:12px;margin-left:6px;background:var(--surface-2);border-radius:3px;padding:2px 6px}
+.tab .n.hot{background:var(--yellow);color:var(--ink)}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ri{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.ri .th{width:56px;height:56px;border-radius:4px;overflow:hidden;background:var(--surface-2)}
+.ri .th img{width:100%;height:100%;object-fit:cover;display:block}
+.ri .th .ph svg{width:70%}
+.ri .tt{font-weight:700;overflow-wrap:anywhere}
+.ri .mm{color:var(--muted);font-size:13px;margin-top:2px;overflow-wrap:anywhere}
+.ri .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+@media(max-width:700px){.ri{grid-template-columns:48px minmax(0,1fr)}.ri .th{width:48px;height:48px}.ri .acts{grid-column:1/-1;justify-content:flex-start}}
+
+/* dialogs */
+dialog{background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:0;width:min(580px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:hidden}
+dialog[open]{display:flex;flex-direction:column}
+dialog::backdrop{background:rgba(0,0,0,.72)}
+.dlg{display:flex;flex-direction:column;gap:14px;padding:20px;overflow-y:auto;min-height:0}
+.dlg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.dlg-head h2{font-size:1.5rem;font-weight:800}
+.x{background:none;border:1px solid var(--line);color:var(--fg);width:34px;height:34px;border-radius:4px;font-size:20px;line-height:1;cursor:pointer;flex:0 0 auto}
+.x:hover{border-color:var(--yellow)}
+.switch{color:var(--muted);font-size:14px}
+.dimg{aspect-ratio:16/9;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.dimg img{width:100%;height:100%;object-fit:cover;display:block}
+.dimg .ph svg{width:34%}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.sum{background:var(--lcd-bg);border:1px solid var(--lcd-line);border-radius:6px;padding:6px 14px}
+.sum div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed #3a3400;font-size:14px}
+.sum div:last-child{border-bottom:0;font-weight:700;color:var(--yellow);font-family:var(--font-mono);font-size:16px}
+.sum span:last-child{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.photo-prev{display:none;width:100%;max-height:180px;object-fit:cover;border-radius:4px;border:1px solid var(--line)}
+.photo-prev.on{display:block}
+.proto{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:var(--yellow);color:var(--ink);font-weight:700;padding:11px 16px;border-radius:4px;max-width:calc(100% - 32px);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+
+/* MESSAGES PAGE - DARK YELLOW THEME */
+.messages-view {
+  min-height: 75vh;
+  padding: 30px 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.messages-view h1 {
+  margin: 0 0 22px;
+  font-size: 28px;
+  color: var(--yellow);
+}
+
+.chat-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: 560px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,.25);
+}
+
+.chat-sidebar {
+  border-right: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.chat-sidebar-head,
+.chat-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.chat-sidebar-head h2 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--yellow);
+}
+
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--surface);
+}
+
+.chat-header {
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.chat-messages {
+  flex: 1;
+  min-height: 350px;
+  padding: 20px;
+  overflow-y: auto;
+  color: var(--fg);
+}
+
+.chat-empty,
+.chat-placeholder {
+  padding: 25px 15px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.chat-empty p {
+  line-height: 1.6;
+}
+
+.chat-composer {
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.chat-composer input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: none;
+}
+
+.chat-composer input:focus {
+  border-color: var(--yellow);
+}
+
+.chat-composer input::placeholder {
+  color: var(--muted);
+}
+
+/* MOBILE */
+@media(max-width:700px) {
+  .messages-view {
+    padding: 18px 0;
+  }
+
+  .chat-layout {
+    grid-template-columns: 1fr;
+    min-height: 500px;
+  }
+
+  .chat-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .chat-messages {
+    min-height: 250px;
+  }
+}
+.unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: 6px;
+  border-radius: 20px;
+  background: var(--yellow);
+  color: #111;
+  font-size: 11px;
+  font-weight: 800;
+}
+/* Conversation list */
+#conversationList {
+  padding: 10px;
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.conversation-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 9px;
+  text-align: left;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.conversation-item:hover {
+  background: var(--surface-2);
+  border-color: var(--yellow);
+}
+
+.conversation-item strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--yellow);
+  font-size: 15px;
+}
+
+.conversation-item span {
+  color: var(--fg);
+  font-size: 13px;
+}
+
+.conversation-item small {
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 6px;
+  border-radius: 50px;
+  background: var(--yellow);
+  color: #111;
+  font-size: 11px;
+  font-weight: 800;
+}
+/* Premium conversation section */
+.chat-sidebar {
+  min-width: 0;
+}
+
+.chat-sidebar-head {
+  background: linear-gradient(135deg, #1c1c15, #14140f);
+}
+
+#conversationList {
+  scrollbar-width: thin;
+  scrollbar-color: var(--yellow) var(--surface);
+}
+
+.conversation-item {
+  position: relative;
+  min-height: 100px;
+  padding: 17px 15px;
+  border-left: 3px solid transparent;
+  box-shadow: 0 3px 12px rgba(0,0,0,.12);
+}
+
+.conversation-item:hover {
+  transform: translateX(3px);
+  border-left-color: var(--yellow);
+  box-shadow: 0 5px 16px rgba(0,0,0,.22);
+}
+
+.conversation-item strong {
+  font-size: 15px;
+  letter-spacing: .2px;
+}
+
+.conversation-item span {
+  font-weight: 600;
+}
+
+.conversation-item small {
+  line-height: 1.5;
+}
+
+.conversation-item:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.chat-empty {
+  margin: 15px 5px;
+  padding: 28px 15px;
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+}
+
+@media(max-width:700px) {
+  #conversationList {
+    max-height: 260px;
+  }
+
+  .conversation-item {
+    min-height: 90px;
+  }
+}
+/* Fixed messages layout with internal scrolling */
+.messages-view {
+  height: calc(100vh - 80px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.messages-view .wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.messages-view h1 {
+  flex-shrink: 0;
+}
+
+.chat-layout {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.chat-sidebar,
+.chat-window {
+  min-height: 0;
+  overflow: hidden;
+}
+
+#conversationList,
+.chat-messages {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.chat-composer {
+  flex-shrink: 0;
+}
+
+@media(max-width:700px) {
+  .messages-view {
+    height: calc(100dvh - 70px);
+  }
+
+  .chat-layout {
+    grid-template-rows: minmax(180px, 40%) minmax(0, 1fr);
+  }
+
+  .chat-sidebar {
+    border-bottom: 1px solid var(--line);
+  }
+}
+/* Selected conversation highlight */
+.conversation-item.active {
+  background: rgba(255, 193, 7, 0.12);
+  border-color: var(--yellow);
+  border-left: 4px solid var(--yellow);
+  box-shadow: 0 0 12px rgba(255, 193, 7, 0.12);
+}
+
+.conversation-item.active strong {
+  color: var(--yellow);
+}
+
+/* Gold Dust - Premium Dark Chat */
+
+.chat-messages {
+  background: #10100D;
+}
+
+.chat-message-row {
+  display: flex;
+  margin: 10px 0;
+  width: 100%;
+}
+
+.chat-message-row.mine {
+  justify-content: flex-end;
+}
+
+.chat-message-row.other {
+  justify-content: flex-start;
+}
+
+.chat-bubble.mine {
+  background: #1D1D19;
+  border: 1px solid #303029;
+  border-radius: 14px 14px 4px 14px;
+}
+
+.chat-bubble.other {
+  background: #1D1D19;
+  border: 1px solid #303029;
+  border-radius: 14px 14px 14px 4px;
+}
+
+.chat-bubble {
+  max-width: 75%;
+  padding: 12px 15px;
+  color: #F0EFE8;
+  overflow-wrap: anywhere;
+}
+
+.chat-message-text {
+  color: #F0EFE8;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.chat-message-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  margin-top: 6px;
+}
+
+.chat-message-meta small {
+  color: #A5A397;
+  font-size: 11px;
+}
+
+.seen-indicator {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: #B49A56;
+  font-size: 11px;
+  font-weight: 600;
+  padding-left: 2px;
+}
+
+.gold-dust {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: #B49A56;
+  animation: goldDust 850ms ease-out forwards;
+}
+
+.dust-one {
+  left: 5px;
+  top: -5px;
+}
+
+.dust-two {
+  left: 15px;
+  top: 3px;
+  background: #776638;
+  animation-delay: 100ms;
+}
+
+.dust-three {
+  left: 24px;
+  top: -4px;
+  animation-delay: 180ms;
+}
+
+@keyframes goldDust {
+  0% {
+    opacity: 0;
+    transform: translateY(3px) scale(0.5);
+  }
+  25% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-9px) scale(0.3);
+  }
+}
+
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#browse" aria-label="CampusRent home">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="4" fill="#ffd60a"/><rect x="5" y="5" width="18" height="7" fill="#141200"/><rect x="5" y="15" width="7" height="7" fill="#141200"/><rect x="16" y="15" width="7" height="7" fill="#141200"/></svg>
+      CampusRent
+    </a>
+    <nav class="nav" aria-label="Main">
+  <a id="navBrowse" href="#browse">Home</a>
+  <a id="navMessages" href="#messages">Messages</a>
+  <a id="navSpace" href="#my-space">My space</a>
+</nav>
+    <div class="auth" id="authArea"></div>
+  </div>
+</header>
+
+<main>
+  <section id="viewBrowse">
+    <div class="hero">
+      <div class="wrap">
+        <div>
+          <h1>Rent what you need for exams. <span class="hl">Earn from what you don't.</span></h1>
+          <p class="sub">Borrow scientific calculators, exam pens, drafters and lab gear from students on your campus. Lend your own when it sits unused and earn rent for every day it is out.</p>
+          <div class="cta">
+            <button class="btn btn-primary" data-action="scroll-grid">Browse gear</button>
+            <button class="btn" data-action="open-list">List an item</button>
+          </div>
+        </div>
+        <div class="readout" aria-label="Live listing counts">
+          <div class="row"><span class="k">Items open</span><span class="v" id="rdOpen">0</span></div>
+          <div class="row"><span class="k">Rent from / day</span><span class="v" id="rdFrom">0</span></div>
+          <div class="row"><span class="k">Out on rent</span><span class="v" id="rdOut">0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap tools" id="browse-grid">
+      <div class="search">
+        <input id="q" type="search" placeholder="Search calculators, pens, drafters..." aria-label="Search items">
+        <select id="sort" aria-label="Sort items">
+          <option value="new">Newest first</option>
+          <option value="low">Price: low to high</option>
+          <option value="high">Price: high to low</option>
+        </select>
+      </div>
+      <div class="keys" id="keys" role="group" aria-label="Categories"></div>
+    </div>
+
+    <div class="wrap">
+      <div class="sec-head"><h2>Available on campus</h2><span class="muted" id="count"></span></div>
+      <ul class="grid" id="grid"></ul>
+    </div>
+
+    <section class="wrap how" aria-labelledby="howT">
+      <h2 id="howT">How it works</h2>
+      <ol>
+        <li><span class="num">1</span><div><h3>List your gear</h3><p>Add a photo, a daily rent and a refundable deposit. It takes about a minute.</p></div></li>
+        <li><span class="num">2</span><div><h3>Request and approve</h3><p>A borrower picks the days and a pickup date. You accept or decline.</p></div></li>
+        <li><span class="num">3</span><div><h3>Hand over and return</h3><p>Meet on campus, settle rent and deposit in person, then mark the item returned.</p></div></li>
+      </ol>
+    </section>
+  </section>
+    <section id="viewMsgs" class="messages-view" hidden>
+    <div class="wrap">
+      <h1>Messages</h1>
+      <div class="chat-layout">
+        <aside class="chat-sidebar">
+          <div class="chat-sidebar-head">
+            <h2>Conversations</h2>
+          </div>
+          <div id="conversationList">
+            <div class="chat-empty">
+              <p>No conversations yet.</p>
+              <p>Open an item and tap Message to start one.</p>
+              <button class="btn btn-primary" data-action="browse-from-chat">Browse items</button>
+            </div>
+          </div>
+        </aside>
+        <section class="chat-window">
+          <div id="chatHeader" class="chat-header">Select a conversation</div>
+          <div id="chatMessages" class="chat-messages">
+            <p class="chat-placeholder">Choose a conversation to read and reply.</p>
+          </div>
+          <form id="chatForm" class="chat-composer" hidden>
+            <input id="chatInput" type="text" maxlength="2000" placeholder="Write a message..." autocomplete="off">
+            <button class="btn btn-primary" type="submit">Send</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewSpace" class="space" hidden>
+    <div class="wrap" id="spaceBody"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+  <p>Developed by Nasir Hussain</p>
+  <p style="color: #b00; font-size: 0.9em;">⚠️ Testing phase — features may change.</p>
+  </div> 
+</footer>
+
+<dialog id="dlgAuth" aria-labelledby="authTitle">
+  <form id="authForm" class="dlg" novalidate>
+    <div class="dlg-head"><h2 id="authTitle">Log in</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
+    <p id="authHint" class="hint"></p>
+    <div class="field" data-signup><label for="aName">Full name</label><input id="aName" autocomplete="name"></div>
+    <div class="field" data-signup><label for="aCollege">College or hostel <span class="opt">(optional)</span></label><input id="aCollege" placeholder="e.g. Boys Hostel B, Engineering"></div>
+    <div class="field"><label for="aEmail">Email</label><input id="aEmail" type="email" autocomplete="email"></div>
+    <div class="field"><label for="aPass">Password</label><input id="aPass" type="password" autocomplete="current-password"></div>
+    <p id="forgotPasswordLink" class="switch" hidden>
+  <a href="#" id="forgotPasswordBtn">Forgot password?</a>
+</p>
+    <div class="field" id="otpField" hidden>
+  <label for="aOtp">Email OTP</label>
+  <input id="aOtp" type="text" inputmode="numeric"
+         maxlength="6" placeholder="Enter 6-digit OTP"
+         autocomplete="one-time-code">
+</div>
+    <p id="authErr" class="err" role="alert"></p>
+    <button class="btn btn-primary" id="authSubmit" type="submit">Log in</button>
+    <p class="switch"><span id="authSwitchText">New here?</span> <button type="button" class="linkbtn" id="authSwitch" data-action="switch-auth">Create an account</button></p>
+  </form>
+</dialog>
+
+<dialog id="dlgList" aria-labelledby="listTitle">
+  <form id="listForm" class="dlg" novalidate>
+    <div class="dlg-head"><h2 id="listTitle">List an item</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
+    <div class="field"><label for="lTitle">Item name</label><input id="lTitle" maxlength="70" placeholder="e.g. Casio fx-991EX calculator"></div>
+    <div class="two">
+      <div class="field"><label for="lCat">Category</label><select id="lCat"></select></div>
+      <div class="field"><label for="lCond">Condition</label><select id="lCond"></select></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="lPrice">Rent per day (&#8377;)</label><input id="lPrice" type="number" min="1" max="5000" inputmode="numeric" placeholder="25"></div>
+      <div class="field"><label for="lDep">Refundable deposit (&#8377;)</label><input id="lDep" type="number" min="0" max="20000" inputmode="numeric" placeholder="300"></div>
+    </div>
+    <div class="field"><label for="lLoc">Pickup spot</label><input id="lLoc" maxlength="60" placeholder="Hostel, block or department"></div>
+    <div class="field"><label for="lDesc">Description <span class="opt">(optional)</span></label><textarea id="lDesc" maxlength="400" placeholder="What is included, any marks or wear, when you are free to hand over."></textarea></div>
+    <div class="field"><label for="lPhoto">Photo <span class="opt">(optional)</span></label><input id="lPhoto" type="file" accept="image/*"><img id="lPrev" class="photo-prev" alt="Photo preview"></div>
+    <p id="listErr" class="err" role="alert"></p>
+    <button class="btn btn-primary" type="submit">Publish listing</button>
+    <p class="proto">Prototype mode: your listing is saved on this device only.</p>
+  </form>
+</dialog>
+
+<dialog id="dlgItem" aria-label="Item details"><div class="dlg" id="itemBody"></div></dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var API='/api',TOKEN_KEY='campusrent.token';
+var CATS=[{id:'calc',label:'Calculators'},{id:'pens',label:'Pens & Stationery'},{id:'lab',label:'Drafting & Lab'},{id:'books',label:'Books & Notes'},{id:'tech',label:'Electronics'},{id:'other',label:'Other'}];
+var CONDS=['New','Like new','Good','Worn but works'];
+var STATUS={pending:['Waiting for owner','wait'],accepted:['Approved','ok'],declined:['Declined','bad'],cancelled:['Cancelled',''],returned:['Returned','']};
+var ICONS={calc:'<rect x="36" y="8" width="48" height="74" rx="5"/><rect x="42" y="15" width="36" height="14"/><path d="M44 40h8M58 40h8M72 40h4M44 52h8M58 52h8M72 52h4M44 64h8M58 64h8M72 64h4"/>',pens:'<path d="M34 72L78 22l10 9L44 82Z"/><path d="M34 72l-6 14 16-4"/><path d="M72 28l10 9"/>',lab:'<path d="M26 78V16l62 62Z"/><path d="M38 66V44l22 22Z"/><path d="M26 30h6M26 44h6M26 58h6"/>',books:'<rect x="28" y="14" width="26" height="66"/><rect x="54" y="22" width="26" height="58"/><path d="M34 26h14M60 34h14"/>',tech:'<rect x="34" y="26" width="52" height="38" rx="4"/><rect x="48" y="36" width="24" height="18"/><path d="M44 18v8M60 18v8M76 18v8M44 64v8M60 64v8M76 64v8M26 38h8M26 52h8M86 38h8M86 52h8"/>',other:'<path d="M60 14l28 14v32L60 74 32 60V28Z"/><path d="M32 28l28 14 28-14M60 42v32"/>'};
+function $(s,r){return (r||document).querySelector(s)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function inr(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
+function catLabel(id){var c=CATS.find(function(x){return x.id===id});return c?c.label:'Other'}
+function today(){var d=new Date(),off=d.getTimezoneOffset();return new Date(d.getTime()-off*60000).toISOString().slice(0,10)}
+function fmtDate(s){var d=new Date(s+'T00:00');return isNaN(d)?s:d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}
+var token=localStorage.getItem(TOKEN_KEY)||'',state={user:null,items:[],rentals:[]};
+var ui={q:'',cat:'all',sort:'new',tab:'listings',authMode:'login',otpSent:false,pending:null,photoFile:null,photoUrl:'',confirmDel:null};
+async function api(path,opts){opts=opts||{};var headers=opts.headers||{};if(token)headers.Authorization='Bearer '+token;if(opts.body&&!(opts.body instanceof FormData))headers['Content-Type']='application/json';var res=await fetch(API+path,Object.assign({},opts,{headers:headers}));var data={};try{data=await res.json()}catch(e){}if(!res.ok){if(res.status===401&&token){token='';localStorage.removeItem(TOKEN_KEY);state.user=null;renderHeader()}throw new Error(data.error||'Request failed ('+res.status+')')}return data}
+var activeConversationId = null;
+var conversations = [];
+
+async function loadConversations() {
+  var data = await api('/messages');
+  conversations = data.conversations || [];
+  renderConversations();
+}
+
+function renderConversations() {
+  var list = $('#conversationList');
+
+  if (!conversations.length) {
+    list.innerHTML = `
+      <div class="chat-empty">
+        <p>No conversations yet.</p>
+        <p>Open an item and tap Message to start one.</p>
+        <button class="btn btn-primary" data-action="browse-from-chat">
+          Browse items
+        </button>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = conversations.map(function(c) {
+    var other = c.renterId === me().id
+      ? c.item.owner
+      : c.renter;
+
+    var last = c.messages && c.messages[0];
+    var unread = c.unreadCount || 0;
+
+var unreadBadge = unread > 0
+  ? '<span class="unread-badge">' + unread + '</span>'
+  : '';
+
+    return `
+      <button class="conversation-item ${activeConversationId === c.id ? 'active' : ''}"
+        data-action="open-conversation"
+        data-id="${esc(c.id)}">
+        <strong>${esc(other.name)} ${unreadBadge}</strong>
+        <span>${esc(c.item.title)}</span>
+        <small>${esc(last ? last.body : 'Start a conversation')}</small>
+      </button>`;
+  }).join('');
+}
+function formatMessageTime(date) {
+  var d = new Date(date);
+  var now = new Date();
+
+  var isToday = d.toDateString() === now.toDateString();
+
+  var yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+
+  var isYesterday = d.toDateString() === yesterday.toDateString();
+
+  if (isToday) {
+    return d.toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  }
+
+  if (isYesterday) {
+    return 'Yesterday';
+  }
+
+  return d.toLocaleDateString([], {
+    day: 'numeric',
+    month: 'short'
+  });
+}
+async function openConversation(id) {
+  try {
+    var data = await api('/messages/' + encodeURIComponent(id) + '/messages');
+
+    activeConversationId = id;
+
+    var c = data.conversation;
+    var other = c.renterId === me().id
+      ? c.item.owner
+      : c.renter;
+
+    $('#chatHeader').textContent = other.name + ' · ' + c.item.title;
+
+    
+$('#chatMessages').innerHTML = (data.messages || []).map(function(m) {
+  var mine = m.senderId === me().id;
+  var seen = mine && m.seenAt;
+
+  return `
+    <div class="chat-message-row ${mine ? 'mine' : 'other'}">
+      <div class="chat-bubble ${mine ? 'mine' : 'other'}">
+        <div class="chat-message-text">${esc(m.body)}</div>
+
+        <div class="chat-message-meta">
+          <small>${formatMessageTime(m.createdAt)}</small>
+
+          ${seen ? `
+            <span class="seen-indicator">
+              <span class="gold-dust dust-one"></span>
+              <span class="gold-dust dust-two"></span>
+              <span class="gold-dust dust-three"></span>
+              · ✦ Seen
+            </span>
+          ` : ''}
+        </div>
+      </div>
+    </div>`;
+}).join('') || '<p class="chat-placeholder">No messages yet. Say hello!</p>';
+
+
+    $('#chatForm').hidden = false;
+    $('#chatMessages').scrollTop = $('#chatMessages').scrollHeight;
+    await loadConversations();
+  } catch (error) {
+    toast(error.message);
+  }
+}
+
+$('#chatForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  if (!activeConversationId) return;
+
+  var body = $('#chatInput').value.trim();
+  if (!body) return;
+
+  try {
+    await api('/messages/' + encodeURIComponent(activeConversationId) + '/messages', {
+      method: 'POST',
+      body: JSON.stringify({ body: body })
+    });
+
+    $('#chatInput').value = '';
+    await openConversation(activeConversationId);
+  } catch (error) {
+    toast(error.message);
+  }
+});
+
+async function refresh(){var data=await api('/bootstrap');state.user=data.user;state.items=data.items;state.rentals=data.rentals;renderHeader();renderBrowse();if(location.hash==='#my-space')renderSpace()}
+function me(){return state.user}
+function itemById(id){return state.items.find(function(x){return x.id===id})}
+function rentalById(id){return state.rentals.find(function(x){return x.id===id})}
+var toastTimer=null;function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('on')},3200)}
+function phSvg(cat){return '<svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[cat]||ICONS.other)+'</svg>'}
+function imgHtml(it){if(it&&it.photo)return '<img src="'+esc(it.photo)+'" alt="" loading="lazy">';return '<span class="ph">'+phSvg(it?it.cat:'other')+'</span>'}
+function statusPill(it){if(it.status==='rented')return '<span class="pill">Rented out</span>';if(it.status==='paused')return '<span class="pill">Paused</span>';return '<span class="pill ok">Available</span>'}
+function renderHeader(){var u=me(),a=$('#authArea');if(u){a.innerHTML='<span class="who"><span class="avatar" aria-hidden="true">'+esc(u.name.charAt(0).toUpperCase())+'</span><span class="nm">'+esc(u.name)+'</span></span><button class="btn btn-sm btn-primary" data-action="open-list">List an item</button><button class="btn btn-sm" data-action="logout">Log out</button>'}else a.innerHTML='<button class="btn btn-sm" data-action="open-login">Log in</button><button class="btn btn-sm btn-primary" data-action="open-signup">Sign up</button>'}
+function visibleItems(){return state.items.filter(function(i){return i.status!=='paused'})}
+function renderReadout(){var v=visibleItems(),open=v.filter(function(i){return i.status==='available'}),out=v.filter(function(i){return i.status==='rented'}).length,min=open.length?Math.min.apply(null,open.map(function(i){return i.price})):0;$('#rdOpen').textContent=open.length;$('#rdFrom').textContent=open.length?inr(min):'-';$('#rdOut').textContent=out}
+function renderKeys(){var v=visibleItems(),html='<button class="key" data-action="key" data-cat="all" aria-pressed="'+(ui.cat==='all')+'">All<span class="n">'+v.length+'</span></button>';CATS.forEach(function(c){var n=v.filter(function(i){return i.cat===c.id}).length;html+='<button class="key" data-action="key" data-cat="'+c.id+'" aria-pressed="'+(ui.cat===c.id)+'">'+esc(c.label)+'<span class="n">'+n+'</span></button>'});$('#keys').innerHTML=html}
+function renderGrid(){var q=ui.q.trim().toLowerCase(),list=visibleItems().filter(function(i){if(ui.cat!=='all'&&i.cat!==ui.cat)return false;if(!q)return true;return (i.title+' '+(i.desc||'')+' '+i.loc+' '+catLabel(i.cat)).toLowerCase().indexOf(q)>-1});list.sort(function(a,b){return ui.sort==='low'?a.price-b.price:ui.sort==='high'?b.price-a.price:new Date(b.createdAt)-new Date(a.createdAt)});$('#count').textContent=list.length+(list.length===1?' item':' items');if(!list.length){$('#grid').innerHTML='<li style="grid-column:1/-1"><div class="empty"><p>No items match your search.</p><button class="btn btn-sm" data-action="clear-filters">Clear filters</button></div></li>';return}$('#grid').innerHTML=list.map(function(i){return '<li><button class="card" data-action="open-item" data-id="'+i.id+'"><span class="img">'+imgHtml(i)+'</span><span class="body"><span class="t">'+esc(i.title)+'</span><span class="m">'+esc(catLabel(i.cat))+' &middot; '+esc(i.cond)+' &middot; '+esc(i.loc)+'</span><span class="foot"><span class="lcd">'+inr(i.price)+'/day</span>'+statusPill(i)+'</span></span></button></li>'}).join('')}
+function renderBrowse(){renderReadout();renderKeys();renderGrid()}
+
+function openItem(id) {
+  var it = itemById(id);
+  if (!it) return;
+
+  var u = me();
+  var own = u && it.ownerId === u.id;
+  var rented = it.status === 'rented';
+  var btn = '';
+  var form = '';
+
+  var messageBtn = '';
+
+  if (!own) {
+    messageBtn = u
+      ? '<button class="btn" data-action="message-owner" data-id="' + it.id + '">Message Owner</button>'
+      : '<button class="btn" data-action="open-login">Log in to message owner</button>';
+  }
+
+  if (own) {
+    btn = '<button class="btn" disabled>This is your listing</button>';
+  } else if (rented || it.status === 'paused') {
+    btn = '<button class="btn" disabled>Currently unavailable</button>';
+  } else if (!u) {
+    btn = '<button class="btn btn-primary" data-action="rent-login" data-id="' + it.id + '">Log in to request</button>';
+  } else {
+    btn = '<button class="btn btn-primary" data-action="rent" data-id="' + it.id + '">Send rental request</button>';
+
+    form = '<div class="two"><div class="field"><label for="iDays">Days</label><input id="iDays" type="number" min="1" max="30" value="3" inputmode="numeric"></div><div class="field"><label for="iStart">Pickup date</label><input id="iStart" type="date" min="' + today() + '" value="' + today() + '"></div></div><div class="field"><label for="iNote">Note to the owner <span class="opt">(optional)</span></label><input id="iNote" maxlength="120" placeholder="e.g. Need it for the Maths exam on Monday"></div><div class="sum" id="iSum" aria-live="polite"></div><p id="iErr" class="err" role="alert"></p>';
+  }
+
+  $('#itemBody').innerHTML =
+    '<div class="dlg-head"><h2>' + esc(it.title) + '</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>' +
+    '<div class="dimg">' + imgHtml(it) + '</div>' +
+    '<div class="facts"><span class="lcd">' + inr(it.price) + '/day</span><span class="pill">Deposit ' + inr(it.deposit) + '</span><span class="pill">' + esc(it.cond) + '</span><span class="pill">' + esc(catLabel(it.cat)) + '</span></div>' +
+    (it.desc ? '<p>' + esc(it.desc) + '</p>' : '') +
+    '<p class="muted">Pickup: ' + esc(it.loc) + '<br>Listed by ' + esc(it.ownerName) + '</p>' +
+    form + messageBtn + btn;
+
+  var dlg = $('#dlgItem');
+  if (!dlg.open) dlg.showModal();
+
+  if (form) updateSum(it);
+}
+
+function updateSum(it){var d=parseInt($('#iDays').value,10);if(!(d>=1))d=0;$('#iSum').innerHTML='<div><span>Rent ('+d+(d===1?' day':' days')+' &times; '+inr(it.price)+')</span><span>'+inr(d*it.price)+'</span></div><div><span>Refundable deposit</span><span>'+inr(it.deposit)+'</span></div><div><span>Pay at handover</span><span>'+inr(d*it.price+it.deposit)+'</span></div>'}
+async function sendRequest(id){var it=itemById(id),days=parseInt($('#iDays').value,10),start=$('#iStart').value,err=$('#iErr');if(!(days>=1&&days<=30)){err.textContent='Choose between 1 and 30 days.';return}if(!start||start<today()){err.textContent='Pick a pickup date from today onward.';return}try{await api('/rentals',{method:'POST',body:JSON.stringify({itemId:id,days:days,start:start,note:$('#iNote').value.trim()})});$('#dlgItem').close();ui.tab='rentals';await refresh();toast('Rental request sent to '+it.ownerName+'.');if(location.hash!=='#my-space')location.hash='my-space'}catch(e){err.textContent=e.message}}
+function tabBtn(id,label,n,hot){return '<button class="tab" role="tab" data-action="tab" data-tab="'+id+'" aria-selected="'+(ui.tab===id)+'">'+label+'<span class="n'+(hot?' hot':'')+'">'+n+'</span></button>'}
+function emptyBox(msg,btn){return '<div class="empty"><p>'+msg+'</p>'+btn+'</div>'}
+function thumb(it,r){return '<span class="th">'+imgHtml(it||(r?{photo:r.photo,cat:r.cat}:null)||{cat:'other'})+'</span>'}
+function rentalMeta(r){return r.days+(r.days===1?' day':' days')+' from '+fmtDate(r.start)+' &middot; '+inr(r.rent)+' rent + '+inr(r.deposit)+' deposit'}
+function statusPillR(r){var s=STATUS[r.status]||['',''];return '<span class="pill '+s[1]+'">'+s[0]+'</span>'}
+function listingsHtml(mine){if(!mine.length)return emptyBox('You have not listed anything yet. Lend a calculator or drafter you are not using.','<button class="btn btn-primary" data-action="open-list">List your first item</button>');return '<ul class="list">'+mine.map(function(i){var acts='';if(i.status!=='rented'){acts+='<button class="btn btn-sm" data-action="toggle-pause" data-id="'+i.id+'">'+(i.status==='paused'?'Resume':'Pause')+'</button>';acts+=ui.confirmDel===i.id?'<button class="btn btn-sm btn-danger" data-action="delete-item" data-id="'+i.id+'">Confirm delete</button>':'<button class="btn btn-sm btn-danger" data-action="ask-delete" data-id="'+i.id+'">Delete</button>'}return '<li class="ri">'+thumb(i)+'<div><div class="tt">'+esc(i.title)+'</div><div class="mm">'+inr(i.price)+'/day &middot; deposit '+inr(i.deposit)+' &middot; '+esc(i.loc)+'</div></div><div class="acts">'+statusPill(i)+acts+'</div></li>'}).join('')+'</ul>'}
+function requestsHtml(list){if(!list.length)return emptyBox('No requests yet. When someone asks to rent one of your items, it shows up here.','');return '<ul class="list">'+list.map(function(r){var acts='';if(r.status==='pending')acts='<button class="btn btn-sm btn-primary" data-action="accept" data-id="'+r.id+'">Accept</button><button class="btn btn-sm" data-action="decline" data-id="'+r.id+'">Decline</button>';if(r.status==='accepted')acts='<button class="btn btn-sm btn-primary" data-action="returned" data-id="'+r.id+'">Mark returned</button>';var contact=(r.status==='accepted'||r.status==='returned')&&r.renterEmail?'<br>Contact: '+esc(r.renterEmail):'';return '<li class="ri">'+thumb(null,r)+'<div><div class="tt">'+esc(r.renterName)+' wants '+esc(r.itemTitle)+'</div><div class="mm">'+rentalMeta(r)+(r.note?'<br>&ldquo;'+esc(r.note)+'&rdquo;':'')+contact+'</div></div><div class="acts">'+statusPillR(r)+acts+'</div></li>'}).join('')+'</ul>'}
+function rentalsHtml(list){if(!list.length)return emptyBox('You have not rented anything yet.','<button class="btn btn-primary" data-action="go-browse">Browse gear</button>');return '<ul class="list">'+list.map(function(r){var acts='';if(r.status==='pending')acts='<button class="btn btn-sm" data-action="cancel" data-id="'+r.id+'">Cancel request</button>';var contact=(r.status==='accepted'||r.status==='returned')&&r.ownerEmail?'<br>Owner: '+esc(r.ownerEmail):'';return '<li class="ri">'+thumb(null,r)+'<div><div class="tt">'+esc(r.itemTitle)+'</div><div class="mm">From '+esc(r.ownerName)+' &middot; '+rentalMeta(r)+contact+'</div></div><div class="acts">'+statusPillR(r)+acts+'</div></li>'}).join('')+'</ul>'}
+function renderSpace(){var u=me();if(!u)return;var mine=state.items.filter(function(i){return i.ownerId===u.id}),incoming=state.rentals.filter(function(r){return r.ownerId===u.id}),outgoing=state.rentals.filter(function(r){return r.renterId===u.id}),earned=incoming.filter(function(r){return r.status==='returned'}).reduce(function(s,r){return s+r.rent},0),out=incoming.filter(function(r){return r.status==='accepted'}).length,spent=outgoing.filter(function(r){return r.status==='accepted'||r.status==='returned'}).reduce(function(s,r){return s+r.rent},0),pend=incoming.filter(function(r){return r.status==='pending'}).length;var h='<div class="sec-head"><h1>Hi, '+esc(u.name.split(' ')[0])+'</h1><button class="btn btn-primary" data-action="open-list">List an item</button></div><div class="stats"><div class="readout"><div class="row"><span class="k">Earned from rentals</span><span class="v">'+inr(earned)+'</span></div></div><div class="readout"><div class="row"><span class="k">Your items out now</span><span class="v">'+out+'</span></div></div><div class="readout"><div class="row"><span class="k">Rent you have paid</span><span class="v">'+inr(spent)+'</span></div></div></div><div class="tabs" role="tablist">'+tabBtn('listings','My listings',mine.length,false)+tabBtn('requests','Requests to me',incoming.length,pend>0)+tabBtn('rentals','My rentals',outgoing.length,false)+'</div>';h+=ui.tab==='listings'?listingsHtml(mine):ui.tab==='requests'?requestsHtml(incoming):rentalsHtml(outgoing);$('#spaceBody').innerHTML=h}
+
+function showView(space, messages) {
+  messages = !!messages;
+
+  $('#viewBrowse').hidden = space || messages;
+  $('#viewSpace').hidden = !space;
+  $('#viewMsgs').hidden = !messages;
+
+  if (space) {
+    $('#navSpace').setAttribute('aria-current', 'page');
+    $('#navBrowse').removeAttribute('aria-current');
+    $('#navMessages').removeAttribute('aria-current');
+    renderSpace();
+  } else if (messages) {
+    $('#navMessages').setAttribute('aria-current', 'page');
+    $('#navBrowse').removeAttribute('aria-current');
+    $('#navSpace').removeAttribute('aria-current');
+      if (me()) {
+      loadConversations().catch(function(error) {
+        toast(error.message);
+      });
+    }
+  } else {
+    $('#navBrowse').setAttribute('aria-current', 'page');
+    $('#navSpace').removeAttribute('aria-current');
+    $('#navMessages').removeAttribute('aria-current');
+    renderBrowse();
+  }
+
+  window.scrollTo(0, 0);
+}
+
+function route() {
+  var space = location.hash === '#my-space';
+  var messages = location.hash === '#messages';
+
+  if (space && !me()) {
+    ui.pending = space ? 'space' : 'messages';
+    showView(false, false);
+    openAuth('login', 'Log in to see your listings, requests and earnings.');
+    return;
+  }
+
+  showView(space, messages);
+}
+
+function openAuth(mode,hint){
+  ui.authMode=mode;
+  ui.otpSent=false;
+  var su=mode==='signup';
+  $('#forgotPasswordLink').hidden = su;
+  $('#authTitle').textContent=su?'Create your account':'Log in';
+  $('#authSubmit').textContent=su?'Create account':'Log in';
+  $('#authSwitchText').textContent=su?'Already have an account?':'New here?';
+  $('#authSwitch').textContent=su?'Log in':'Create an account';
+  $('#authHint').textContent=hint||(su?'Sign up to list items, earn rent and borrow from other students.':'');
+  $('#aPass').setAttribute('autocomplete',su?'new-password':'current-password');
+  document.querySelectorAll('#authForm [data-signup]').forEach(function(el){
+    el.hidden=!su;
+  });
+  $('#otpField').hidden=true;
+  $('#aOtp').value='';
+  $('#authErr').textContent='';
+  if(!$('#dlgAuth').open)$('#dlgAuth').showModal();
+}
+$('#forgotPasswordBtn').addEventListener('click',function(e){
+  e.preventDefault();
+  openAuth('forgot');
+  $('#authTitle').textContent='Forgot password';
+  $('#authHint').textContent='Enter your registered email to receive an OTP.';
+  $('#aPass').parentElement.hidden=true;
+  $('#authSubmit').textContent='Send OTP';
+  $('#authErr').textContent='';
+});
+async function afterAuth(){await refresh();var p=ui.pending;ui.pending=null;$('#authForm').reset();$('#dlgAuth').close();toast('Welcome, '+me().name.split(' ')[0]+'.');if(p==='space'){if(location.hash==='#my-space')route();else location.hash='my-space'}else if(p==='list')openList();else if(p&&p.item)openItem(p.item);else if(location.hash==='#my-space')route()}
+$('#authForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  var su=ui.authMode==='signup',
+      err=function(m){$('#authErr').textContent=m},
+      name=$('#aName').value.trim(),
+      college=$('#aCollege').value.trim(),
+      email=$('#aEmail').value.trim().toLowerCase(),
+      password=$('#aPass').value,
+      otp=$('#aOtp').value.trim();
+
+  if(su&&name.length<2)return err('Enter your full name.');
+  if(!/^\S+@\S+\.\S+$/.test(email))return err('Enter a valid email address.');
+  if(ui.authMode==='forgot'||ui.authMode==='reset'){
+  try{
+    if(ui.authMode==='forgot'){
+      await api('/auth/forgot-password',{
+        method:'POST',
+        body:JSON.stringify({email:email})
+      });
+
+      ui.authMode='reset';
+      ui.otpSent=true;
+      $('#otpField').hidden=false;
+      $('#aPass').parentElement.hidden=false;
+      $('#aPass').previousElementSibling.textContent='New password';
+      $('#authTitle').textContent='Reset password';
+      $('#authSubmit').textContent='Reset password';
+      $('#authHint').textContent='Enter the OTP sent to your email and your new password.';
+      $('#aPass').previousElementSibling.textContent='New password';
+      $('#aPass').value='';
+      $('#aOtp').focus();
+      return;
+    }
+
+    if(!/^\d{6}$/.test(otp))return err('Enter the 6-digit OTP.');
+    if(password.length<8)return err('New password must be at least 8 characters.');
+
+    await api('/auth/reset-password',{
+      method:'POST',
+      body:JSON.stringify({
+        email:email,
+        otp:otp,
+        newPassword:password
+      })
+    });
+
+    openAuth('login','Password reset successfully. Please log in.');
+    return;
+  }catch(ex){
+    return err(ex.message);
+  }
+}
+  if(password.length<8)return err('Password must be at least 8 characters.');
+
+  if(su&&ui.otpSent&&!/^\d{6}$/.test(otp))
+    return err('Enter the 6-digit OTP.');
+
+  try{
+    var data;
+
+    if(su&&!ui.otpSent){
+      await api('/auth/send-otp',{
+        method:'POST',
+        body:JSON.stringify({name:name,college:college,email:email,password:password})
+      });
+      ui.otpSent=true;
+      $('#otpField').hidden=false;
+      $('#authSubmit').textContent='Verify OTP';
+      $('#authHint').textContent='OTP sent to your email. Enter the 6-digit code.';
+      $('#aOtp').focus();
+      return;
+    }
+
+    if(su){
+      data=await api('/auth/verify-otp',{
+        method:'POST',
+        body:JSON.stringify({name:name,college:college,email:email,password:password,otp:otp})
+      });
+    }else{
+      data=await api('/auth/login',{
+        method:'POST',
+        body:JSON.stringify({email:email,password:password})
+      });
+    }
+
+    token=data.token;
+    localStorage.setItem(TOKEN_KEY,token);
+    await afterAuth();
+  }catch(ex){
+    err(ex.message);
+  }
+});
+function openList(){if(!me()){ui.pending='list';openAuth('signup','Create an account to list your first item.');return}ui.photoFile=null;ui.photoUrl='';$('#listForm').reset();$('#lPrev').classList.remove('on');$('#listErr').textContent='';if(!$('#dlgList').open)$('#dlgList').showModal()}
+$('#lPhoto').addEventListener('change',function(){var f=this.files&&this.files[0],prev=$('#lPrev');ui.photoFile=f||null;prev.classList.remove('on');if(!f)return;if(!f.type.startsWith('image/')){$('#listErr').textContent='Choose an image file.';return}var url=URL.createObjectURL(f);prev.src=url;prev.classList.add('on');$('#listErr').textContent=''});
+$('#listForm').addEventListener('submit',async function(e){e.preventDefault();var title=$('#lTitle').value.trim(),price=Number($('#lPrice').value),dep=Number($('#lDep').value||0),loc=$('#lLoc').value.trim(),err=function(m){$('#listErr').textContent=m};if(title.length<3)return err('Give the item a name of at least 3 characters.');if(!(price>=1&&price<=5000))return err('Enter a daily rent between ₹1 and ₹5,000.');if(!(dep>=0&&dep<=20000))return err('Deposit must be between ₹0 and ₹20,000.');if(loc.length<2)return err('Tell borrowers where to pick it up.');try{var fd=new FormData();fd.append('title',title);fd.append('cat',$('#lCat').value);fd.append('cond',$('#lCond').value);fd.append('price',String(price));fd.append('deposit',String(dep));fd.append('loc',loc);fd.append('desc',$('#lDesc').value.trim());if(ui.photoFile)fd.append('photo',ui.photoFile);await api('/items',{method:'POST',body:fd});$('#dlgList').close();ui.tab='listings';await refresh();toast('Your item is now listed.');if(location.hash==='#my-space')renderSpace()}catch(ex){err(ex.message)}});
+async function actionRequest(path,success){try{await api(path,{method:'PATCH'});await refresh();toast(success||'Updated.')}catch(e){toast(e.message)}}
+
+document.addEventListener('click', async function(e) {
+  var target = e.target;
+  if (target && target.tagName === 'DIALOG' && target.open) {
+    target.close();
+    return;
+  }
+
+  var el = target.closest('[data-action]');
+  if (!el) return;
+
+  var a = el.getAttribute('data-action');
+  var id = el.getAttribute('data-id');
+
+  switch (a) {
+    case 'open-login':
+      openAuth('login');
+      break;
+
+    case 'open-signup':
+      openAuth('signup');
+      break;
+
+    case 'switch-auth':
+      openAuth(ui.authMode === 'login' ? 'signup' : 'login');
+      break;
+
+    case 'logout':
+      try {
+        await api('/auth/logout', { method: 'POST' });
+      } catch (_) {}
+
+      token = '';
+      localStorage.removeItem(TOKEN_KEY);
+      state = { user: null, items: [], rentals: [] };
+      renderHeader();
+      renderBrowse();
+      toast('You are logged out.');
+      if (location.hash === '#my-space' || location.hash === '#messages') {
+        location.hash = 'browse';
+      }
+      break;
+
+    case 'close':
+      var d = el.closest('dialog');
+      if (d) d.close();
+      break;
+
+    case 'open-list':
+      openList();
+      break;
+
+    case 'open-item':
+      openItem(id);
+      break;
+
+    case 'rent-login':
+      $('#dlgItem').close();
+      ui.pending = { item: id };
+      openAuth('login', 'Log in to send a rental request.');
+      break;
+
+    case 'rent':
+      await sendRequest(id);
+      break;
+
+    case 'key':
+      ui.cat = el.getAttribute('data-cat');
+      renderKeys();
+      renderGrid();
+      break;
+
+    case 'clear-filters':
+      ui.q = '';
+      ui.cat = 'all';
+      $('#q').value = '';
+      renderKeys();
+      renderGrid();
+      break;
+
+    case 'scroll-grid':
+      $('#browse-grid').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+      break;
+
+    case 'browse-from-chat':
+      location.hash = 'browse';
+      break;
+
+   case 'open-conversation':
+  await openConversation(id);
+  break;
+
+case 'message-owner':
+  try {
+    var result = await api('/messages', {
+      method: 'POST',
+      body: JSON.stringify({ itemId: id })
+    });
+
+    $('#dlgItem').close();
+    location.hash = 'messages';
+    await openConversation(result.conversation.id);
+  } catch (error) {
+    toast(error.message);
+  }
+  break;
+
+case 'tab':
+      ui.tab = el.getAttribute('data-tab');
+      renderSpace();
+      break;
+
+    case 'toggle-pause':
+      await actionRequest('/items/' + id + '/status', 'Listing status updated.');
+      break;
+
+    case 'ask-delete':
+      ui.confirmDel = id;
+      renderSpace();
+      break;
+
+    case 'delete-item':
+      try {
+        await api('/items/' + id, { method: 'DELETE' });
+        ui.confirmDel = null;
+        await refresh();
+        toast('Listing deleted.');
+      } catch (ex) {
+        toast(ex.message);
+      }
+      break;
+
+    case 'accept':
+      await actionRequest('/rentals/' + id + '/accept', 'Request accepted. Contact details are now visible.');
+      break;
+
+    case 'decline':
+      await actionRequest('/rentals/' + id + '/decline', 'Request declined.');
+      break;
+
+    case 'cancel':
+      await actionRequest('/rentals/' + id + '/cancel', 'Request cancelled.');
+      break;
+
+    case 'returned':
+      await actionRequest('/rentals/' + id + '/return', 'Marked as returned.');
+      break;
+  }
+});
+
+$('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){var btn=document.querySelector('[data-action="rent"]');if(btn){var it=itemById(btn.getAttribute('data-id'));if(it)updateSum(it)}}});$('#q').addEventListener('input',function(){ui.q=this.value;renderGrid()});$('#sort').addEventListener('change',function(){ui.sort=this.value;renderGrid()});window.addEventListener('hashchange',route);
+$('#lCat').innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+esc(c.label)+'</option>'}).join('');$('#lCond').innerHTML=CONDS.map(function(c){return '<option'+(c==='Good'?' selected':'')+'>'+esc(c)+'</option>'}).join('');
+(async function init(){renderHeader();try{await refresh()}catch(e){toast('Could not connect to CampusRent server. Start the backend and refresh.')}route()})();
+})();
+</script>
+
+</body></html>

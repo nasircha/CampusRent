@@ -1,0 +1,20 @@
+const router = require('express').Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const { z } = require('zod');
+const prisma = require('../db');
+const { requireAuth } = require('../middleware/auth');
+const uploadDir = path.join(__dirname, '../../uploads');
+fs.mkdirSync(uploadDir, { recursive: true });
+const storage = multer.diskStorage({ destination: (_req, _file, cb) => cb(null, uploadDir), filename: (_req, file, cb) => cb(null, `${Date.now()}-${require('crypto').randomBytes(8).toString('hex')}${path.extname(file.originalname).toLowerCase()}`) });
+const upload = multer({ storage, limits: { fileSize: Number(process.env.MAX_UPLOAD_MB || 5) * 1024 * 1024 }, fileFilter: (_req, file, cb) => cb(/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype) ? null : new Error('Upload a JPEG, PNG, WebP, or GIF image.'), /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) });
+const itemInput = z.object({ title: z.string().trim().min(3).max(70), cat: z.enum(['calc','pens','lab','books','tech','other']), cond: z.enum(['New','Like new','Good','Worn but works']), price: z.coerce.number().int().min(1).max(5000), deposit: z.coerce.number().int().min(0).max(20000), loc: z.string().trim().min(2).max(60), desc: z.string().trim().max(400).optional().default('') });
+const publicItem = { owner: { select: { id: true, name: true } } };
+router.get('/', async (req, res, next) => { try { const items = await prisma.item.findMany({ where: { status: { in: ['available','rented'] } }, include: publicItem, orderBy: { createdAt: 'desc' } }); res.json({ items: items.map(formatItem) }); } catch (e) { next(e); } });
+router.get('/:id', async (req, res, next) => { try { const item = await prisma.item.findUnique({ where: { id: req.params.id }, include: publicItem }); if (!item || item.status === 'deleted') return res.status(404).json({ error: 'Listing not found.' }); res.json({ item: formatItem(item) }); } catch (e) { next(e); } });
+router.post('/', requireAuth, upload.single('photo'), async (req, res, next) => { try { const parsed = itemInput.safeParse(req.body); if (!parsed.success) { if (req.file) fs.unlink(req.file.path, () => {}); return res.status(400).json({ error: parsed.error.issues[0].message }); } const item = await prisma.item.create({ data: { ...parsed.data, ownerId: req.user.id, photo: req.file ? `/uploads/${req.file.filename}` : '' }, include: publicItem }); res.status(201).json({ item: formatItem(item) }); } catch (e) { next(e); } });
+router.patch('/:id/status', requireAuth, async (req, res, next) => { try { const item = await prisma.item.findUnique({ where: { id: req.params.id } }); if (!item || item.ownerId !== req.user.id) return res.status(404).json({ error: 'Listing not found.' }); if (item.status === 'rented') return res.status(409).json({ error: 'A rented item cannot be paused.' }); const status = item.status === 'paused' ? 'available' : 'paused'; await prisma.item.update({ where: { id: item.id }, data: { status } }); res.json({ ok: true, status }); } catch (e) { next(e); } });
+router.delete('/:id', requireAuth, async (req, res, next) => { try { const item = await prisma.item.findUnique({ where: { id: req.params.id }, include: { rentals: { select: { id: true, status: true } } } }); if (!item || item.ownerId !== req.user.id) return res.status(404).json({ error: 'Listing not found.' }); if (item.status === 'rented') return res.status(409).json({ error: 'You cannot delete an item while it is rented.' }); await prisma.$transaction(async tx => { await tx.rental.updateMany({ where: { itemId: item.id, status: 'pending' }, data: { status: 'declined' } }); if (item.rentals.length) await tx.item.update({ where: { id: item.id }, data: { status: 'deleted' } }); else await tx.item.delete({ where: { id: item.id } }); }); res.json({ ok: true }); } catch (e) { next(e); } });
+function formatItem(i) { return { id: i.id, title: i.title, cat: i.cat, cond: i.cond, price: i.price, deposit: i.deposit, loc: i.loc, desc: i.desc, photo: i.photo, status: i.status, createdAt: i.createdAt, ownerId: i.ownerId, ownerName: i.owner?.name || '' }; }
+module.exports = router;
