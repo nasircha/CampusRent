@@ -68,6 +68,11 @@
   .chat-layout { grid-template-rows: minmax(110px, 32%) minmax(0,1fr); }
 }
 
+
+/* Red notification counters on the main navigation */
+.nav a{position:relative}
+.nav-alert-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:#e32636;color:#fff;font-size:11px;font-weight:800;line-height:1;vertical-align:middle;box-shadow:0 0 0 2px var(--bg,#fff)}
+.nav-alert-badge[hidden]{display:none}
 </style></head><body>
 <div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
   <div class="loader-card">
@@ -1096,8 +1101,8 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
     </a>
     <nav class="nav" aria-label="Main">
   <a id="navBrowse" href="#browse">Home</a>
-  <a id="navMessages" href="#messages">Messages</a>
-  <a id="navSpace" href="#my-space">My space</a>
+  <a id="navMessages" href="#messages">Messages<span class="nav-alert-badge" id="messagesNavBadge" hidden></span></a>
+  <a id="navSpace" href="#my-space">My space<span class="nav-alert-badge" id="spaceNavBadge" hidden></span></a>
 </nav>
     <div class="auth" id="authArea"></div>
   </div>
@@ -1329,8 +1334,32 @@ async function loadConversations() {
   if (list) list.dataset.loaded = 'true';
   renderConversations();
   renderDirectRequests();
+  updateNavNotificationBadges();
 }
 
+function updateNavNotificationBadges(){
+  var unreadRental=conversations.reduce(function(total,c){return total+(Number(c.unreadCount)||0)},0);
+  var unreadDirect=directChats.reduce(function(total,c){return total+(Number(c.unreadCount)||0)},0);
+  var pendingMessages=directRequests.filter(function(r){return r.receiverId===me().id&&r.status==='pending'}).length;
+  var pendingRentals=state.rentals.filter(function(r){return r.ownerId===me().id&&r.status==='pending'}).length;
+  var messagesBadge=$('#messagesNavBadge'),spaceBadge=$('#spaceNavBadge');
+  if(messagesBadge){var count=unreadRental+unreadDirect+pendingMessages;messagesBadge.textContent=count>9?'9+':String(count);messagesBadge.hidden=count===0;messagesBadge.setAttribute('aria-label',count+' new messages or requests');}
+  if(spaceBadge){spaceBadge.textContent=pendingRentals>9?'9+':String(pendingRentals);spaceBadge.hidden=pendingRentals===0;spaceBadge.setAttribute('aria-label',pendingRentals+' rental requests');}
+}
+async function refreshNavNotifications(){
+  if(!me())return;
+  try{
+    var results=await Promise.all([api('/bootstrap'),api('/messages'),api('/messages/direct'),api('/messages/requests')]);
+    if(!me())return;
+    state.rentals=results[0].rentals||state.rentals;
+    conversations=results[1].conversations||[];
+    directChats=results[2].chats||[];
+    directRequests=results[3].requests||[];
+    updateNavNotificationBadges();
+    if(location.hash==='#messages'){renderConversations();renderDirectRequests();}
+    if(location.hash==='#my-space')renderSpace();
+  }catch(error){/* Keep the last known notification counts while offline. */}
+}
 function renderConversations() {
   var list=$('#conversationList'); if(!list)return;
   var previousScroll=list.scrollTop, combined=[];
@@ -2185,6 +2214,8 @@ if(!navigator.onLine)showNetworkOffline();
     }
   }
   route();
+  await refreshNavNotifications();
+  window.setInterval(refreshNavNotifications,15000);
 })();
 })();
 </script>
