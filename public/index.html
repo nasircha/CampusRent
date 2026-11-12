@@ -1722,29 +1722,73 @@ $('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){va
 window.addEventListener('hashchange',route);
 $('#lCat').innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+esc(c.label)+'</option>'}).join('');$('#lCond').innerHTML=CONDS.map(function(c){return '<option'+(c==='Good'?' selected':'')+'>'+esc(c)+'</option>'}).join('');
 
-function updateNetworkStatus(){
+function showNetworkOffline(){
   var bar=$('#networkStatus');
   if(!bar)return;
-  var online=navigator.onLine;
-  bar.classList.toggle('is-online',online);
+  bar.classList.remove('is-online');
   bar.classList.add('is-visible');
-  $('#networkTitle').textContent=online?'Connection restored':'You are offline';
-  $('#networkMessage').textContent=online?'CampusRent is back online.':'Check your internet connection. CampusRent will reconnect automatically.';
-  $('#networkRetry').textContent=online?'Refresh':'Try again';
-  if(online){
-    window.clearTimeout(window.__networkStatusTimer);
-    window.__networkStatusTimer=window.setTimeout(function(){bar.classList.remove('is-visible')},3500);
-  }else{
-    window.clearTimeout(window.__networkStatusTimer);
+  $('#networkTitle').textContent='You are offline';
+  $('#networkMessage').textContent='Check your internet connection. CampusRent will reconnect automatically.';
+  $('#networkRetry').textContent='Try again';
+  window.clearTimeout(window.__networkStatusTimer);
+}
+function showNetworkOnline(){
+  var bar=$('#networkStatus');
+  if(!bar)return;
+  bar.classList.add('is-online','is-visible');
+  $('#networkTitle').textContent='Connection restored';
+  $('#networkMessage').textContent='CampusRent is connected again.';
+  $('#networkRetry').textContent='Connected';
+  window.clearTimeout(window.__networkStatusTimer);
+  window.__networkStatusTimer=window.setTimeout(function(){bar.classList.remove('is-visible')},3500);
+}
+async function reconnectCampusRent(){
+  if(window.__reconnectBusy||!navigator.onLine)return;
+  window.__reconnectBusy=true;
+  var bar=$('#networkStatus');
+  if(bar){
+    bar.classList.remove('is-online');
+    bar.classList.add('is-visible');
+    $('#networkTitle').textContent='Reconnecting...';
+    $('#networkMessage').textContent='Restoring your CampusRent data. Please wait.';
+    $('#networkRetry').textContent='Connecting...';
+    $('#networkRetry').disabled=true;
+  }
+  var lastError=null;
+  try{
+    for(var attempt=0;attempt<4;attempt++){
+      if(!navigator.onLine)throw new Error('Internet connection unavailable.');
+      try{
+        await refresh();
+        if(me()&&location.hash==='#messages'){
+          await loadConversations();
+          if(activeDirectChatId)await openDirectChat(activeDirectChatId,true);
+          else if(activeConversationId)await openConversation(activeConversationId,true);
+        }
+        showNetworkOnline();
+        return;
+      }catch(error){
+        lastError=error;
+        if(error&&/401|403/.test(error.message||''))throw error;
+        if(attempt<3)await new Promise(function(resolve){setTimeout(resolve,1000*Math.pow(2,attempt))});
+      }
+    }
+    throw lastError||new Error('Could not reconnect to CampusRent.');
+  }catch(error){
+    if(bar){
+      $('#networkTitle').textContent=navigator.onLine?'Server not responding':'You are offline';
+      $('#networkMessage').textContent=navigator.onLine?'Connection is back, but the server is not responding. Tap Try again in a moment.':'Waiting for internet connection...';
+      $('#networkRetry').textContent='Try again';
+    }
+  }finally{
+    window.__reconnectBusy=false;
+    if($('#networkRetry'))$('#networkRetry').disabled=false;
   }
 }
-window.addEventListener('offline',updateNetworkStatus);
-window.addEventListener('online',updateNetworkStatus);
-$('#networkRetry').addEventListener('click',function(){
-  if(navigator.onLine)window.location.reload();
-  else updateNetworkStatus();
-});
-if(!navigator.onLine)updateNetworkStatus();
+window.addEventListener('offline',showNetworkOffline);
+window.addEventListener('online',reconnectCampusRent);
+$('#networkRetry').addEventListener('click',reconnectCampusRent);
+if(!navigator.onLine)showNetworkOffline();
 
 (async function init(){
   var loader = $('#appLoader');
