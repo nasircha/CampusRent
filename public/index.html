@@ -1219,11 +1219,11 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 <dialog id="dlgProfile" aria-labelledby="profileTitle">
   <form id="profileForm" class="dlg" novalidate>
     <div class="dlg-head"><h2 id="profileTitle">Your profile</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
-    <p class="hint">Your account details. You can update your display name below.</p>
-    <div class="field"><label for="profileEmail">Logged-in email</label><input id="profileEmail" type="email" readonly aria-readonly="true"></div>
+    <p class="hint">Your account details.</p>
+    <div class="field"><label for="profileName">Display Name</label><input id="profileName" name="name" autocomplete="name" maxlength="80" required></div>
     <div class="field"><label for="profileCollege">College or University</label><input id="profileCollege" type="text" readonly aria-readonly="true" placeholder="Not added"></div>
+    <div class="field"><label for="profileEmail">Logged-in Email</label><input id="profileEmail" type="email" readonly aria-readonly="true"></div>
     <p id="profileRole" class="hint" role="status" hidden></p>
-    <div class="field"><label for="profileName">Display name</label><input id="profileName" name="name" autocomplete="name" maxlength="80" required></div>
     <p id="profileErr" class="err" role="alert"></p>
     <div class="logout-actions"><button type="button" class="btn" data-action="close">Cancel</button><button type="submit" class="btn btn-primary" id="profileSave">Save name</button></div>
   </form>
@@ -1901,25 +1901,27 @@ document.addEventListener('click', async function(e) {
 
     case 'edit-profile':
       $('#profileName').value=me()?me().name:'';
+      $('#profileCollege').value=me()&&me().college?me().college:'Not added';
       $('#profileEmail').value=me()?me().email:'';
-      $('#profileCollege').value=me()?(me().college||'Not added'):'Not added';
       $('#profileErr').textContent='';
       var isPlatformOwner=String(me()&&me().email||'').trim().toLowerCase()==='mdnasirhussain121@gmail.com';
       $('#profileRole').hidden=!isPlatformOwner;
-      if(isPlatformOwner){
-        $('#profileRole').textContent='Checking admin access...';
-        api('/auth/me').then(function(data){
-          state.user=data.user;
-          $('#profileEmail').value=data.user.email||'';
-          $('#profileRole').textContent=data.user.isAdmin?'Super Admin: Enabled':'Super Admin: Not enabled';
-          renderHeader();
-          if(location.hash==='#my-space')renderSpace();
-        }).catch(function(){
-          $('#profileRole').textContent='Could not verify admin access. Please try again.';
-        });
-      }
+      if(isPlatformOwner)$('#profileRole').textContent='Checking admin access...';
       if (!$('#dlgProfile').open) $('#dlgProfile').showModal();
       $('#profileName').focus();
+      api('/auth/me').then(function(data){
+        state.user=data.user;
+        $('#profileName').value=data.user.name||'';
+        $('#profileCollege').value=data.user.college&&data.user.college.trim()?data.user.college:'Not added';
+        $('#profileEmail').value=data.user.email||'';
+        var owner=String(data.user.email||'').trim().toLowerCase()==='mdnasirhussain121@gmail.com';
+        $('#profileRole').hidden=!owner;
+        if(owner)$('#profileRole').textContent=data.user.isAdmin?'Super Admin: Enabled':'Super Admin: Not enabled';
+        renderHeader();
+        if(location.hash==='#my-space')renderSpace();
+      }).catch(function(error){
+        if(isPlatformOwner)$('#profileRole').textContent='Could not verify admin access. Please try again.';
+      });
       break;
 
     case 'logout':
