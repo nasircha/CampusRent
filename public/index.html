@@ -1221,19 +1221,25 @@ document.addEventListener('click', async function(e) {
       break;
 
     case 'logout':
-      try {
-        await api('/auth/logout', { method: 'POST' });
-      } catch (_) {}
-
+      // Logout must work even if the API is temporarily unavailable.
       token = '';
       localStorage.removeItem(TOKEN_KEY);
+      stopChatAutoRefresh();
+      activeConversationId = null;
+      conversations = [];
+      chatRefreshBusy = false;
+      ui.pending = null;
+      ui.confirmDel = null;
       state = { user: null, items: [], rentals: [] };
+      ['dlgAuth', 'dlgList', 'dlgItem'].forEach(function(id) {
+        var dialog = $('#' + id);
+        if (dialog && dialog.open) dialog.close();
+      });
       renderHeader();
       renderBrowse();
+      if (location.hash !== '#browse') location.hash = 'browse';
+      else route();
       toast('You are logged out.');
-      if (location.hash === '#my-space' || location.hash === '#messages') {
-        location.hash = 'browse';
-      }
       break;
 
     case 'close':
@@ -1346,7 +1352,22 @@ case 'tab':
   }
 });
 
-$('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){var btn=document.querySelector('[data-action="rent"]');if(btn){var it=itemById(btn.getAttribute('data-id'));if(it)updateSum(it)}}});$('#q').addEventListener('input',function(){ui.q=this.value;renderGrid()});$('#sort').addEventListener('change',function(){ui.sort=this.value;renderGrid()});window.addEventListener('hashchange',route);
+$('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){var btn=document.querySelector('[data-action="rent"]');if(btn){var it=itemById(btn.getAttribute('data-id'));if(it)updateSum(it)}}});$('#q').addEventListener('input',function(){ui.q=this.value;renderGrid()});$('#sort').addEventListener('change',function(){ui.sort=this.value;renderGrid()});window.addEventListener('storage', function(e) {
+  if (e.key !== TOKEN_KEY || e.newValue !== null) return;
+  token = '';
+  stopChatAutoRefresh();
+  activeConversationId = null;
+  conversations = [];
+  chatRefreshBusy = false;
+  ui.pending = null;
+  state = { user: null, items: [], rentals: [] };
+  renderHeader();
+  renderBrowse();
+  if (location.hash !== '#browse') location.hash = 'browse';
+  else route();
+  toast('You have been logged out in another tab.');
+});
+window.addEventListener('hashchange',route);
 $('#lCat').innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+esc(c.label)+'</option>'}).join('');$('#lCond').innerHTML=CONDS.map(function(c){return '<option'+(c==='Good'?' selected':'')+'>'+esc(c)+'</option>'}).join('');
 (async function init(){renderHeader();try{await refresh()}catch(e){toast('Could not connect to CampusRent server. Start the backend and refresh.')}route()})();
 })();
