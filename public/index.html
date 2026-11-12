@@ -1687,7 +1687,7 @@ function openItem(id) {
 
 function updateSum(it){var d=parseInt($('#iDays').value,10);if(!(d>=1))d=0;$('#iSum').innerHTML='<div><span>Rent ('+d+(d===1?' day':' days')+' &times; '+inr(it.price)+')</span><span>'+inr(d*it.price)+'</span></div><div><span>Refundable deposit</span><span>'+inr(it.deposit)+'</span></div><div><span>Pay at handover</span><span>'+inr(d*it.price+it.deposit)+'</span></div>'}
 async function sendRequest(id){var it=itemById(id),days=parseInt($('#iDays').value,10),start=$('#iStart').value,err=$('#iErr');if(!(days>=1&&days<=30)){err.textContent='Choose between 1 and 30 days.';return}if(!start||start<today()){err.textContent='Pick a pickup date from today onward.';return}try{await api('/rentals',{method:'POST',body:JSON.stringify({itemId:id,days:days,start:start,note:$('#iNote').value.trim()})});$('#dlgItem').close();ui.tab='rentals';await refresh();toast('Rental request sent to '+it.ownerName+'.');if(location.hash!=='#my-space')goToView('my-space')}catch(e){err.textContent=e.message}}
-function tabBtn(id,label,n,hot){return '<button class="tab" role="tab" data-action="tab" data-tab="'+id+'" aria-selected="'+(ui.tab===id)+'">'+label+'</button>}
+function tabBtn(id,label,n,hot){return '<button class="tab" role="tab" data-action="tab" data-tab="'+id+'" aria-selected="'+(ui.tab===id)+'">'+label+'</button>'}
 function emptyBox(msg,btn){return '<div class="empty"><p>'+msg+'</p>'+btn+'</div>'}
 function thumb(it,r){return '<span class="th">'+imgHtml(it||(r?{photo:r.photo,cat:r.cat}:null)||{cat:'other'})+'</span>'}
 function rentalMeta(r){return r.days+(r.days===1?' day':' days')+' from '+fmtDate(r.start)+' &middot; '+inr(r.rent)+' rent + '+inr(r.deposit)+' deposit'}
