@@ -1,4 +1,12 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
+  <div class="loader-card">
+    <div class="loader-mark" aria-hidden="true">C</div>
+    <div class="loader-brand">Campus<span>Rent</span></div>
+    <p class="loader-copy">Getting your campus gear ready...</p>
+    <div class="loader-track" aria-hidden="true"></div>
+  </div>
+</div>
 <title>CampusRent</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -147,6 +155,21 @@ footer .wrap{display:grid;gap:6px}
 @media(max-width:700px){.ri{grid-template-columns:48px minmax(0,1fr)}.ri .th{width:48px;height:48px}.ri .acts{grid-column:1/-1;justify-content:flex-start}}
 
 /* dialogs */
+/* CampusRent branded startup loader */
+#appLoader{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 42%,rgba(255,214,10,.09),transparent 42%),var(--bg);opacity:1;visibility:visible;transition:opacity .28s ease,visibility .28s ease}
+#appLoader.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
+.loader-card{width:min(340px,100%);display:grid;justify-items:center;gap:18px;padding:30px 24px;border:1px solid var(--line);border-radius:10px;background:rgba(20,20,15,.94);box-shadow:0 20px 70px rgba(0,0,0,.38)}
+.loader-mark{position:relative;width:68px;height:68px;display:grid;place-items:center;border:1px solid var(--lcd-line);border-radius:18px;background:var(--lcd-bg);color:var(--yellow);font:800 28px/1 var(--font-display);box-shadow:0 0 28px rgba(255,214,10,.12)}
+.loader-mark:after{content:"";position:absolute;inset:-7px;border:2px solid transparent;border-top-color:var(--yellow);border-right-color:rgba(255,214,10,.25);border-radius:22px;animation:loaderSpin 1.15s linear infinite}
+.loader-brand{font:800 22px/1 var(--font-display);letter-spacing:-.03em;color:var(--fg)}
+.loader-brand span{color:var(--yellow)}
+.loader-copy{color:var(--muted);font-size:13px;text-align:center}
+.loader-track{width:100%;height:4px;overflow:hidden;border-radius:9px;background:var(--surface-2)}
+.loader-track:after{content:"";display:block;width:38%;height:100%;border-radius:9px;background:var(--yellow);box-shadow:0 0 12px rgba(255,214,10,.55);animation:loaderProgress 1.35s ease-in-out infinite}
+@keyframes loaderSpin{to{transform:rotate(360deg)}}
+@keyframes loaderProgress{0%{transform:translateX(-110%)}100%{transform:translateX(280%)}}
+@media(prefers-reduced-motion:reduce){#appLoader,.loader-mark:after,.loader-track:after{animation:none;transition:none}.loader-track:after{width:100%;transform:none}}
+
 /* Custom logout confirmation */
 #dlgLogout{max-width:420px;border-color:var(--lcd-line);box-shadow:0 18px 60px rgba(0,0,0,.55)}
 #dlgLogout .logout-icon{width:46px;height:46px;display:grid;place-items:center;border:1px solid var(--lcd-line);border-radius:50%;background:var(--lcd-bg);color:var(--yellow);font-size:22px;font-weight:800}
@@ -1397,11 +1420,17 @@ $('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){va
 window.addEventListener('hashchange',route);
 $('#lCat').innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+esc(c.label)+'</option>'}).join('');$('#lCond').innerHTML=CONDS.map(function(c){return '<option'+(c==='Good'?' selected':'')+'>'+esc(c)+'</option>'}).join('');
 (async function init(){
+  var loader = $('#appLoader');
   try {
     await refresh();
   } catch (e) {
     renderHeader();
     toast('Could not connect to CampusRent server. Start the backend and refresh.');
+  } finally {
+    if (loader) {
+      loader.classList.add('is-hidden');
+      window.setTimeout(function(){ loader.remove(); }, 320);
+    }
   }
   route();
 })();
