@@ -50,6 +50,7 @@ a{color:inherit}
 .who .nm{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:560px){.who .nm{display:none}}
 
+.direct-search{padding:12px;border-bottom:1px solid var(--line);display:grid;gap:7px}.direct-search label{font-size:12px;color:var(--muted);font-weight:600}.direct-search input{font-size:14px}.direct-search-result,.direct-request-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}.direct-search-result small,.direct-request-row small{display:block;color:var(--muted)}.direct-request-actions{display:flex;gap:5px;flex-shrink:0}.direct-request-actions .btn{padding:7px 9px;font-size:12px}.direct-section-title{padding:12px 12px 5px;color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}.direct-empty{padding:10px 12px;color:var(--muted);font-size:13px}
 /* buttons and fields */
 .btn{font:700 14px/1 var(--font-body);padding:11px 16px;border-radius:4px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .btn:hover{border-color:var(--yellow)}
@@ -710,8 +711,14 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
       <div class="chat-layout">
         <aside class="chat-sidebar">
           <div class="chat-sidebar-head">
-            <h2>Conversations</h2>
+            <h2>Messages</h2>
           </div>
+          <div class="direct-search">
+            <label for="directUserSearch">Find student by Gmail username</label>
+            <input id="directUserSearch" type="search" placeholder="Type before @gmail.com (e.g. mdh21)" autocomplete="off">
+            <div id="directSearchResults" aria-live="polite"></div>
+          </div>
+          <div id="directRequests"></div>
           <div id="conversationList">
             <div class="chat-empty">
               <p>No conversations yet.</p>
@@ -838,15 +845,18 @@ var ui={q:'',cat:'all',sort:'new',tab:'listings',authMode:'login',otpSent:false,
 async function api(path,opts){opts=opts||{};var headers=opts.headers||{};if(token)headers.Authorization='Bearer '+token;if(opts.body&&!(opts.body instanceof FormData))headers['Content-Type']='application/json';var res=await fetch(API+path,Object.assign({},opts,{headers:headers}));var data={};try{data=await res.json()}catch(e){}if(!res.ok){if(res.status===401&&token){token='';localStorage.removeItem(TOKEN_KEY);state.user=null;renderHeader()}throw new Error(data.error||'Request failed ('+res.status+')')}return data}
 var activeConversationId = null;
 var conversations = [];
+var directChats = [];
+var directRequests = [];
+var activeDirectChatId = null;
 var chatRefreshTimer = null;
 var chatRefreshBusy = false;
 
 function startChatAutoRefresh() {
   stopChatAutoRefresh();
   chatRefreshTimer = setInterval(function() {
-    if (location.hash !== '#messages' || !activeConversationId || chatRefreshBusy) return;
+    if (location.hash !== '#messages' || (!activeConversationId && !activeDirectChatId) || chatRefreshBusy) return;
     chatRefreshBusy = true;
-    openConversation(activeConversationId, true).finally(function() {
+    (activeDirectChatId ? openDirectChat(activeDirectChatId, true) : openConversation(activeConversationId, true)).finally(function() {
       chatRefreshBusy = false;
     });
   }, 3000);
@@ -864,10 +874,17 @@ async function loadConversations() {
   if (!conversations.length && list && !list.dataset.loaded) {
     list.innerHTML = '<p class="chat-placeholder">Loading conversations...</p>';
   }
-  var data = await api('/messages');
-  conversations = data.conversations || [];
+  var results = await Promise.all([
+    api('/messages'),
+    api('/messages/direct'),
+    api('/messages/requests')
+  ]);
+  conversations = results[0].conversations || [];
+  directChats = results[1].chats || [];
+  directRequests = results[2].requests || [];
   if (list) list.dataset.loaded = 'true';
   renderConversations();
+  renderDirectRequests();
 }
 
 function renderConversations() {
@@ -882,7 +899,8 @@ function renderConversations() {
           Browse items
         </button>
       </div>`;
-    if (list.innerHTML !== emptyHtml) list.innerHTML = emptyHtml;
+    list.innerHTML = emptyHtml;
+    renderDirectChats();
     return;
   }
 
@@ -907,7 +925,49 @@ var unreadBadge = unread > 0
         <small>${esc(last ? last.body : 'Start a conversation')}</small>
       </button>`;
   }).join('');
-  if (list.innerHTML !== conversationsHtml) list.innerHTML = conversationsHtml;
+  list.innerHTML = conversationsHtml;
+  renderDirectChats();
+}
+function renderDirectChats() {
+  var list = $('#conversationList');
+  if (!list) return;
+  var html = '<div class="direct-section-title">Personal chats</div>';
+  if (!directChats.length) html += '<div class="direct-empty">No approved personal chats yet.</div>';
+  html += directChats.map(function(c) {
+    var other = c.starterId === me().id ? c.receiver : c.starter;
+    var last = c.messages && c.messages[0];
+    return '<button class="conversation-item '+(activeDirectChatId===c.id?'active':'')+'" data-action="open-direct-chat" data-id="'+esc(c.id)+'"><strong>'+esc(other.name)+'</strong><span>Personal message</span><small>'+esc(last?last.body:'You are connected')+'</small></button>';
+  }).join('');
+  list.insertAdjacentHTML('beforeend', html);
+}
+function renderDirectRequests() {
+  var el = $('#directRequests');
+  if (!el) return;
+  var incoming = directRequests.filter(function(r){return r.receiverId===me().id && r.status==='pending'});
+  var outgoing = directRequests.filter(function(r){return r.senderId===me().id && r.status==='pending'});
+  var html = '<div class="direct-section-title">Message requests ('+incoming.length+')</div>';
+  if (!incoming.length) html += '<div class="direct-empty">No pending requests.</div>';
+  html += incoming.map(function(r){
+    return '<div class="direct-request-row"><div><strong>'+esc(r.sender.name)+'</strong><small>'+esc(r.sender.college||'College not provided')+'</small></div><div class="direct-request-actions"><button class="btn btn-primary" data-action="decide-direct-request" data-id="'+esc(r.id)+'" data-decision="approved">Approve</button><button class="btn" data-action="decide-direct-request" data-id="'+esc(r.id)+'" data-decision="declined">Decline</button></div></div>';
+  }).join('');
+  if(outgoing.length) html += '<div class="direct-empty">Sent requests: '+outgoing.length+' awaiting approval.</div>';
+  el.innerHTML = html;
+}
+async function searchDirectUsers(value) {
+  var box = $('#directSearchResults');
+  var q = String(value||'').trim().toLowerCase();
+  if (!box) return;
+  if (q.length < 3) { box.innerHTML=''; return; }
+  if (!/^[a-z0-9._]+$/.test(q)) { box.innerHTML='<small>Use only the Gmail username before @gmail.com.</small>'; return; }
+  box.innerHTML='<small>Searching verified Gmail accounts...</small>';
+  try {
+    var data = await api('/messages/users/search?q='+encodeURIComponent(q));
+    if ($('#directUserSearch').value.trim().toLowerCase() !== q) return;
+    box.innerHTML = (data.users||[]).map(function(u){
+      var existing = directRequests.find(function(r){return r.senderId===me().id&&r.receiverId===u.id&&r.status==='pending'});
+      return '<div class="direct-search-result"><div><strong>'+esc(u.name)+'</strong><small>'+esc(u.emailHint)+' · '+esc(u.college||'College not provided')+'</small></div><button class="btn btn-primary btn-sm" data-action="send-direct-request" data-id="'+esc(u.id)+'" '+(existing?'disabled':'')+'>'+(existing?'Requested':'Request')+'</button></div>';
+    }).join('') || '<small>No verified Gmail account found.</small>';
+  } catch(error) { box.innerHTML='<small>'+esc(error.message)+'</small>'; }
 }
 function formatMessageTime(date) {
   var d = new Date(date);
@@ -936,8 +996,34 @@ function formatMessageTime(date) {
     month: 'short'
   });
 }
+async function openDirectChat(id, silent) {
+  try {
+    var same = activeDirectChatId === id;
+    var box = $('#chatMessages');
+    var wasAtBottom = !same || (box.scrollHeight-box.scrollTop-box.clientHeight<80);
+    if (!silent && !same) {
+      $('#chatHeader').textContent='Loading personal chat...';
+      $('#chatMessages').innerHTML='<p class="chat-placeholder">Loading messages...</p>';
+      $('#chatForm').hidden=true;
+    }
+    var data=await api('/messages/direct/'+encodeURIComponent(id)+'/messages');
+    activeConversationId=null;
+    activeDirectChatId=id;
+    if(!silent) startChatAutoRefresh();
+    $('#chatHeader').textContent=data.other.name+' · Personal message';
+    var html=(data.messages||[]).map(function(m){
+      var mine=m.senderId===me().id;
+      return '<div class="chat-message-row '+(mine?'mine':'other')+'"><div class="chat-bubble '+(mine?'mine':'other')+'"><div class="chat-message-text">'+esc(m.body)+'</div><div class="chat-message-meta"><small>'+formatMessageTime(m.createdAt)+'</small>'+(mine&&m.seenAt?'<span> · ✦ Seen</span>':'')+'</div></div></div>';
+    }).join('')||'<p class="chat-placeholder">No messages yet. Say hello!</p>';
+    if(box.innerHTML!==html) box.innerHTML=html;
+    $('#chatForm').hidden=false;
+    if(wasAtBottom) box.scrollTop=box.scrollHeight;
+    if(!silent) await loadConversations();
+  } catch(error) { if(!silent) toast(error.message); }
+}
 async function openConversation(id, silent) {
   try {
+    activeDirectChatId=null;
     var sameConversation = activeConversationId === id;
     var chatBox = $('#chatMessages');
     var wasAtBottom = !sameConversation ||
@@ -997,6 +1083,13 @@ var messagesHtml = (data.messages || []).map(function(m) {
   }
 }
 
+var directSearchTimer = null;
+$('#directUserSearch').addEventListener('input', function(e) {
+  clearTimeout(directSearchTimer);
+  var value=e.target.value;
+  directSearchTimer=setTimeout(function(){searchDirectUsers(value)},350);
+});
+
 $('#chatForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
@@ -1006,13 +1099,19 @@ $('#chatForm').addEventListener('submit', async function(e) {
   if (!body) return;
 
   try {
-    await api('/messages/' + encodeURIComponent(activeConversationId) + '/messages', {
-      method: 'POST',
-      body: JSON.stringify({ body: body })
-    });
-
-    $('#chatInput').value = '';
-    await openConversation(activeConversationId);
+    if (activeDirectChatId) {
+      await api('/messages/direct/' + encodeURIComponent(activeDirectChatId) + '/messages', {
+        method: 'POST', body: JSON.stringify({ body: body })
+      });
+      $('#chatInput').value = '';
+      await openDirectChat(activeDirectChatId);
+    } else {
+      await api('/messages/' + encodeURIComponent(activeConversationId) + '/messages', {
+        method: 'POST', body: JSON.stringify({ body: body })
+      });
+      $('#chatInput').value = '';
+      await openConversation(activeConversationId);
+    }
   } catch (error) {
     toast(error.message);
   }
@@ -1346,7 +1445,10 @@ document.addEventListener('click', async function(e) {
       localStorage.removeItem(TOKEN_KEY);
       stopChatAutoRefresh();
       activeConversationId = null;
+      activeDirectChatId = null;
       conversations = [];
+      directChats = [];
+      directRequests = [];
       chatRefreshBusy = false;
       ui.pending = null;
       ui.confirmDel = null;
@@ -1412,6 +1514,30 @@ document.addEventListener('click', async function(e) {
 
    case 'open-conversation':
   await openConversation(id);
+  break;
+
+case 'open-direct-chat':
+  await openDirectChat(id);
+  break;
+
+case 'send-direct-request':
+  try {
+    await api('/messages/requests',{method:'POST',body:JSON.stringify({userId:id})});
+    await loadConversations();
+    searchDirectUsers($('#directUserSearch').value);
+    toast('Message request sent. They must approve before you can chat.');
+  } catch(error) { toast(error.message); }
+  break;
+
+case 'decide-direct-request':
+  try {
+    await api('/messages/requests/'+encodeURIComponent(id),{
+      method:'PATCH',
+      body:JSON.stringify({decision:el.getAttribute('data-decision')})
+    });
+    await loadConversations();
+    toast(el.getAttribute('data-decision')==='approved'?'Request approved. You can now message.':'Request declined.');
+  } catch(error) { toast(error.message); }
   break;
 
 case 'message-owner':
