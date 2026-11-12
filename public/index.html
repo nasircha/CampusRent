@@ -170,6 +170,9 @@ footer .wrap{display:grid;gap:6px}
 @keyframes loaderProgress{0%{transform:translateX(-110%)}100%{transform:translateX(280%)}}
 @media(prefers-reduced-motion:reduce){#appLoader,.loader-mark:after,.loader-track:after{animation:none;transition:none}.loader-track:after{width:100%;transform:none}}
 
+.who{border:0;background:transparent;color:inherit;padding:0;cursor:pointer}
+.who:hover .nm{color:var(--yellow)}
+#dlgProfile{max-width:420px;border-color:var(--lcd-line);box-shadow:0 18px 60px rgba(0,0,0,.55)}
 /* Custom logout confirmation */
 #dlgLogout{max-width:420px;border-color:var(--lcd-line);box-shadow:0 18px 60px rgba(0,0,0,.55)}
 #dlgLogout .logout-icon{width:46px;height:46px;display:grid;place-items:center;border:1px solid var(--lcd-line);border-radius:50%;background:var(--lcd-bg);color:var(--yellow);font-size:22px;font-weight:800}
@@ -756,6 +759,17 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   </div>
 </dialog>
 
+
+<dialog id="dlgProfile" aria-labelledby="profileTitle">
+  <form id="profileForm" class="dlg" novalidate>
+    <div class="dlg-head"><h2 id="profileTitle">Your profile</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
+    <p class="hint">Update the name shown across CampusRent.</p>
+    <div class="field"><label for="profileName">Display name</label><input id="profileName" name="name" autocomplete="name" maxlength="80" required></div>
+    <p id="profileErr" class="err" role="alert"></p>
+    <div class="logout-actions"><button type="button" class="btn" data-action="close">Cancel</button><button type="submit" class="btn btn-primary" id="profileSave">Save name</button></div>
+  </form>
+</dialog>
+
 <dialog id="dlgAuth" aria-labelledby="authTitle">
   <form id="authForm" class="dlg" novalidate>
     <div class="dlg-head"><h2 id="authTitle">Log in</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
@@ -999,7 +1013,7 @@ var toastTimer=null;function toast(msg){var t=$('#toast');t.textContent=msg;t.cl
 function phSvg(cat){return '<svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[cat]||ICONS.other)+'</svg>'}
 function imgHtml(it){if(it&&it.photo)return '<img src="'+esc(it.photo)+'" alt="" loading="lazy">';return '<span class="ph">'+phSvg(it?it.cat:'other')+'</span>'}
 function statusPill(it){if(it.status==='rented')return '<span class="pill">Rented out</span>';if(it.status==='paused')return '<span class="pill">Paused</span>';return '<span class="pill ok">Available</span>'}
-function renderHeader(){var u=me(),a=$('#authArea');if(u){a.innerHTML='<span class="who"><span class="avatar" aria-hidden="true">'+esc(u.name.charAt(0).toUpperCase())+'</span><span class="nm">'+esc(u.name)+'</span></span><button class="btn btn-sm btn-primary" data-action="open-list">List an item</button><button class="btn btn-sm" data-action="logout">Log out</button>'}else a.innerHTML='<button class="btn btn-sm" data-action="open-login">Log in</button><button class="btn btn-sm btn-primary" data-action="open-signup">Sign up</button>'}
+function renderHeader(){var u=me(),a=$('#authArea');if(u){a.innerHTML='<button type="button" class="who" data-action="edit-profile" title="Edit your name"><span class="avatar" aria-hidden="true">'+esc(u.name.charAt(0).toUpperCase())+'</span><span class="nm">'+esc(u.name)+'</span></button><button class="btn btn-sm btn-primary" data-action="open-list">List an item</button><button class="btn btn-sm" data-action="logout">Log out</button>'}else a.innerHTML='<button class="btn btn-sm" data-action="open-login">Log in</button><button class="btn btn-sm btn-primary" data-action="open-signup">Sign up</button>'}
 function visibleItems(){return state.items.filter(function(i){return i.status!=='paused'})}
 function renderReadout(){var v=visibleItems(),open=v.filter(function(i){return i.status==='available'}),out=v.filter(function(i){return i.status==='rented'}).length,min=open.length?Math.min.apply(null,open.map(function(i){return i.price})):0;$('#rdOpen').textContent=open.length;$('#rdFrom').textContent=open.length?inr(min):'-';$('#rdOut').textContent=out}
 function renderKeys(){var v=visibleItems(),html='<button class="key" data-action="key" data-cat="all" aria-pressed="'+(ui.cat==='all')+'">All<span class="n">'+v.length+'</span></button>';CATS.forEach(function(c){var n=v.filter(function(i){return i.cat===c.id}).length;html+='<button class="key" data-action="key" data-cat="'+c.id+'" aria-pressed="'+(ui.cat===c.id)+'">'+esc(c.label)+'<span class="n">'+n+'</span></button>'});$('#keys').innerHTML=html}
@@ -1138,6 +1152,19 @@ $('#forgotPasswordBtn').addEventListener('click',function(e){
   $('#authErr').textContent='';
 });
 async function afterAuth(){await refresh();var p=ui.pending;ui.pending=null;$('#authForm').reset();$('#dlgAuth').close();toast('Welcome, '+me().name.split(' ')[0]+'.');if(p==='space'){if(location.hash==='#my-space')route();else location.hash='my-space'}else if(p==='list')openList();else if(p&&p.item)openItem(p.item);else if(location.hash==='#my-space')route()}
+$('#profileForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  var name=$('#profileName').value.trim();
+  $('#profileErr').textContent='';
+  if(name.length<2)return $('#profileErr').textContent='Name must be at least 2 characters.';
+  var save=$('#profileSave');save.disabled=true;save.textContent='Saving...';
+  try{
+    var data=await api('/auth/me',{method:'PATCH',body:JSON.stringify({name:name})});
+    state.user=data.user;renderHeader();$('#dlgProfile').close();toast('Your name has been updated.');
+    if(location.hash==='#my-space')renderSpace();
+  }catch(ex){$('#profileErr').textContent=ex.message;}
+  finally{save.disabled=false;save.textContent='Save name';}
+});
 $('#authForm').addEventListener('submit',async function(e){
   e.preventDefault();
   var su=ui.authMode==='signup',
@@ -1259,6 +1286,13 @@ document.addEventListener('click', async function(e) {
 
     case 'switch-auth':
       openAuth(ui.authMode === 'login' ? 'signup' : 'login');
+      break;
+
+    case 'edit-profile':
+      $('#profileName').value=me()?me().name:'';
+      $('#profileErr').textContent='';
+      if (!$('#dlgProfile').open) $('#dlgProfile').showModal();
+      $('#profileName').focus();
       break;
 
     case 'logout':
