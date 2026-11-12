@@ -1068,6 +1068,24 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 .rental-archived-note{margin:8px auto;padding:8px 12px;max-width:90%;border:1px solid var(--line);border-radius:8px;text-align:center;font-size:11px}
 @media(max-width:760px){#directRequests{padding:7px 9px}.request-inbox-trigger{min-height:32px}.request-popup-row{gap:6px}.request-popup-actions .btn{padding:7px 8px}}
 
+
+/* Keep composer reachable above the mobile keyboard */
+.chat-window{position:relative;display:flex;flex-direction:column;min-height:0}
+.chat-messages{flex:1 1 0;min-height:0;overflow-y:auto;padding-bottom:12px}
+.chat-composer{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:8px;flex-shrink:0;padding:10px;background:#111217;border-top:1px solid #34343b}
+.chat-composer input{flex:1 1 auto;min-width:0}
+.chat-composer button{flex:0 0 auto;min-width:66px}
+.chat-composer button:disabled{opacity:.55;cursor:wait}
+@media(max-width:760px){
+ .chat-window{height:min(58dvh,520px)!important;min-height:330px!important;max-height:520px!important;overflow:hidden!important}
+ .chat-composer{position:sticky;bottom:0;padding:8px 9px calc(8px + env(safe-area-inset-bottom))}
+ .chat-composer input{font-size:16px!important;min-height:42px}
+ .chat-composer button{min-height:42px}
+}
+@media(max-width:420px){
+ .chat-window{height:min(56dvh,470px)!important;min-height:310px!important}
+}
+
 </style>
 
 <header class="top">
@@ -1485,31 +1503,49 @@ $('#directUserSearch').addEventListener('input', function(e) {
   directSearchTimer=setTimeout(function(){searchDirectUsers(value)},350);
 });
 
+var messageSending = false;
 $('#chatForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-
-  if (!activeConversationId && !activeDirectChatId) return;
-
-  var body = $('#chatInput').value.trim();
-  if (!body) return;
-
-  try {
-    if (activeDirectChatId) {
-      await api('/messages/direct/' + encodeURIComponent(activeDirectChatId) + '/messages', {
-        method: 'POST', body: JSON.stringify({ body: body })
-      });
-      $('#chatInput').value = '';
-      await openDirectChat(activeDirectChatId);
-    } else {
-      await api('/messages/' + encodeURIComponent(activeConversationId) + '/messages', {
-        method: 'POST', body: JSON.stringify({ body: body })
-      });
-      $('#chatInput').value = '';
-      await openConversation(activeConversationId);
-    }
-  } catch (error) {
+  if (messageSending || (!activeConversationId && !activeDirectChatId)) return;
+  var input=$('#chatInput'), body=input.value.trim();
+  if(!body)return;
+  var directId=activeDirectChatId, rentalId=activeConversationId;
+  var endpoint=directId
+    ? '/messages/direct/'+encodeURIComponent(directId)+'/messages'
+    : '/messages/'+encodeURIComponent(rentalId)+'/messages';
+  messageSending=true;
+  var sendButton=$('#chatForm button[type="submit"]');
+  sendButton.disabled=true;
+  input.value='';
+  input.focus();
+  var pending=document.createElement('div');
+  pending.className='chat-message-row mine';
+  pending.innerHTML='<div class="chat-bubble mine"><div class="chat-message-text"></div><div class="chat-message-meta"><small>Sending…</small></div></div>';
+  pending.querySelector('.chat-message-text').textContent=body;
+  var box=$('#chatMessages');box.appendChild(pending);box.scrollTop=box.scrollHeight;
+  try{
+    await api(endpoint,{method:'POST',body:JSON.stringify({body:body})});
+    pending.remove();
+    // Fetch only the active thread; avoid reloading inbox + requests after every send.
+    if(directId && activeDirectChatId===directId) await openDirectChat(directId,true);
+    else if(rentalId && activeConversationId===rentalId) await openConversation(rentalId,true);
+    // Refresh inbox list in the background without delaying the sender.
+    loadConversations().catch(function(){});
+    input.focus();
+  }catch(error){
+    pending.remove();
+    input.value=body;
     toast(error.message);
+    input.focus();
+  }finally{
+    messageSending=false;
+    sendButton.disabled=false;
   }
+});
+$('#chatInput').setAttribute('enterkeyhint','send');
+$('#chatInput').setAttribute('autocomplete','off');
+$('#chatInput').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#chatForm').requestSubmit();}
 });
 
 async function refresh(){var data=await api('/bootstrap');state.user=data.user;state.items=data.items;state.rentals=data.rentals;renderHeader();renderBrowse();if(location.hash==='#my-space')renderSpace()}
