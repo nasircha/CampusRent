@@ -8,6 +8,7 @@ const { requireAuth } = require('../middleware/auth');
 
 const { createOtp, verifyOtp } = require('../services/otp');
 const { sendOtpEmail } = require('../services/email');
+const { recordActivity } = require('../services/activity');
 
 const credentials = z.object({
   email: z.string().email().max(254).transform(v => v.toLowerCase().trim()),
@@ -129,6 +130,8 @@ router.post('/verify-otp', async (req, res, next) => {
         email: true
       }
     });
+
+    await recordActivity(user, 'signup');
 
     res.status(201).json({
       token: issue(user),
@@ -266,6 +269,8 @@ router.post('/login', async (req, res, next) => {
       email: user.email
     };
 
+    await recordActivity(safe, 'login');
+
     res.json({
       token: issue(safe),
       user: safe
@@ -276,7 +281,8 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-router.post('/logout', (_req, res) => {
+router.post('/logout', requireAuth, async (req, res) => {
+  await recordActivity(req.user, 'logout');
   res.json({ ok: true });
 });
 
