@@ -782,6 +782,26 @@ var ui={q:'',cat:'all',sort:'new',tab:'listings',authMode:'login',otpSent:false,
 async function api(path,opts){opts=opts||{};var headers=opts.headers||{};if(token)headers.Authorization='Bearer '+token;if(opts.body&&!(opts.body instanceof FormData))headers['Content-Type']='application/json';var res=await fetch(API+path,Object.assign({},opts,{headers:headers}));var data={};try{data=await res.json()}catch(e){}if(!res.ok){if(res.status===401&&token){token='';localStorage.removeItem(TOKEN_KEY);state.user=null;renderHeader()}throw new Error(data.error||'Request failed ('+res.status+')')}return data}
 var activeConversationId = null;
 var conversations = [];
+var chatRefreshTimer = null;
+var chatRefreshBusy = false;
+
+function startChatAutoRefresh() {
+  stopChatAutoRefresh();
+  chatRefreshTimer = setInterval(function() {
+    if (location.hash !== '#messages' || !activeConversationId || chatRefreshBusy) return;
+    chatRefreshBusy = true;
+    openConversation(activeConversationId, true).finally(function() {
+      chatRefreshBusy = false;
+    });
+  }, 1000);
+}
+
+function stopChatAutoRefresh() {
+  if (chatRefreshTimer) {
+    clearInterval(chatRefreshTimer);
+    chatRefreshTimer = null;
+  }
+}
 
 async function loadConversations() {
   var data = await api('/messages');
@@ -853,11 +873,17 @@ function formatMessageTime(date) {
     month: 'short'
   });
 }
-async function openConversation(id) {
+async function openConversation(id, silent) {
   try {
+    var sameConversation = activeConversationId === id;
+    var chatBox = $('#chatMessages');
+    var wasAtBottom = !sameConversation ||
+      (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 80);
+
     var data = await api('/messages/' + encodeURIComponent(id) + '/messages');
 
     activeConversationId = id;
+    if (!silent) startChatAutoRefresh();
 
     var c = data.conversation;
     var other = c.renterId === me().id
@@ -894,10 +920,12 @@ $('#chatMessages').innerHTML = (data.messages || []).map(function(m) {
 
 
     $('#chatForm').hidden = false;
-    $('#chatMessages').scrollTop = $('#chatMessages').scrollHeight;
-    await loadConversations();
+    if (wasAtBottom) {
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    if (!silent) await loadConversations();
   } catch (error) {
-    toast(error.message);
+    if (!silent) toast(error.message);
   }
 }
 
@@ -995,6 +1023,8 @@ function renderSpace(){var u=me();if(!u)return;var mine=state.items.filter(funct
 
 function showView(space, messages) {
   messages = !!messages;
+
+  if (!messages) stopChatAutoRefresh();
 
   $('#viewBrowse').hidden = space || messages;
   $('#viewSpace').hidden = !space;
