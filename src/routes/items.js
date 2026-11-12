@@ -3,7 +3,7 @@ const multer = require('multer');
 const crypto = require('crypto');
 const { z } = require('zod');
 const prisma = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, isAdminEmail } = require('../middleware/auth');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: Number(process.env.MAX_UPLOAD_MB || 5) * 1024 * 1024 }, fileFilter: (_req, file, cb) => cb(/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype) ? null : new Error('Upload a JPEG, PNG, WebP, or GIF image.'), /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) });
 const itemInput = z.object({ title: z.string().trim().min(3).max(70), cat: z.enum(['calc','pens','lab','books','tech','other']), cond: z.enum(['New','Like new','Good','Worn but works']), price: z.coerce.number().int().min(1).max(5000), deposit: z.coerce.number().int().min(0).max(20000), loc: z.string().trim().min(2).max(60), desc: z.string().trim().max(400).optional().default('') });
 const publicItem = { owner: { select: { id: true, name: true } } };
@@ -37,7 +37,7 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
       include: { rentals: { select: { id: true, status: true } } }
     });
     if (!item || item.status === 'deleted') return res.status(404).json({ error: 'Listing not found.' });
-    const isAdmin = req.user.isAdmin === true;
+    const isAdmin = isAdminEmail(req.user.email);
     if (!isAdmin && item.ownerId !== req.user.id) return res.status(404).json({ error: 'Listing not found.' });
     if (!isAdmin && item.status === 'rented') return res.status(409).json({ error: 'You cannot delete an item while it is rented.' });
     await prisma.$transaction(async tx => {
