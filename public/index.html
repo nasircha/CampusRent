@@ -122,7 +122,7 @@ a{color:inherit}
 .muted{color:var(--muted)}
 
 /* top bar */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(12,12,9,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;width:100%;z-index:100;background:rgba(12,12,9,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .top .wrap{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px;min-height:60px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:1.2rem;font-variation-settings:"wdth" 118;letter-spacing:-.01em}
 .nav{display:flex;gap:4px}
@@ -1098,6 +1098,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 
 </style>
 
+<script>(function(){function sizeTopbar(){var h=document.querySelector(".top"),m=document.querySelector("main");if(h&&m)m.style.paddingTop=h.offsetHeight+"px"}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",sizeTopbar);else sizeTopbar();window.addEventListener("load",sizeTopbar);window.addEventListener("resize",sizeTopbar);})();</script>
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#browse" aria-label="CampusRent home">
