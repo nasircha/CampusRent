@@ -1373,10 +1373,36 @@ function updateNavNotificationBadges(){
   if(messagesBadge){messagesBadge.textContent='';messagesBadge.hidden=!shouldShow('messages',messagesCount);messagesBadge.setAttribute('aria-label',messagesCount+' new messages or requests');}
   if(spaceBadge){spaceBadge.textContent='';spaceBadge.hidden=!shouldShow('space',spaceCount);spaceBadge.setAttribute('aria-label',spaceCount+' rental requests');}
 }
-var lastKnownUnreadMessageCount=null;
-function getUnreadMessageCount(){
-  return conversations.reduce(function(total,c){return total+(Number(c.unreadCount)||0)},0)+
-    directChats.reduce(function(total,c){return total+(Number(c.unreadCount)||0)},0);
+var knownUnreadByChat=null;
+function messageNotification(title,body){
+  toast(title+': '+body);
+  if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
+    try{
+      var n=new Notification(title,{body:body,tag:'campusrent-new-message'});
+      n.onclick=function(){window.focus();goToView('messages');n.close()};
+    }catch(error){}
+  }
+}
+function detectNewMessages(){
+  var current={},fresh=[];
+  conversations.forEach(function(c){
+    var count=Number(c.unreadCount)||0,key='rental:'+c.id;
+    current[key]=count;
+    if(knownUnreadByChat&&count>(knownUnreadByChat[key]||0)){
+      var m=c.messages&&c.messages[0],sender=c.renterId===me().id?c.item.owner:c.renter;
+      fresh.push({name:sender&&sender.name||'New message',body:m&&m.body||'You have a new message'});
+    }
+  });
+  directChats.forEach(function(c){
+    var count=Number(c.unreadCount)||0,key='direct:'+c.id;
+    current[key]=count;
+    if(knownUnreadByChat&&count>(knownUnreadByChat[key]||0)){
+      var m=c.messages&&c.messages[0],sender=c.starterId===me().id?c.receiver:c.starter;
+      fresh.push({name:sender&&sender.name||'New message',body:m&&m.body||'You have a new message'});
+    }
+  });
+  knownUnreadByChat=current;
+  fresh.forEach(function(x){messageNotification(x.name,x.body)});
 }
 async function refreshNavNotifications(){
   if(!me())return;
@@ -1387,11 +1413,7 @@ async function refreshNavNotifications(){
     conversations=results[1].conversations||[];
     directChats=results[2].chats||[];
     directRequests=results[3].requests||[];
-    var unreadNow=getUnreadMessageCount();
-    if(lastKnownUnreadMessageCount!==null&&unreadNow>lastKnownUnreadMessageCount){
-      toast('New message received. Open Messages to view it.');
-    }
-    lastKnownUnreadMessageCount=unreadNow;
+    detectNewMessages();
     if(location.hash==='#messages')markNavNotificationsSeen('messages');
     if(location.hash==='#my-space')markNavNotificationsSeen('space');
     updateNavNotificationBadges();
@@ -1634,7 +1656,7 @@ var toastTimer=null;function toast(msg){var t=$('#toast');t.textContent=msg;t.cl
 function phSvg(cat){return '<svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[cat]||ICONS.other)+'</svg>'}
 function imgHtml(it){if(it&&it.photo)return '<img src="'+esc(it.photo)+'" alt="" loading="lazy">';return '<span class="ph">'+phSvg(it?it.cat:'other')+'</span>'}
 function statusPill(it){if(it.status==='rented')return '<span class="pill">Rented out</span>';if(it.status==='paused')return '<span class="pill">Paused</span>';return '<span class="pill ok">Available</span>'}
-function renderHeader(){var u=me(),a=$('#authArea');if(u){a.innerHTML='<button type="button" class="who" data-action="edit-profile" title="Edit your name"><span class="avatar" aria-hidden="true">'+esc(u.name.charAt(0).toUpperCase())+'</span><span class="nm">'+esc(u.name)+'</span></button><button class="btn btn-sm btn-primary" data-action="open-list">List an item</button><button class="btn btn-sm" data-action="logout">Log out</button>'}else a.innerHTML='<button class="btn btn-sm" data-action="open-login">Log in</button><button class="btn btn-sm btn-primary" data-action="open-signup">Sign up</button>'}
+function renderHeader(){var u=me(),a=$('#authArea'),notify=typeof Notification!=='undefined'&&Notification.permission!=='granted'?'<button class="btn btn-sm" data-action="enable-notifications">Enable alerts</button>':'';if(u){a.innerHTML=notify+'<button type="button" class="who" data-action="edit-profile" title="Edit your name"><span class="avatar" aria-hidden="true">'+esc(u.name.charAt(0).toUpperCase())+'</span><span class="nm">'+esc(u.name)+'</span></button><button class="btn btn-sm btn-primary" data-action="open-list">List an item</button><button class="btn btn-sm" data-action="logout">Log out</button>'}else a.innerHTML='<button class="btn btn-sm" data-action="open-login">Log in</button><button class="btn btn-sm btn-primary" data-action="open-signup">Sign up</button>'}
 function visibleItems(){var u=me();var college=function(v){return String(v||'').trim().toLowerCase().replace(/\\s+/g,' ')};var myCollege=college(u&&u.college);return state.items.filter(function(i){if(i.status==='paused')return false;if(u&&u.isAdmin)return true;if(!myCollege)return true;return college(i.ownerCollege)===myCollege})}
 function renderReadout(){var v=visibleItems(),out=v.filter(function(i){return i.status==='rented'}).length;$('#rdOpen').textContent=v.length;$('#rdOut').textContent=out}
 function renderKeys(){var v=visibleItems(),html='<button class="key" data-action="key" data-cat="all" aria-pressed="'+(ui.cat==='all')+'">All<span class="n">'+v.length+'</span></button>';CATS.forEach(function(c){var n=v.filter(function(i){return i.cat===c.id}).length;html+='<button class="key" data-action="key" data-cat="'+c.id+'" aria-pressed="'+(ui.cat===c.id)+'">'+esc(c.label)+'<span class="n">'+n+'</span></button>'});$('#keys').innerHTML=html}
@@ -1935,6 +1957,15 @@ document.addEventListener('click', async function(e) {
   var id = el.getAttribute('data-id');
 
   switch (a) {
+    case 'enable-notifications':
+      if(typeof Notification==='undefined'){toast('Browser notifications are not supported here.');break;}
+      try{
+        var permission=await Notification.requestPermission();
+        if(permission==='granted'){toast('Browser notifications enabled.');renderHeader()}
+        else toast('Notifications are blocked. Allow them in browser site settings.');
+      }catch(error){toast('Could not enable browser notifications.')}
+      break;
+
     case 'open-login':
       openAuth('login');
       break;
