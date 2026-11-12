@@ -860,6 +860,70 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
  .chat-messages{padding:10px 8px}
 }
 
+
+/* Messaging visual cleanup: quieter surfaces, clear hierarchy, usable mobile stack */
+.messages-view{background:#0b0c0e!important;padding:22px 0 30px!important;color:#f4f1e9}
+.messages-page-heading{max-width:1160px!important;margin:0 auto 14px!important;padding:0 18px!important}
+.messages-page-heading h1{font-size:28px!important;letter-spacing:-.7px!important}
+.messages-page-heading p{color:#92939a!important;font-size:13px!important}
+.chat-layout{max-width:1160px!important;min-height:580px!important;height:calc(100dvh - 175px)!important;max-height:850px!important;grid-template-columns:310px minmax(0,1fr)!important;gap:14px!important;padding:0 18px!important}
+.chat-sidebar,.chat-window{border:1px solid #292a2e!important;border-radius:13px!important;box-shadow:none!important}
+.chat-sidebar{background:#121316!important}
+.chat-sidebar-head{padding:17px 17px 13px!important;border-bottom:1px solid #292a2e!important}
+.chat-sidebar-head h2{font-size:17px!important;color:#f8f7f3!important}
+.chat-sidebar-head p{color:#8e9098!important}
+.direct-search{padding:13px 14px!important;border-bottom:1px solid #292a2e!important}
+.direct-search label{color:#aaa9a2!important;font-size:10px!important;letter-spacing:.07em!important}
+.direct-search input{height:42px!important;border-radius:8px!important;background:#0b0c0e!important;border:1px solid #34363b!important}
+.direct-search input:focus{border-color:#cda64c!important;box-shadow:0 0 0 2px #cda64c20!important}
+#directSearchResults{padding-top:6px!important}
+#directRequests{border-bottom:1px solid #292a2e!important}
+#conversationList{padding:8px!important}
+.conversation-item{border-radius:8px!important;border:1px solid transparent!important;margin-bottom:4px!important;padding:11px 12px!important}
+.conversation-item:hover{background:#1b1c20!important;border-color:#303137!important}
+.conversation-item.active{background:#282317!important;border:1px solid #6e5728!important;border-left:3px solid #d7ad50!important}
+.conversation-item.active strong{color:#f2d28b!important}
+.chat-window{background:#101114!important}
+.chat-header{min-height:64px!important;padding:13px 18px!important;background:#141519!important;border-bottom:1px solid #292a2e!important}
+.chat-messages{background:#0e0f12!important;padding:20px!important}
+.chat-placeholder{color:#777982!important}
+.chat-empty{background:#17181c!important;border:1px dashed #393a40!important;border-radius:10px!important}
+.chat-bubble{box-shadow:none!important;line-height:1.55!important}
+.chat-bubble.mine{background:#3a301c!important;border:1px solid #65512b!important;color:#fff8e8!important}
+.chat-bubble.other{background:#202126!important;border:1px solid #34353b!important;color:#f0f0f1!important}
+.chat-composer{background:#141519!important;border-top:1px solid #292a2e!important;padding:12px 14px!important}
+.chat-composer input{background:#0b0c0e!important;border:1px solid #34363b!important;border-radius:9px!important;color:#fff!important;min-height:44px!important}
+.chat-composer .btn{background:#d5ad58!important;color:#17130a!important;border:0!important;border-radius:9px!important;font-weight:800!important}
+@media(max-width:760px){
+ .messages-view{padding:12px 0 22px!important;min-height:0!important;height:auto!important}
+ .messages-page-heading{padding:0 13px!important;margin-bottom:10px!important}
+ .messages-page-heading h1{font-size:24px!important}
+ .messages-page-heading p{font-size:12px!important}
+ .chat-layout{display:flex!important;flex-direction:column!important;gap:10px!important;padding:0 10px!important;height:auto!important;min-height:0!important;max-height:none!important}
+ .chat-sidebar{height:auto!important;max-height:310px!important;min-height:0!important;border-radius:11px!important}
+ .chat-sidebar-head{padding:11px 13px 8px!important}
+ .chat-sidebar-head h2{font-size:15px!important}
+ .chat-sidebar-head p{font-size:11px!important}
+ .direct-search{padding:9px 11px!important}
+ .direct-search label{font-size:9px!important;margin-bottom:5px!important}
+ .direct-search input{height:39px!important;font-size:14px!important}
+ #directRequests{max-height:95px!important;overflow-y:auto!important;padding:0 10px 5px!important}
+ #conversationList{display:block!important;overflow-y:auto!important;overflow-x:hidden!important;max-height:125px!important;padding:5px 8px 8px!important}
+ #conversationList>*{width:100%!important;max-width:none!important}
+ .conversation-item{display:flex!important;min-height:0!important;padding:9px 10px!important;margin:0 0 4px!important}
+ .chat-window{height: min(62dvh,590px)!important;min-height:390px!important;border-radius:11px!important}
+ .chat-header{min-height:52px!important;padding:10px 13px!important;font-size:14px!important}
+ .chat-messages{padding:12px 10px!important}
+ .chat-bubble{max-width:88%!important;padding:9px 11px!important;font-size:13px!important}
+ .chat-composer{padding:9px!important;padding-bottom:max(9px,env(safe-area-inset-bottom))!important;gap:7px!important}
+ .chat-composer input{font-size:16px!important;min-height:42px!important}
+ .chat-composer .btn{min-height:42px!important;padding:0 14px!important}
+}
+@media(max-width:380px){
+ .chat-layout{padding:0 8px!important}
+ .chat-window{height:60dvh!important;min-height:370px!important}
+}
+
 </style>
 
 <header class="top">
