@@ -730,6 +730,78 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 .network-status.is-online{border-color:var(--ok)}
 .network-status.is-online .network-icon{color:var(--ok)}
 @media(max-width:420px){.network-status{top:8px;padding:10px}.network-status button{padding:8px}.network-status small{font-size:10px}}
+
+/* Refined, structured messaging workspace */
+.messages-view{height:calc(100dvh - 76px);padding:22px 0 26px;overflow:hidden}
+.messages-view .wrap{gap:14px}
+.messages-page-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+.messages-page-heading h1{font-size:clamp(1.8rem,3vw,2.35rem);letter-spacing:-.035em}
+.messages-page-heading p,.chat-sidebar-head p{margin-top:5px;color:var(--muted);font-size:13px}
+.chat-layout{display:grid;grid-template-columns:minmax(285px,350px) minmax(0,1fr);gap:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:0 16px 42px rgba(0,0,0,.22)}
+.chat-sidebar{display:flex;flex-direction:column;background:#11110d;border-right:1px solid var(--line)}
+.chat-sidebar-head{padding:17px 18px 14px;border-bottom:1px solid var(--line)}
+.chat-sidebar-head h2{font-size:17px;font-weight:800}
+.direct-search{padding:14px 15px;background:var(--surface);border-bottom:1px solid var(--line);gap:8px}
+.direct-search label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:800}
+.direct-search input{border-radius:7px;background:#0c0c09;padding:11px 12px}
+#directSearchResults:empty{display:none}
+#directSearchResults{padding-top:3px}
+#directRequests{padding:0 14px 8px;border-bottom:1px solid var(--line);max-height:190px;overflow-y:auto}
+.direct-section-title{padding:13px 13px 7px;font-size:10px;letter-spacing:.1em;color:var(--yellow)}
+.direct-request-row{padding:9px 0}
+.direct-request-row strong{font-size:13px}
+.direct-request-actions{gap:5px}
+.direct-request-actions .btn{padding:7px 9px}
+#conversationList{flex:1;min-height:0;overflow-y:auto;padding:10px}
+#conversationList>.direct-section-title{padding:13px 8px 7px}
+.conversation-item{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:12px 13px;margin:0 0 7px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--fg);cursor:pointer;transition:background .16s,border-color .16s}
+.conversation-item:hover{background:var(--surface-2);border-color:var(--line)}
+.conversation-item strong{display:flex;align-items:center;justify-content:space-between;width:100%;font-size:14px}
+.conversation-item span{font-size:12px;color:var(--yellow);font-weight:600}
+.conversation-item small{display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:12px}
+.conversation-item.active{background:rgba(255,214,10,.09);border-color:rgba(255,214,10,.42);border-left:3px solid var(--yellow);box-shadow:none}
+.conversation-item.active strong{color:var(--yellow)}
+.chat-window{display:flex;flex-direction:column;min-width:0;background:#0e0e0b}
+.chat-header{min-height:68px;display:flex;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line);background:#13130f;font-weight:800;font-size:15px}
+.chat-messages{flex:1;min-height:0;overflow-y:auto;padding:22px;background:radial-gradient(ellipse at top,rgba(255,214,10,.025),transparent 55%),#0e0e0b}
+.chat-placeholder,.chat-empty{color:var(--muted);text-align:center;line-height:1.7}
+.chat-empty{margin:18px 8px;padding:24px 16px;border:1px dashed var(--line);border-radius:9px;background:#14140f}
+.chat-empty p:first-child{font-weight:800;color:var(--fg);margin-bottom:5px}
+.chat-empty .btn{margin-top:14px}
+.chat-message-row{margin:12px 0}
+.chat-bubble{max-width:min(72%,560px);padding:11px 14px;border-radius:14px;line-height:1.55;font-size:14px;overflow-wrap:anywhere}
+.chat-bubble.mine{background:#29250f;border:1px solid #55480c;border-radius:14px 14px 4px 14px}
+.chat-bubble.other{background:#20201a;border:1px solid #35352c;border-radius:14px 14px 14px 4px}
+.chat-composer{display:flex;align-items:center;gap:10px;padding:13px 16px;border-top:1px solid var(--line);background:#13130f}
+.chat-composer input{min-width:0;border-radius:8px;background:#0c0c09;padding:12px 14px}
+.chat-composer .btn{min-height:42px;border-radius:8px;padding:0 19px}
+.unread-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--yellow);color:var(--ink);font-size:11px;font-weight:800}
+@media(max-width:700px){
+ .messages-view{height:calc(100dvh - 104px);min-height:480px;padding:14px 0}
+ .messages-view .wrap{gap:10px}
+ .messages-page-heading h1{font-size:23px}
+ .messages-page-heading p{font-size:12px}
+ .chat-layout{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(190px,42%) minmax(0,1fr);border-radius:10px}
+ .chat-sidebar{border-right:0;border-bottom:1px solid var(--line)}
+ .chat-sidebar-head{padding:11px 13px}
+ .direct-search{padding:9px 11px;gap:5px}
+ #directRequests{max-height:100px;padding:0 10px 5px}
+ .direct-request-row{padding:6px 0}
+ #conversationList{padding:6px;max-height:none}
+ .conversation-item{padding:9px 10px;margin-bottom:4px;gap:3px;min-height:0}
+ .chat-header{min-height:48px;padding:10px 13px}
+ .chat-messages{padding:12px}
+ .chat-bubble{max-width:88%;padding:9px 11px}
+ .chat-composer{padding:9px;gap:7px;padding-bottom:max(9px,env(safe-area-inset-bottom))}
+ .chat-composer input{font-size:16px;padding:10px}
+ .chat-composer .btn{min-height:40px;padding:0 13px}
+}
+@media(max-width:380px){
+ .messages-view{height:calc(100dvh - 100px)}
+ .chat-layout{grid-template-rows:minmax(175px,44%) minmax(0,1fr)}
+ .direct-request-actions .btn{padding:6px 7px;font-size:11px}
+}
+
 </style>
 
 <header class="top">
@@ -794,11 +866,11 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   </section>
     <section id="viewMsgs" class="messages-view" hidden>
     <div class="wrap">
-      <h1>Messages</h1>
+      <div class="messages-page-heading"><div><h1>Messages</h1><p>Stay connected with students and manage your conversations.</p></div></div>
       <div class="chat-layout">
         <aside class="chat-sidebar">
           <div class="chat-sidebar-head">
-            <h2>Messages</h2>
+            <div><h2>Inbox</h2><p>Your chats and message requests</p></div>
           </div>
           <div class="direct-search">
             <label for="directUserSearch">Find student by Gmail username</label>
