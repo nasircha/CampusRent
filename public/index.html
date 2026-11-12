@@ -1,4 +1,74 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+/* Mobile layout refinements */
+@media (max-width: 700px) {
+  html, body { width: 100%; overflow-x: hidden; }
+  .wrap { padding-left: 14px; padding-right: 14px; }
+  .top .wrap { gap: 8px 12px; min-height: 0; }
+  .brand { font-size: 1.08rem; }
+  .nav { order: 3; width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { flex: 0 0 auto; padding: 9px 10px; }
+  .auth { margin-left: auto; gap: 6px; }
+  .auth .btn { padding: 9px 10px; font-size: 12px; }
+  .hero { padding-top: 26px; padding-bottom: 20px; }
+  .hero .wrap { gap: 20px; }
+  .hero .sub { font-size: .98rem; }
+  .readout .v { font-size: 1.55rem; }
+  .tools { gap: 10px; }
+  .search { display: grid; grid-template-columns: minmax(0,1fr); }
+  .search input, .search select { width: 100%; min-width: 0; }
+  .keys { gap: 6px; }
+  .key { padding: 9px 10px; }
+  .grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+  .card .body { padding: 9px 10px 11px; }
+  .card .t { font-size: .92rem; overflow-wrap: anywhere; }
+  .card .m { font-size: 12px; }
+  .card .foot { align-items: flex-start; }
+  .sec-head { align-items: center; flex-wrap: wrap; }
+  .stats { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+  .stats .readout { padding: 6px 10px; }
+  .stats .v { font-size: 1.35rem; }
+  .tabs { margin-right: -14px; padding-right: 14px; }
+  .ri { grid-template-columns: 44px minmax(0,1fr); gap: 9px; padding: 9px; }
+  .ri .th { width: 44px; height: 44px; }
+  .ri .acts { grid-column: 1 / -1; width: 100%; justify-content: flex-start; }
+  .ri .acts .btn { flex: 1 1 auto; }
+  dialog { width: calc(100% - 20px); max-height: calc(100dvh - 20px); }
+  .dlg { padding: 15px; }
+  .two { grid-template-columns: minmax(0,1fr); }
+  .messages-view { height: calc(100dvh - 104px); min-height: 420px; padding: 12px 0; }
+  .messages-view h1 { font-size: 23px; margin-bottom: 12px; }
+  .chat-layout {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-rows: minmax(150px, 38%) minmax(0,1fr);
+    min-height: 0;
+    border-radius: 10px;
+  }
+  .chat-sidebar { display: flex; flex-direction: column; min-height: 0; border-right: 0; border-bottom: 1px solid var(--line); }
+  .chat-sidebar-head, .chat-header { padding: 12px 14px; }
+  .direct-search { padding: 9px 10px; gap: 5px; }
+  .direct-search-result, .direct-request-row { padding: 7px 0; }
+  #conversationList { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; padding: 7px; }
+  .conversation-item { min-height: 0; padding: 10px; margin-bottom: 6px; gap: 4px; }
+  .chat-window { min-height: 0; }
+  .chat-messages { min-height: 0; padding: 12px; }
+  .chat-bubble { max-width: 88%; padding: 10px 12px; }
+  .chat-composer { gap: 7px; padding: 9px; padding-bottom: max(9px, env(safe-area-inset-bottom)); }
+  .chat-composer input { padding: 10px; font-size: 16px; }
+  .chat-composer .btn { padding: 10px 12px; }
+}
+@media (max-width: 380px) {
+  .grid { grid-template-columns: minmax(0,1fr); }
+  .stats { grid-template-columns: minmax(0,1fr); }
+  .auth .btn { padding: 8px; }
+  .chat-layout { grid-template-rows: minmax(130px, 36%) minmax(0,1fr); }
+}
+@media (max-width: 700px) and (orientation: landscape) {
+  .messages-view { height: calc(100dvh - 78px); }
+  .chat-layout { grid-template-rows: minmax(110px, 32%) minmax(0,1fr); }
+}
+
+</style></head><body>
 <div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
   <div class="loader-card">
     <div class="loader-mark" aria-hidden="true">C</div>
