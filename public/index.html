@@ -77,6 +77,11 @@
     <div class="loader-track" aria-hidden="true"></div>
   </div>
 </div>
+<div id="networkStatus" class="network-status" role="status" aria-live="polite" aria-atomic="true">
+  <span class="network-icon" aria-hidden="true">⌁</span>
+  <span class="network-copy"><strong id="networkTitle">You are offline</strong><small id="networkMessage">Check your internet connection. CampusRent will reconnect automatically.</small></span>
+  <button type="button" id="networkRetry">Try again</button>
+</div>
 <title>CampusRent</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -713,6 +718,18 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   }
 }
 
+
+/* Theme-matched network status */
+.network-status{position:fixed;z-index:9999;top:12px;left:50%;transform:translate(-50%,-150%);width:min(440px,calc(100% - 24px));display:flex;align-items:center;gap:11px;padding:12px 14px;background:var(--surface-2);color:var(--fg);border:1px solid var(--yellow);border-radius:12px;box-shadow:0 12px 36px #0009;opacity:0;pointer-events:none;transition:transform .25s ease,opacity .25s ease}
+.network-status.is-visible{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.network-status .network-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border:1px solid var(--line);border-radius:9px;color:var(--yellow);font-size:18px}
+.network-status .network-copy{min-width:0;flex:1}
+.network-status strong{display:block;font-size:13px;letter-spacing:.02em}
+.network-status small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.network-status button{border:1px solid var(--yellow);background:var(--yellow);color:var(--ink);border-radius:8px;padding:8px 10px;font:600 12px var(--font);cursor:pointer;white-space:nowrap}
+.network-status.is-online{border-color:var(--ok)}
+.network-status.is-online .network-icon{color:var(--ok)}
+@media(max-width:420px){.network-status{top:8px;padding:10px}.network-status button{padding:8px}.network-status small{font-size:10px}}
 </style>
 
 <header class="top">
@@ -1704,6 +1721,31 @@ $('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){va
 });
 window.addEventListener('hashchange',route);
 $('#lCat').innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+esc(c.label)+'</option>'}).join('');$('#lCond').innerHTML=CONDS.map(function(c){return '<option'+(c==='Good'?' selected':'')+'>'+esc(c)+'</option>'}).join('');
+
+function updateNetworkStatus(){
+  var bar=$('#networkStatus');
+  if(!bar)return;
+  var online=navigator.onLine;
+  bar.classList.toggle('is-online',online);
+  bar.classList.add('is-visible');
+  $('#networkTitle').textContent=online?'Connection restored':'You are offline';
+  $('#networkMessage').textContent=online?'CampusRent is back online.':'Check your internet connection. CampusRent will reconnect automatically.';
+  $('#networkRetry').textContent=online?'Refresh':'Try again';
+  if(online){
+    window.clearTimeout(window.__networkStatusTimer);
+    window.__networkStatusTimer=window.setTimeout(function(){bar.classList.remove('is-visible')},3500);
+  }else{
+    window.clearTimeout(window.__networkStatusTimer);
+  }
+}
+window.addEventListener('offline',updateNetworkStatus);
+window.addEventListener('online',updateNetworkStatus);
+$('#networkRetry').addEventListener('click',function(){
+  if(navigator.onLine)window.location.reload();
+  else updateNetworkStatus();
+});
+if(!navigator.onLine)updateNetworkStatus();
+
 (async function init(){
   var loader = $('#appLoader');
   try {
