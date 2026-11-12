@@ -69,10 +69,11 @@
 }
 
 
-/* Red notification counters on the main navigation */
+/* Small red notification dots above the navigation labels */
 .nav a{position:relative}
-.nav-alert-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:#e32636;color:#fff;font-size:11px;font-weight:800;line-height:1;vertical-align:middle;box-shadow:0 0 0 2px var(--bg,#fff)}
+.nav-alert-badge{position:absolute;top:-5px;right:-7px;width:9px;height:9px;padding:0;border:2px solid #111;border-radius:50%;background:#ef3340;font-size:0;line-height:0;box-shadow:0 0 0 1px rgba(239,51,64,.18)}
 .nav-alert-badge[hidden]{display:none}
+#chatForm.is-sending button[type="submit"]{opacity:.65;pointer-events:none;cursor:wait}
 </style></head><body>
 <div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
   <div class="loader-card">
@@ -1343,8 +1344,8 @@ function updateNavNotificationBadges(){
   var pendingMessages=directRequests.filter(function(r){return r.receiverId===me().id&&r.status==='pending'}).length;
   var pendingRentals=state.rentals.filter(function(r){return r.ownerId===me().id&&r.status==='pending'}).length;
   var messagesBadge=$('#messagesNavBadge'),spaceBadge=$('#spaceNavBadge');
-  if(messagesBadge){var count=unreadRental+unreadDirect+pendingMessages;messagesBadge.textContent=count>9?'9+':String(count);messagesBadge.hidden=count===0;messagesBadge.setAttribute('aria-label',count+' new messages or requests');}
-  if(spaceBadge){spaceBadge.textContent=pendingRentals>9?'9+':String(pendingRentals);spaceBadge.hidden=pendingRentals===0;spaceBadge.setAttribute('aria-label',pendingRentals+' rental requests');}
+  if(messagesBadge){var count=unreadRental+unreadDirect+pendingMessages;messagesBadge.textContent='';messagesBadge.hidden=count===0;messagesBadge.setAttribute('aria-label',count+' new messages or requests');}
+  if(spaceBadge){spaceBadge.textContent='';spaceBadge.hidden=pendingRentals===0;spaceBadge.setAttribute('aria-label',pendingRentals+' rental requests');}
 }
 async function refreshNavNotifications(){
   if(!me())return;
@@ -1533,16 +1534,23 @@ $('#directUserSearch').addEventListener('input', function(e) {
 });
 
 var messageSending = false;
+var lastSuccessfulMessageKey = '';
+var lastSuccessfulMessageAt = 0;
 $('#chatForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   if (messageSending || (!activeConversationId && !activeDirectChatId)) return;
   var input=$('#chatInput'), body=input.value.trim();
   if(!body)return;
   var directId=activeDirectChatId, rentalId=activeConversationId;
+  var chatKey=(directId?'direct:':'rental:')+(directId||rentalId);
+  var duplicateKey=chatKey+'|'+body;
+  var now=Date.now();
+  if(duplicateKey===lastSuccessfulMessageKey && now-lastSuccessfulMessageAt<1800){input.value='';return;}
   var endpoint=directId
     ? '/messages/direct/'+encodeURIComponent(directId)+'/messages'
     : '/messages/'+encodeURIComponent(rentalId)+'/messages';
   messageSending=true;
+  $('#chatForm').classList.add('is-sending');
   var sendButton=$('#chatForm button[type="submit"]');
   sendButton.disabled=true;
   input.value='';
@@ -1554,6 +1562,8 @@ $('#chatForm').addEventListener('submit', async function(e) {
   var box=$('#chatMessages');box.appendChild(pending);box.scrollTop=box.scrollHeight;
   try{
     await api(endpoint,{method:'POST',body:JSON.stringify({body:body})});
+    lastSuccessfulMessageKey=duplicateKey;
+    lastSuccessfulMessageAt=Date.now();
     pending.remove();
     // Fetch only the active thread; avoid reloading inbox + requests after every send.
     if(directId && activeDirectChatId===directId) await openDirectChat(directId,true);
@@ -1568,13 +1578,14 @@ $('#chatForm').addEventListener('submit', async function(e) {
     input.focus();
   }finally{
     messageSending=false;
+    $('#chatForm').classList.remove('is-sending');
     sendButton.disabled=false;
   }
 });
 $('#chatInput').setAttribute('enterkeyhint','send');
 $('#chatInput').setAttribute('autocomplete','off');
 $('#chatInput').addEventListener('keydown',function(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#chatForm').requestSubmit();}
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!e.repeat&&!messageSending)$('#chatForm').requestSubmit();}
 });
 
 async function refresh(){var data=await api('/bootstrap');state.user=data.user;state.items=data.items;state.rentals=data.rentals;renderHeader();renderBrowse();if(location.hash==='#my-space')renderSpace()}
