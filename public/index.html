@@ -1001,6 +1001,54 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
  }
 }
 
+
+/* Stable messaging layout + clear inbox hierarchy */
+#chatForm[hidden]{display:none!important}
+#chatForm:not([hidden]){display:flex}
+#conversationList:before{content:none!important;display:none!important}
+#conversationList{display:block;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.inbox-group{display:block;margin:0 0 12px}
+.inbox-group-heading{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 8px;color:#e4c477;font-size:11px;font-weight:850;letter-spacing:.075em;text-transform:uppercase}
+.inbox-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 6px;border:1px solid #51452d;border-radius:20px;color:#e8c879;font-size:10px}
+.inbox-empty{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin:0 6px 10px;padding:13px;border:1px dashed #383941;border-radius:10px;color:#b6b6bd;font-size:12px;line-height:1.45}
+.inbox-empty small{color:#888b94;font-size:11px}
+.inbox-empty.compact{padding:10px 12px;margin-bottom:8px}
+.inbox-empty .btn{min-height:34px;padding:0 12px;font-size:12px}
+.conversation-item{min-height:68px}
+.chat-layout,.chat-sidebar,.chat-window{box-sizing:border-box}
+.chat-layout{overflow:hidden}
+.chat-sidebar{min-height:0}
+.chat-window{min-height:0}
+.chat-header{flex:0 0 60px}
+.chat-messages{flex:1 1 0;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.chat-composer{flex:0 0 auto}
+.chat-placeholder{margin:0;padding:16px;color:#a6a7af}
+@media(max-width:760px){
+ .messages-view{height:auto!important;min-height:0!important;overflow:visible!important;padding:12px 0 24px!important}
+ .messages-view>.wrap{height:auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;gap:12px!important}
+ .messages-page-heading{margin:0 0 2px!important;padding:0 12px!important}
+ .chat-layout{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;padding:0 10px!important;overflow:visible!important}
+ .chat-sidebar{display:flex!important;flex:0 0 360px!important;width:100%!important;height:360px!important;min-height:360px!important;max-height:360px!important;overflow:hidden!important;border-radius:13px!important}
+ .chat-sidebar-head{flex:0 0 auto!important;padding:12px 14px!important}
+ .direct-search{flex:0 0 auto!important;padding:10px 12px!important}
+ #directSearchResults{max-height:100px!important;overflow:auto!important}
+ #directRequests{flex:0 0 auto!important;max-height:82px!important;overflow:auto!important}
+ #conversationList{display:block!important;flex:1 1 0!important;width:100%!important;min-height:0!important;height:auto!important;max-height:none!important;overflow-x:hidden!important;overflow-y:auto!important;padding:5px 8px 10px!important}
+ .inbox-group{margin-bottom:5px!important}
+ .inbox-group-heading{padding:8px 8px 7px!important}
+ .conversation-item{width:100%!important;min-height:64px!important;height:auto!important;margin:0 0 6px!important;padding:10px 11px!important;border-radius:10px!important}
+ .inbox-empty{margin:0 5px 8px!important;padding:10px!important}
+ .chat-window{display:flex!important;flex:0 0 auto!important;width:100%!important;height: min(54dvh,480px)!important;min-height:340px!important;max-height:480px!important;overflow:hidden!important;border-radius:13px!important}
+ .chat-header{flex-basis:54px!important;min-height:54px!important;padding:10px 13px!important}
+ .chat-messages{flex:1 1 0!important;min-height:0!important;overflow-y:auto!important}
+ .chat-composer{flex:0 0 auto!important}
+}
+@media(max-width:420px){
+ .chat-sidebar{flex-basis:350px!important;height:350px!important;min-height:350px!important;max-height:350px!important}
+ .chat-window{height:52dvh!important;min-height:320px!important;max-height:440px!important}
+ .conversation-item{min-height:66px!important}
+}
+
 </style>
 
 <header class="top">
@@ -1247,56 +1295,35 @@ async function loadConversations() {
 
 function renderConversations() {
   var list = $('#conversationList');
-
-  if (!conversations.length) {
-    var emptyHtml = `
-      <div class="chat-empty">
-        <p>No conversations yet.</p>
-        <p>Open an item and tap Message to start one.</p>
-        <button class="btn btn-primary" data-action="browse-from-chat">
-          Browse items
-        </button>
-      </div>`;
-    list.innerHTML = emptyHtml;
-    renderDirectChats();
-    return;
-  }
-
-  var conversationsHtml = conversations.map(function(c) {
-    var other = c.renterId === me().id
-      ? c.item.owner
-      : c.renter;
-
-    var last = c.messages && c.messages[0];
-    var unread = c.unreadCount || 0;
-
-var unreadBadge = unread > 0
-  ? '<span class="unread-badge">' + unread + '</span>'
-  : '';
-
-    return `
-      <button class="conversation-item ${activeConversationId === c.id ? 'active' : ''}"
-        data-action="open-conversation"
-        data-id="${esc(c.id)}">
-        <strong>${esc(other.name)} ${unreadBadge}</strong>
-        <span>${esc(c.item.title)}</span>
-        <small>${esc(last ? last.body : 'Start a conversation')}</small>
-      </button>`;
-  }).join('');
-  list.innerHTML = conversationsHtml;
-  renderDirectChats();
-}
-function renderDirectChats() {
-  var list = $('#conversationList');
   if (!list) return;
-  var html = '<div class="direct-section-title">Personal chats</div>';
-  if (!directChats.length) html += '<div class="direct-empty">No approved personal chats yet.</div>';
-  html += directChats.map(function(c) {
-    var other = c.starterId === me().id ? c.receiver : c.starter;
-    var last = c.messages && c.messages[0];
-    return '<button class="conversation-item '+(activeDirectChatId===c.id?'active':'')+'" data-action="open-direct-chat" data-id="'+esc(c.id)+'"><strong>'+esc(other.name)+'</strong><span>Personal message</span><small>'+esc(last?last.body:'You are connected')+'</small></button>';
-  }).join('');
-  list.insertAdjacentHTML('beforeend', html);
+  var previousScroll = list.scrollTop;
+  var rentalHtml = '<section class="inbox-group"><div class="inbox-group-heading"><span>Rental chats</span><span class="inbox-count">'+conversations.length+'</span></div>';
+  if (!conversations.length) {
+    rentalHtml += '<div class="inbox-empty">No rental conversations yet.<small>Open a listed item and tap Message to start.</small><button class="btn btn-primary" data-action="browse-from-chat">Browse items</button></div>';
+  } else {
+    rentalHtml += conversations.map(function(c) {
+      var other = c.renterId === me().id ? c.item.owner : c.renter;
+      var last = c.messages && c.messages[0];
+      var unread = c.unreadCount || 0;
+      var unreadBadge = unread > 0 ? '<span class="unread-badge">'+unread+'</span>' : '';
+      return '<button class="conversation-item '+(activeConversationId===c.id?'active':'')+'" data-action="open-conversation" data-id="'+esc(c.id)+'"><strong>'+esc(other.name)+' '+unreadBadge+'</strong><span>'+esc(c.item.title)+'</span><small>'+esc(last?last.body:'Start a conversation')+'</small></button>';
+    }).join('');
+  }
+  rentalHtml += '</section>';
+
+  var personalHtml = '<section class="inbox-group"><div class="inbox-group-heading"><span>Personal chats</span><span class="inbox-count">'+directChats.length+'</span></div>';
+  if (!directChats.length) {
+    personalHtml += '<div class="inbox-empty compact">No approved personal chats yet.</div>';
+  } else {
+    personalHtml += directChats.map(function(c) {
+      var other = c.starterId === me().id ? c.receiver : c.starter;
+      var last = c.messages && c.messages[0];
+      return '<button class="conversation-item '+(activeDirectChatId===c.id?'active':'')+'" data-action="open-direct-chat" data-id="'+esc(c.id)+'"><strong>'+esc(other.name)+'</strong><span>Personal message</span><small>'+esc(last?last.body:'You are connected')+'</small></button>';
+    }).join('');
+  }
+  personalHtml += '</section>';
+  list.innerHTML = rentalHtml + personalHtml;
+  list.scrollTop = previousScroll;
 }
 function renderDirectRequests() {
   var el = $('#directRequests');
