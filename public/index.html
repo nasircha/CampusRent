@@ -924,6 +924,57 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
  .chat-window{height:60dvh!important;min-height:370px!important}
 }
 
+
+/* Mobile inbox: keep chat choices visible and easy to tap */
+@media(max-width:760px){
+ .chat-layout{gap:12px!important}
+ .chat-sidebar{display:flex!important;flex-direction:column!important;height:auto!important;max-height:none!important;overflow:visible!important;min-height:0!important}
+ .chat-sidebar-head{flex:0 0 auto!important}
+ .direct-search{flex:0 0 auto!important}
+ #directSearchResults{max-height:105px!important;overflow-y:auto!important}
+ #directRequests{flex:0 0 auto!important;max-height:82px!important;overflow-y:auto!important}
+ #conversationList{
+   display:block!important;flex:0 0 auto!important;
+   min-height:100px!important;max-height:210px!important;height:auto!important;
+   overflow-y:auto!important;overflow-x:hidden!important;
+   padding:7px 9px 10px!important;
+   border-top:1px solid #303137!important;
+   background:#101114!important;
+   -webkit-overflow-scrolling:touch!important;
+ }
+ #conversationList:before{
+   content:"YOUR CONVERSATIONS";
+   display:block!important;
+   padding:7px 9px 8px!important;
+   color:#d8b768!important;
+   font-size:10px!important;font-weight:800!important;letter-spacing:.09em!important;
+ }
+ #conversationList>.direct-section-title{padding:8px 9px 6px!important}
+ #conversationList .conversation-item{
+   display:flex!important;width:100%!important;max-width:none!important;
+   min-height:62px!important;height:auto!important;
+   margin:0 0 6px!important;padding:10px 11px!important;
+   border:1px solid #34363d!important;border-radius:9px!important;
+   background:#191a1f!important;text-align:left!important;
+   flex-direction:column!important;align-items:flex-start!important;
+   justify-content:center!important;gap:3px!important;
+ }
+ #conversationList .conversation-item strong{width:100%!important;color:#f5f3ed!important;font-size:13px!important}
+ #conversationList .conversation-item span{font-size:11px!important;color:#d8b768!important}
+ #conversationList .conversation-item small{font-size:11px!important;color:#a4a5ac!important}
+ #conversationList .conversation-item.active{
+   background:#302819!important;border:1px solid #d0a64d!important;
+   border-left:4px solid #e0b95e!important;
+ }
+ #conversationList .conversation-item.active strong{color:#ffe2a0!important}
+ .chat-window{height:min(58dvh,560px)!important;min-height:350px!important}
+}
+@media(max-width:420px){
+ #conversationList{max-height:225px!important;min-height:105px!important}
+ #conversationList .conversation-item{min-height:66px!important}
+ .chat-window{height:56dvh!important;min-height:340px!important}
+}
+
 </style>
 
 <header class="top">
