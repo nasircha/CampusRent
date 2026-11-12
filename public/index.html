@@ -1264,7 +1264,7 @@ function openItem(id) {
 }
 
 function updateSum(it){var d=parseInt($('#iDays').value,10);if(!(d>=1))d=0;$('#iSum').innerHTML='<div><span>Rent ('+d+(d===1?' day':' days')+' &times; '+inr(it.price)+')</span><span>'+inr(d*it.price)+'</span></div><div><span>Refundable deposit</span><span>'+inr(it.deposit)+'</span></div><div><span>Pay at handover</span><span>'+inr(d*it.price+it.deposit)+'</span></div>'}
-async function sendRequest(id){var it=itemById(id),days=parseInt($('#iDays').value,10),start=$('#iStart').value,err=$('#iErr');if(!(days>=1&&days<=30)){err.textContent='Choose between 1 and 30 days.';return}if(!start||start<today()){err.textContent='Pick a pickup date from today onward.';return}try{await api('/rentals',{method:'POST',body:JSON.stringify({itemId:id,days:days,start:start,note:$('#iNote').value.trim()})});$('#dlgItem').close();ui.tab='rentals';await refresh();toast('Rental request sent to '+it.ownerName+'.');if(location.hash!=='#my-space')location.hash='my-space'}catch(e){err.textContent=e.message}}
+async function sendRequest(id){var it=itemById(id),days=parseInt($('#iDays').value,10),start=$('#iStart').value,err=$('#iErr');if(!(days>=1&&days<=30)){err.textContent='Choose between 1 and 30 days.';return}if(!start||start<today()){err.textContent='Pick a pickup date from today onward.';return}try{await api('/rentals',{method:'POST',body:JSON.stringify({itemId:id,days:days,start:start,note:$('#iNote').value.trim()})});$('#dlgItem').close();ui.tab='rentals';await refresh();toast('Rental request sent to '+it.ownerName+'.');if(location.hash!=='#my-space')goToView('my-space')}catch(e){err.textContent=e.message}}
 function tabBtn(id,label,n,hot){return '<button class="tab" role="tab" data-action="tab" data-tab="'+id+'" aria-selected="'+(ui.tab===id)+'">'+label+'<span class="n'+(hot?' hot':'')+'">'+n+'</span></button>'}
 function emptyBox(msg,btn){return '<div class="empty"><p>'+msg+'</p>'+btn+'</div>'}
 function thumb(it,r){return '<span class="th">'+imgHtml(it||(r?{photo:r.photo,cat:r.cat}:null)||{cat:'other'})+'</span>'}
@@ -1316,6 +1316,14 @@ function showView(space, messages) {
   window.scrollTo(0, 0);
 }
 
+function goToView(view){
+  var nextHash='#'+String(view||'browse').replace(/^#/,'');
+  if(location.hash!==nextHash){
+    history.replaceState({campusRentView:nextHash},'',location.pathname+location.search+nextHash);
+  }
+  route();
+}
+
 function route() {
   var space = location.hash === '#my-space';
   var messages = location.hash === '#messages';
@@ -1358,7 +1366,7 @@ $('#forgotPasswordBtn').addEventListener('click',function(e){
   $('#authSubmit').textContent='Send OTP';
   $('#authErr').textContent='';
 });
-async function afterAuth(){await refresh();var p=ui.pending;ui.pending=null;$('#authForm').reset();$('#dlgAuth').close();toast('Welcome, '+me().name.split(' ')[0]+'.');if(p==='space'){if(location.hash==='#my-space')route();else location.hash='my-space'}else if(p==='list')openList();else if(p&&p.item)openItem(p.item);else if(location.hash==='#my-space')route()}
+async function afterAuth(){await refresh();var p=ui.pending;ui.pending=null;$('#authForm').reset();$('#dlgAuth').close();toast('Welcome, '+me().name.split(' ')[0]+'.');if(p==='space'){if(location.hash==='#my-space')route();else goToView('my-space')}else if(p==='list')openList();else if(p&&p.item)openItem(p.item);else if(location.hash==='#my-space')route()}
 $('#profileForm').addEventListener('submit',async function(e){
   e.preventDefault();
   var name=$('#profileName').value.trim();
@@ -1546,7 +1554,7 @@ document.addEventListener('click', async function(e) {
       });
       renderHeader();
       renderBrowse();
-      if (location.hash !== '#browse') location.hash = 'browse';
+      if (location.hash !== '#browse') goToView('browse');
       else route();
       toast('You are logged out.');
       break;
@@ -1596,7 +1604,7 @@ document.addEventListener('click', async function(e) {
       break;
 
     case 'browse-from-chat':
-      location.hash = 'browse';
+      goToView('browse');
       break;
 
    case 'open-conversation':
@@ -1635,7 +1643,7 @@ case 'message-owner':
     });
 
     $('#dlgItem').close();
-    location.hash = 'messages';
+    goToView('messages');
     await openConversation(result.conversation.id);
   } catch (error) {
     toast(error.message);
@@ -1715,9 +1723,18 @@ $('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){va
   state = { user: null, items: [], rentals: [] };
   renderHeader();
   renderBrowse();
-  if (location.hash !== '#browse') location.hash = 'browse';
+  if (location.hash !== '#browse') goToView('browse');
   else route();
   toast('You have been logged out in another tab.');
+});
+document.addEventListener('click',function(event){
+  var link=event.target.closest('a[href^="#"]');
+  if(!link)return;
+  var hash=link.getAttribute('href');
+  if(hash==='#browse'||hash==='#messages'||hash==='#my-space'){
+    event.preventDefault();
+    goToView(hash);
+  }
 });
 window.addEventListener('hashchange',route);
 $('#lCat').innerHTML=CATS.map(function(c){return '<option value="'+c.id+'">'+esc(c.label)+'</option>'}).join('');$('#lCond').innerHTML=CONDS.map(function(c){return '<option'+(c==='Good'?' selected':'')+'>'+esc(c)+'</option>'}).join('');
