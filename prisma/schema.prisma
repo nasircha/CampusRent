@@ -164,3 +164,15 @@ model DirectChatMessage {
   sender    User @relation("DirectMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
   @@index([chatId, createdAt])
 }
+model UserActivity {
+  id        String   @id @default(cuid())
+  userId    String?
+  name      String
+  college   String   @default("")
+  email     String
+  event     String
+  createdAt DateTime @default(now())
+
+  @@index([event, createdAt])
+  @@index([email, createdAt])
+}
