@@ -802,6 +802,64 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
  .direct-request-actions .btn{padding:6px 7px;font-size:11px}
 }
 
+
+/* CampusRent messaging — Black & Gold, mobile-first refresh */
+.messages-view{background:#090a0d;color:#f7f4ec;padding:18px 0 28px;min-height:calc(100dvh - 72px)}
+.messages-page-heading{margin:0 auto 16px;max-width:1180px;padding:0 14px}
+.messages-page-heading h1{font-size:clamp(25px,5vw,34px);font-weight:850;letter-spacing:-.04em;margin:0;color:#fff}
+.messages-page-heading p{margin:5px 0 0;color:#9a9aa1;font-size:13px}
+.chat-layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:12px;padding:0 14px;min-height:620px;height:calc(100dvh - 168px);max-height:820px}
+.chat-sidebar,.chat-window{background:#111216;border:1px solid #292a30;border-radius:18px;overflow:hidden;min-width:0;box-shadow:0 12px 36px #0005}
+.chat-sidebar{display:flex;flex-direction:column}
+.chat-sidebar-head{padding:17px 17px 13px;border-bottom:1px solid #282930}
+.chat-sidebar-head h2{margin:0;color:#fff;font-size:18px;font-weight:800;letter-spacing:-.02em}
+.chat-sidebar-head p{margin:4px 0 0;color:#898b94;font-size:12px}
+.direct-search{padding:13px 14px;border-bottom:1px solid #282930}
+.direct-search label{display:block;color:#c9c6bc;font-size:11px;font-weight:750;letter-spacing:.04em;text-transform:uppercase;margin:0 0 8px}
+.direct-search input{width:100%;height:43px;border:1px solid #383941;border-radius:11px;background:#090a0d;color:#fff;padding:0 12px;outline:none;font-size:14px}
+.direct-search input:focus{border-color:#d8ad45;box-shadow:0 0 0 3px #d8ad4522}
+#directSearchResults,#directRequests{padding:0 12px}
+#conversationList{overflow:auto;min-height:0;flex:1;padding:7px}
+.chat-window{display:flex;flex-direction:column;background:#0e0f12}
+.chat-header{min-height:68px;padding:14px 18px;border-bottom:1px solid #292a30;color:#fff;display:flex;align-items:center;font-weight:800}
+.chat-messages{flex:1;min-height:0;overflow:auto;padding:18px;background:radial-gradient(ellipse at top right,#d6a83b0b,transparent 48%),#0c0d10}
+.chat-composer{padding:12px;border-top:1px solid #292a30;background:#111216;gap:9px}
+.chat-composer input,.chat-composer textarea{background:#090a0d!important;color:#fff!important;border:1px solid #383941!important;border-radius:12px!important;min-height:44px}
+.chat-composer button,.chat-window [data-action="send-message"]{background:linear-gradient(135deg,#f0ca70,#c58d25)!important;color:#17130a!important;border:0!important;border-radius:12px!important;font-weight:850!important}
+.chat-messages .message-bubble,.chat-messages .chat-bubble{border-radius:16px}
+.chat-sidebar [data-action],#directSearchResults [data-action],#directRequests [data-action]{transition:background .18s,border-color .18s}
+#conversationList [data-action]:hover,#directSearchResults [data-action]:hover,#directRequests [data-action]:hover{background:#d6a83b12}
+.chat-sidebar button,.chat-sidebar [role="button"]{border-radius:11px}
+.chat-sidebar .active,.chat-sidebar [aria-current="true"]{background:#d6a83b16;border-color:#c99b3b}
+.chat-sidebar small,.chat-sidebar .muted{color:#9698a1}
+@media(max-width:760px){
+ .messages-view{padding:10px 0 14px;min-height:calc(100dvh - 60px)}
+ .messages-page-heading{padding:0 12px;margin-bottom:10px}
+ .messages-page-heading h1{font-size:25px}
+ .messages-page-heading p{font-size:12px}
+ .chat-layout{height:calc(100dvh - 128px);min-height:540px;max-height:none;padding:0 9px;gap:9px;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(185px,36%) minmax(0,1fr)}
+ .chat-sidebar{border-radius:15px}
+ .chat-sidebar-head{padding:11px 13px 8px}
+ .chat-sidebar-head h2{font-size:16px}
+ .chat-sidebar-head p{font-size:11px}
+ .direct-search{padding:9px 11px}
+ .direct-search label{font-size:10px;margin-bottom:5px}
+ .direct-search input{height:39px;font-size:14px}
+ #conversationList{display:flex;overflow-x:auto;overflow-y:hidden;gap:7px;padding:7px 8px 9px;scroll-snap-type:x proximity}
+ #conversationList>*{flex:0 0 min(78vw,260px);min-width:0;scroll-snap-align:start}
+ #directRequests{max-height:74px;overflow:auto}
+ .chat-window{border-radius:15px;min-height:0}
+ .chat-header{min-height:54px;padding:10px 13px;font-size:14px}
+ .chat-messages{padding:12px 10px}
+ .chat-composer{padding:9px;gap:7px}
+ .chat-composer input,.chat-composer textarea{min-height:42px;font-size:14px}
+}
+@media(max-width:420px){
+ .chat-layout{height:calc(100dvh - 120px);grid-template-rows:minmax(174px,34%) minmax(0,1fr);padding:0 7px}
+ .messages-page-heading{padding:0 9px}
+ .chat-messages{padding:10px 8px}
+}
+
 </style>
 
 <header class="top">
