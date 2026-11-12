@@ -1343,14 +1343,35 @@ async function loadConversations() {
   updateNavNotificationBadges();
 }
 
+function navSeenKey(type){
+  return 'campusrent.navSeen.'+String(me()&&me().id||'guest')+'.'+type;
+}
+function navNotificationCount(type){
+  if(type==='messages'){
+    var unreadRental=conversations.reduce(function(total,c){return total+(Number(c.unreadCount)||0)},0);
+    var unreadDirect=directChats.reduce(function(total,c){return total+(Number(c.unreadCount)||0)},0);
+    var pendingMessages=directRequests.filter(function(r){return r.receiverId===me().id&&r.status==='pending'}).length;
+    return unreadRental+unreadDirect+pendingMessages;
+  }
+  return state.rentals.filter(function(r){return r.ownerId===me().id&&r.status==='pending'}).length;
+}
+function markNavNotificationsSeen(type){
+  if(!me())return;
+  try{localStorage.setItem(navSeenKey(type),String(navNotificationCount(type)))}catch(error){}
+}
 function updateNavNotificationBadges(){
-  var unreadRental=conversations.reduce(function(total,c){return total+(Number(c.unreadCount)||0)},0);
-  var unreadDirect=directChats.reduce(function(total,c){return total+(Number(c.unreadCount)||0)},0);
-  var pendingMessages=directRequests.filter(function(r){return r.receiverId===me().id&&r.status==='pending'}).length;
-  var pendingRentals=state.rentals.filter(function(r){return r.ownerId===me().id&&r.status==='pending'}).length;
+  if(!me())return;
+  var messagesCount=navNotificationCount('messages');
+  var spaceCount=navNotificationCount('space');
   var messagesBadge=$('#messagesNavBadge'),spaceBadge=$('#spaceNavBadge');
-  if(messagesBadge){var count=unreadRental+unreadDirect+pendingMessages;messagesBadge.textContent='';messagesBadge.hidden=count===0;messagesBadge.setAttribute('aria-label',count+' new messages or requests');}
-  if(spaceBadge){spaceBadge.textContent='';spaceBadge.hidden=pendingRentals===0;spaceBadge.setAttribute('aria-label',pendingRentals+' rental requests');}
+  function shouldShow(type,count){
+    var key=navSeenKey(type),seen=0;
+    try{seen=Number(localStorage.getItem(key)||0)}catch(error){}
+    if(count<seen){seen=count;try{localStorage.setItem(key,String(seen))}catch(error){}}
+    return count>seen;
+  }
+  if(messagesBadge){messagesBadge.textContent='';messagesBadge.hidden=!shouldShow('messages',messagesCount);messagesBadge.setAttribute('aria-label',messagesCount+' new messages or requests');}
+  if(spaceBadge){spaceBadge.textContent='';spaceBadge.hidden=!shouldShow('space',spaceCount);spaceBadge.setAttribute('aria-label',spaceCount+' rental requests');}
 }
 async function refreshNavNotifications(){
   if(!me())return;
@@ -1361,6 +1382,8 @@ async function refreshNavNotifications(){
     conversations=results[1].conversations||[];
     directChats=results[2].chats||[];
     directRequests=results[3].requests||[];
+    if(location.hash==='#messages')markNavNotificationsSeen('messages');
+    if(location.hash==='#my-space')markNavNotificationsSeen('space');
     updateNavNotificationBadges();
     if(location.hash==='#messages'){renderConversations();renderDirectRequests();}
     if(location.hash==='#my-space')renderSpace();
@@ -1681,6 +1704,9 @@ function showView(space, messages) {
   $('#viewBrowse').hidden = space || messages;
   $('#viewSpace').hidden = !space;
   $('#viewMsgs').hidden = !messages;
+
+  if(messages)markNavNotificationsSeen('messages');
+  if(space)markNavNotificationsSeen('space');
 
   if (space) {
     $('#navSpace').setAttribute('aria-current', 'page');
