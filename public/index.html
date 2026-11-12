@@ -1324,6 +1324,17 @@ function goToView(view){
   route();
 }
 
+// Keep one in-app history guard: Back from Messages/My Space returns to Browse.
+// Once Browse is reached, the next Back is allowed to leave CampusRent.
+history.replaceState({campusRentPrevious:true},'',location.href);
+history.pushState({campusRentHome:true},'',location.href);
+window.addEventListener('popstate',function(){
+  if(location.hash!=='#browse'){
+    history.replaceState({campusRentHome:true},'',location.pathname+location.search+'#browse');
+    route();
+  }
+});
+
 function route() {
   var space = location.hash === '#my-space';
   var messages = location.hash === '#messages';
