@@ -280,6 +280,16 @@ router.post('/logout', (_req, res) => {
   res.json({ ok: true });
 });
 
+
+router.patch('/me', requireAuth, async (req, res, next) => {
+  try {
+    const parsed = z.object({ name: z.string().trim().min(2, 'Name must be at least 2 characters.').max(80, 'Name must be 80 characters or fewer.') }).safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
+    const user = await prisma.user.update({ where: { id: req.user.id }, data: { name: parsed.data.name }, select: { id: true, name: true, college: true, email: true } });
+    res.json({ user });
+  } catch (error) { next(error); }
+});
+
 router.get('/me', requireAuth, (req, res) => {
   res.json({ user: req.user });
 });
