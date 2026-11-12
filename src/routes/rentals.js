@@ -43,7 +43,9 @@ router.patch('/:id/:action', async (req, res, next) => {
       } else if (action === 'return') {
         if (rental.ownerId !== req.user.id) throw Object.assign(new Error('Only the listing owner can mark an item returned.'), { status: 403 });
         if (rental.status !== 'accepted') throw Object.assign(new Error('Only accepted rentals can be marked returned.'), { status: 409 });
-        await tx.item.update({ where: { id: rental.itemId }, data: { status: 'available' } }); update = { status: 'returned', returnedAt: new Date() };
+        await tx.item.update({ where: { id: rental.itemId }, data: { status: 'available' } });
+        await tx.conversation.updateMany({ where: { itemId: rental.itemId, renterId: rental.renterId, archivedAt: null }, data: { archivedAt: new Date() } });
+        update = { status: 'returned', returnedAt: new Date() };
       } else throw Object.assign(new Error('Unknown rental action.'), { status: 404 });
       return tx.rental.update({ where: { id }, data: update });
     }, { isolationLevel: 'Serializable' });
