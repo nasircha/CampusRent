@@ -1093,7 +1093,7 @@ $('#directUserSearch').addEventListener('input', function(e) {
 $('#chatForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  if (!activeConversationId) return;
+  if (!activeConversationId && !activeDirectChatId) return;
 
   var body = $('#chatInput').value.trim();
   if (!body) return;
@@ -1209,7 +1209,7 @@ function showView(space, messages) {
     $('#navSpace').removeAttribute('aria-current');
     if (me()) {
       if (!conversations.length) $('#conversationList').innerHTML = '<p class="chat-placeholder">Loading conversations...</p>';
-      if (!activeConversationId) {
+      if (!activeConversationId && !activeDirectChatId) {
         $('#chatHeader').textContent = 'Select a conversation';
         $('#chatMessages').innerHTML = '<p class="chat-placeholder">Your messages will appear here when you select a conversation.</p>';
         $('#chatForm').hidden = true;
