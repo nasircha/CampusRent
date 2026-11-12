@@ -1099,6 +1099,29 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 </style>
 
 <script>(function(){function sizeTopbar(){var h=document.querySelector(".top"),m=document.querySelector("main");if(h&&m)m.style.paddingTop=h.offsetHeight+"px"}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",sizeTopbar);else sizeTopbar();window.addEventListener("load",sizeTopbar);window.addEventListener("resize",sizeTopbar);})();</script>
+<script>
+(function(){
+  var startX=0,startY=0;
+  function currentIndex(){var h=location.hash;return h==='#messages'?1:h==='#my-space'?2:0}
+  document.addEventListener('touchstart',function(e){
+    if(!e.touches||e.touches.length!==1)return;
+    var t=e.target;
+    if(t.closest('input,textarea,select,button,a,dialog,.chat-layout,.chat-window,.chat-sidebar,.tabs,[contenteditable="true"]')){startX=0;return}
+    startX=e.touches[0].clientX;startY=e.touches[0].clientY;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(!startX||!e.changedTouches||!e.changedTouches.length)return;
+    var dx=e.changedTouches[0].clientX-startX,dy=e.changedTouches[0].clientY-startY;
+    startX=0;
+    if(Math.abs(dx)<85||Math.abs(dx)<Math.abs(dy)*1.35)return;
+    var next=currentIndex()+(dx<0?1:-1);
+    if(next<0||next>2)return;
+    var views=['browse','messages','my-space'];
+    if(views[next]==='my-space'&&!document.querySelector('#authArea .who')){goToView('my-space');return}
+    goToView(views[next]);
+  },{passive:true});
+})();
+</script>
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#browse" aria-label="CampusRent home">
