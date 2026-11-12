@@ -1096,32 +1096,18 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
  .chat-window{height:min(56dvh,470px)!important;min-height:310px!important}
 }
 
+
+/* Smooth horizontal transitions between Home, Messages and My Space.
+   Navigation remains link-based; browser Back/Forward keeps its native behavior. */
+@keyframes campusViewFromRight{from{opacity:.72;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+@keyframes campusViewFromLeft{from{opacity:.72;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}}
+.view-slide-in-right{animation:campusViewFromRight .24s ease-out both}
+.view-slide-in-left{animation:campusViewFromLeft .24s ease-out both}
+@media(prefers-reduced-motion:reduce){.view-slide-in-right,.view-slide-in-left{animation:none}}
 </style>
 
 <script>(function(){function sizeTopbar(){var h=document.querySelector(".top"),m=document.querySelector("main");if(h&&m)m.style.paddingTop=h.offsetHeight+"px"}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",sizeTopbar);else sizeTopbar();window.addEventListener("load",sizeTopbar);window.addEventListener("resize",sizeTopbar);})();</script>
-<script>
-(function(){
-  var startX=0,startY=0;
-  function currentIndex(){var h=location.hash;return h==='#messages'?1:h==='#my-space'?2:0}
-  document.addEventListener('touchstart',function(e){
-    if(!e.touches||e.touches.length!==1)return;
-    var t=e.target;
-    if(t.closest('input,textarea,select,button,a,dialog,.chat-layout,.chat-window,.chat-sidebar,.tabs,[contenteditable="true"]')){startX=0;return}
-    startX=e.touches[0].clientX;startY=e.touches[0].clientY;
-  },{passive:true});
-  document.addEventListener('touchend',function(e){
-    if(!startX||!e.changedTouches||!e.changedTouches.length)return;
-    var dx=e.changedTouches[0].clientX-startX,dy=e.changedTouches[0].clientY-startY;
-    startX=0;
-    if(Math.abs(dx)<85||Math.abs(dx)<Math.abs(dy)*1.35)return;
-    var next=currentIndex()+(dx<0?1:-1);
-    if(next<0||next>2)return;
-    var views=['browse','messages','my-space'];
-    if(views[next]==='my-space'&&!document.querySelector('#authArea .who')){goToView('my-space');return}
-    goToView(views[next]);
-  },{passive:true});
-})();
-</script>
+
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#browse" aria-label="CampusRent home">
@@ -1754,12 +1740,24 @@ function renderSpace(){var u=me();if(!u)return;var isPlatformOwner=String(u.emai
 
 function showView(space, messages) {
   messages = !!messages;
+  var previousView=document.querySelector('#viewMsgs:not([hidden]),#viewSpace:not([hidden]),#viewBrowse:not([hidden])');
+  var nextView=space?$('#viewSpace'):messages?$('#viewMsgs'):$('#viewBrowse');
+  var previousName=previousView&&previousView.id||'viewBrowse';
+  var nextName=nextView&&nextView.id||'viewBrowse';
+  var viewOrder={viewBrowse:0,viewMsgs:1,viewSpace:2};
+  var slideClass=viewOrder[nextName]>=viewOrder[previousName]?'view-slide-in-right':'view-slide-in-left';
 
   if (!messages) stopChatAutoRefresh();
 
   $('#viewBrowse').hidden = space || messages;
   $('#viewSpace').hidden = !space;
   $('#viewMsgs').hidden = !messages;
+  if(previousName!==nextName&&nextView){
+    nextView.classList.remove('view-slide-in-left','view-slide-in-right');
+    void nextView.offsetWidth;
+    nextView.classList.add(slideClass);
+    nextView.addEventListener('animationend',function(){nextView.classList.remove('view-slide-in-left','view-slide-in-right')},{once:true});
+  }
 
   if(messages)markNavNotificationsSeen('messages');
   if(space)markNavNotificationsSeen('space');
@@ -1798,21 +1796,13 @@ function showView(space, messages) {
 function goToView(view){
   var nextHash='#'+String(view||'browse').replace(/^#/,'');
   if(location.hash!==nextHash){
-    history.replaceState({campusRentView:nextHash},'',location.pathname+location.search+nextHash);
+    history.pushState({campusRentView:nextHash},'',location.pathname+location.search+nextHash);
   }
   route();
 }
 
-// Keep one in-app history guard: Back from Messages/My Space returns to Browse.
-// Once Browse is reached, the next Back is allowed to leave CampusRent.
-history.replaceState({campusRentPrevious:true},'',location.href);
-history.pushState({campusRentHome:true},'',location.href);
-window.addEventListener('popstate',function(){
-  if(location.hash!=='#browse'){
-    history.replaceState({campusRentHome:true},'',location.pathname+location.search+'#browse');
-    route();
-  }
-});
+// Let the browser's native Back/Forward buttons navigate between visited views.
+window.addEventListener('popstate',route);
 
 function route() {
   var space = location.hash === '#my-space';
