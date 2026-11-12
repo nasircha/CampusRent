@@ -30,6 +30,26 @@ async function uploadPhoto(file) {
   return result.secure_url;
 }
 router.patch('/:id/status', requireAuth, async (req, res, next) => { try { const item = await prisma.item.findUnique({ where: { id: req.params.id } }); if (!item || item.ownerId !== req.user.id) return res.status(404).json({ error: 'Listing not found.' }); if (item.status === 'rented') return res.status(409).json({ error: 'A rented item cannot be paused.' }); const status = item.status === 'paused' ? 'available' : 'paused'; await prisma.item.update({ where: { id: item.id }, data: { status } }); res.json({ ok: true, status }); } catch (e) { next(e); } });
-router.delete('/:id', requireAuth, async (req, res, next) => { try { const item = await prisma.item.findUnique({ where: { id: req.params.id }, include: { rentals: { select: { id: true, status: true } } } }); if (!item || item.ownerId !== req.user.id) return res.status(404).json({ error: 'Listing not found.' }); if (item.status === 'rented') return res.status(409).json({ error: 'You cannot delete an item while it is rented.' }); await prisma.$transaction(async tx => { await tx.rental.updateMany({ where: { itemId: item.id, status: 'pending' }, data: { status: 'declined' } }); if (item.rentals.length) await tx.item.update({ where: { id: item.id }, data: { status: 'deleted' } }); else await tx.item.delete({ where: { id: item.id } }); }); res.json({ ok: true }); } catch (e) { next(e); } });
+router.delete('/:id', requireAuth, async (req, res, next) => {
+  try {
+    const item = await prisma.item.findUnique({
+      where: { id: req.params.id },
+      include: { rentals: { select: { id: true, status: true } } }
+    });
+    if (!item || item.status === 'deleted') return res.status(404).json({ error: 'Listing not found.' });
+    const isAdmin = req.user.isAdmin === true;
+    if (!isAdmin && item.ownerId !== req.user.id) return res.status(404).json({ error: 'Listing not found.' });
+    if (!isAdmin && item.status === 'rented') return res.status(409).json({ error: 'You cannot delete an item while it is rented.' });
+    await prisma.$transaction(async tx => {
+      await tx.rental.updateMany({ where: { itemId: item.id, status: 'pending' }, data: { status: 'declined' } });
+      if (isAdmin || item.rentals.length) {
+        await tx.item.update({ where: { id: item.id }, data: { status: 'deleted' } });
+      } else {
+        await tx.item.delete({ where: { id: item.id } });
+      }
+    });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
 function formatItem(i) { return { id: i.id, title: i.title, cat: i.cat, cond: i.cond, price: i.price, deposit: i.deposit, loc: i.loc, desc: i.desc, photo: i.photo, status: i.status, createdAt: i.createdAt, ownerId: i.ownerId, ownerName: i.owner?.name || '' }; }
 module.exports = router;
