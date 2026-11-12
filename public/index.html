@@ -1221,6 +1221,7 @@ document.addEventListener('click', async function(e) {
       break;
 
     case 'logout':
+      if (!window.confirm('Are you sure you want to log out of CampusRent?')) break;
       // Logout must work even if the API is temporarily unavailable.
       token = '';
       localStorage.removeItem(TOKEN_KEY);
