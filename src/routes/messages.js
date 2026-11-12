@@ -110,7 +110,13 @@ router.get('/direct', async (req, res, next) => {
       },
       orderBy: { updatedAt: 'desc' }
     });
-    res.json({ chats });
+    const chatsWithUnread = await Promise.all(chats.map(async chat => ({
+      ...chat,
+      unreadCount: await prisma.directChatMessage.count({
+        where: { chatId: chat.id, senderId: { not: req.user.id }, seenAt: null }
+      })
+    })));
+    res.json({ chats: chatsWithUnread });
   } catch (error) { next(error); }
 });
 
