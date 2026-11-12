@@ -2,8 +2,11 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../db');
 
 function isAdminEmail(email) {
-  const adminEmail = String(process.env.ADMIN_EMAIL || 'mdnasirhussain121@gmail.com').trim().toLowerCase();
-  return !!adminEmail && String(email || '').trim().toLowerCase() === adminEmail;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const adminEmails = [process.env.ADMIN_EMAIL, 'mdnasirhussain121@gmail.com']
+    .map(value => String(value || '').trim().toLowerCase())
+    .filter(Boolean);
+  return adminEmails.includes(normalizedEmail);
 }
 
 async function requireAuth(req, res, next) {
