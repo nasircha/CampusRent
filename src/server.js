@@ -20,6 +20,7 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: 'draft-7', legacyHeaders: false }));
 app.get('/api/health', async (_req, res) => { await prisma.$queryRaw`SELECT 1`; res.json({ ok: true, service: 'CampusRent API' }); });
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/admin', require('./routes/admin'));
 app.use('/api/bootstrap', require('./routes/bootstrap'));
 app.use('/api/items', require('./routes/items'));
 app.use('/api/rentals', require('./routes/rentals'));
