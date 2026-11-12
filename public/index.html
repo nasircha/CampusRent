@@ -763,7 +763,8 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 <dialog id="dlgProfile" aria-labelledby="profileTitle">
   <form id="profileForm" class="dlg" novalidate>
     <div class="dlg-head"><h2 id="profileTitle">Your profile</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
-    <p class="hint">Update the name shown across CampusRent.</p>
+    <p class="hint">Your account details. You can update your display name below.</p>
+    <div class="field"><label for="profileEmail">Logged-in email</label><input id="profileEmail" type="email" readonly aria-readonly="true"></div>
     <div class="field"><label for="profileName">Display name</label><input id="profileName" name="name" autocomplete="name" maxlength="80" required></div>
     <p id="profileErr" class="err" role="alert"></p>
     <div class="logout-actions"><button type="button" class="btn" data-action="close">Cancel</button><button type="submit" class="btn btn-primary" id="profileSave">Save name</button></div>
@@ -1291,6 +1292,7 @@ document.addEventListener('click', async function(e) {
 
     case 'edit-profile':
       $('#profileName').value=me()?me().name:'';
+      $('#profileEmail').value=me()?me().email:'';
       $('#profileErr').textContent='';
       if (!$('#dlgProfile').open) $('#dlgProfile').showModal();
       $('#profileName').focus();
