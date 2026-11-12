@@ -30,7 +30,7 @@ router.get('/users/search', async (req, res, next) => {
     });
     res.json({ users: users.map(u => ({
       id: u.id, name: u.name, college: u.college,
-      emailHint: u.email.replace(/^(.{2}).*(@gmail\\.com)$/, '$1•••$2')
+      emailHint: u.email.split('@')[0].slice(0, 2) + '•••@gmail.com'
     })) });
   } catch (error) { next(error); }
 });
