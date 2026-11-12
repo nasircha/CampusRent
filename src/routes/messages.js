@@ -161,6 +161,7 @@ router.get('/', async (req, res, next) => {
   try {
     const conversations = await prisma.conversation.findMany({
       where: {
+        archivedAt: null,
         OR: [
           { renterId: req.user.id },
           { item: { ownerId: req.user.id } }
@@ -254,7 +255,7 @@ router.post('/', async (req, res, next) => {
         itemId: item.id,
         renterId: req.user.id
       },
-      update: {},
+      update: { archivedAt: null },
       include: {
         item: {
           select: {
@@ -364,6 +365,7 @@ router.post('/:id/messages', async (req, res, next) => {
     ) {
       return res.status(404).json({ error: 'Conversation not found.' });
     }
+    if (conversation.archivedAt) return res.status(409).json({ error: 'This rental chat is closed. Choose the item again from Browse to message.' });
 
     const now = new Date();
     const readField = conversation.renterId === req.user.id
