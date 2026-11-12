@@ -849,7 +849,7 @@ function startChatAutoRefresh() {
     openConversation(activeConversationId, true).finally(function() {
       chatRefreshBusy = false;
     });
-  }, 1000);
+  }, 3000);
 }
 
 function stopChatAutoRefresh() {
@@ -860,8 +860,13 @@ function stopChatAutoRefresh() {
 }
 
 async function loadConversations() {
+  var list = $('#conversationList');
+  if (!conversations.length && list && !list.dataset.loaded) {
+    list.innerHTML = '<p class="chat-placeholder">Loading conversations...</p>';
+  }
   var data = await api('/messages');
   conversations = data.conversations || [];
+  if (list) list.dataset.loaded = 'true';
   renderConversations();
 }
 
@@ -869,7 +874,7 @@ function renderConversations() {
   var list = $('#conversationList');
 
   if (!conversations.length) {
-    list.innerHTML = `
+    var emptyHtml = `
       <div class="chat-empty">
         <p>No conversations yet.</p>
         <p>Open an item and tap Message to start one.</p>
@@ -877,10 +882,11 @@ function renderConversations() {
           Browse items
         </button>
       </div>`;
+    if (list.innerHTML !== emptyHtml) list.innerHTML = emptyHtml;
     return;
   }
 
-  list.innerHTML = conversations.map(function(c) {
+  var conversationsHtml = conversations.map(function(c) {
     var other = c.renterId === me().id
       ? c.item.owner
       : c.renter;
@@ -901,6 +907,7 @@ var unreadBadge = unread > 0
         <small>${esc(last ? last.body : 'Start a conversation')}</small>
       </button>`;
   }).join('');
+  if (list.innerHTML !== conversationsHtml) list.innerHTML = conversationsHtml;
 }
 function formatMessageTime(date) {
   var d = new Date(date);
@@ -936,6 +943,11 @@ async function openConversation(id, silent) {
     var wasAtBottom = !sameConversation ||
       (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 80);
 
+    if (!silent && !sameConversation) {
+      $('#chatHeader').textContent = 'Loading conversation...';
+      $('#chatMessages').innerHTML = '<p class="chat-placeholder">Loading messages...</p>';
+      $('#chatForm').hidden = true;
+    }
     var data = await api('/messages/' + encodeURIComponent(id) + '/messages');
 
     activeConversationId = id;
@@ -949,7 +961,7 @@ async function openConversation(id, silent) {
     $('#chatHeader').textContent = other.name + ' · ' + c.item.title;
 
     
-$('#chatMessages').innerHTML = (data.messages || []).map(function(m) {
+var messagesHtml = (data.messages || []).map(function(m) {
   var mine = m.senderId === me().id;
   var seen = mine && m.seenAt;
 
@@ -973,7 +985,7 @@ $('#chatMessages').innerHTML = (data.messages || []).map(function(m) {
       </div>
     </div>`;
 }).join('') || '<p class="chat-placeholder">No messages yet. Say hello!</p>';
-
+    if (chatBox.innerHTML !== messagesHtml) chatBox.innerHTML = messagesHtml;
 
     $('#chatForm').hidden = false;
     if (wasAtBottom) {
@@ -1096,8 +1108,15 @@ function showView(space, messages) {
     $('#navMessages').setAttribute('aria-current', 'page');
     $('#navBrowse').removeAttribute('aria-current');
     $('#navSpace').removeAttribute('aria-current');
-      if (me()) {
+    if (me()) {
+      if (!conversations.length) $('#conversationList').innerHTML = '<p class="chat-placeholder">Loading conversations...</p>';
+      if (!activeConversationId) {
+        $('#chatHeader').textContent = 'Select a conversation';
+        $('#chatMessages').innerHTML = '<p class="chat-placeholder">Your messages will appear here when you select a conversation.</p>';
+        $('#chatForm').hidden = true;
+      }
       loadConversations().catch(function(error) {
+        $('#conversationList').innerHTML = '<p class="chat-placeholder">Could not load conversations. Please try again.</p>';
         toast(error.message);
       });
     }
