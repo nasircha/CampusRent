@@ -12,8 +12,8 @@ router.get('/activity', requireAuth, requireAdmin, async (_req, res, next) => {
       prisma.userActivity.count({ where: { event: 'logout' } }),
       prisma.userActivity.count({ where: { event: 'signup', createdAt: { gte: new Date(new Date().setHours(0,0,0,0)) } } }),
       prisma.userActivity.count({ where: { event: 'login', createdAt: { gte: new Date(new Date().setHours(0,0,0,0)) } } }),
-      prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 300, select: { id: true, name: true, college: true, email: true, emailVerified: true, createdAt: true } }),
-      prisma.userActivity.findMany({ orderBy: { createdAt: 'desc' }, take: 300, select: { id: true, userId: true, name: true, college: true, email: true, event: true, createdAt: true } }),
+      prisma.user.findMany({ orderBy: { createdAt: 'desc' }, select: { id: true, name: true, college: true, email: true, emailVerified: true, createdAt: true } }),
+      prisma.userActivity.findMany({ orderBy: { createdAt: 'desc' }, select: { id: true, userId: true, name: true, college: true, email: true, event: true, createdAt: true } }),
       prisma.userActivity.groupBy({ by: ['userId'], where: { event: 'login', userId: { not: null } }, _max: { createdAt: true } })
     ]);
     const loginMap = Object.fromEntries(lastLogins.filter(x => x.userId).map(x => [x.userId, x._max.createdAt]));
