@@ -103,6 +103,7 @@ model Conversation {
   ownerLastReadAt   DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  archivedAt        DateTime?
 
   item     Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
   renter   User      @relation("ConversationRenter", fields: [renterId], references: [id], onDelete: Cascade)
