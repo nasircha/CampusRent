@@ -1049,6 +1049,25 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
  .conversation-item{min-height:66px!important}
 }
 
+/* Unified inbox and compact request popup */
+#directRequests{padding:8px 12px;border-bottom:1px solid var(--line)}
+.request-inbox-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;min-height:34px;padding:6px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface-2);color:var(--fg);font:700 12px var(--font-body);cursor:pointer}
+.request-inbox-trigger:hover{border-color:var(--yellow)}
+.request-count{display:inline-grid;place-items:center;min-width:21px;height:21px;padding:0 6px;border-radius:20px;background:var(--yellow);color:var(--ink);font-size:11px}
+.sent-request-note{display:block;margin:5px 2px 0;color:var(--muted);font-size:10px}
+.request-dialog{gap:12px}
+#dlgMessageRequests{width:min(430px,calc(100% - 24px));max-height:min(75dvh,560px)}
+#messageRequestsList{overflow:auto;max-height:55dvh}
+.request-popup-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.request-person{min-width:0}
+.request-person strong,.request-person small{display:block;overflow-wrap:anywhere}
+.request-person small{color:var(--muted);font-size:11px}
+.request-popup-actions{display:flex;gap:5px;flex-shrink:0}
+.request-popup-actions .btn{padding:7px 9px;font-size:11px}
+.inbox-group-heading,.direct-section-title{display:none!important}
+.rental-archived-note{margin:8px auto;padding:8px 12px;max-width:90%;border:1px solid var(--line);border-radius:8px;text-align:center;font-size:11px}
+@media(max-width:760px){#directRequests{padding:7px 9px}.request-inbox-trigger{min-height:32px}.request-popup-row{gap:6px}.request-popup-actions .btn{padding:7px 8px}}
+
 </style>
 
 <header class="top">
@@ -1172,6 +1191,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 </dialog>
 
 
+<dialog id="dlgMessageRequests" aria-labelledby="messageRequestsTitle"><div class="dlg request-dialog"><div class="dlg-head"><div><h2 id="messageRequestsTitle">Message requests</h2><p class="hint">Approve a request to start chatting.</p></div><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div><div id="messageRequestsList"></div></div></dialog>
 <dialog id="dlgProfile" aria-labelledby="profileTitle">
   <form id="profileForm" class="dlg" novalidate>
     <div class="dlg-head"><h2 id="profileTitle">Your profile</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
@@ -1294,49 +1314,38 @@ async function loadConversations() {
 }
 
 function renderConversations() {
-  var list = $('#conversationList');
-  if (!list) return;
-  var previousScroll = list.scrollTop;
-  var rentalHtml = '<section class="inbox-group"><div class="inbox-group-heading"><span>Rental chats</span><span class="inbox-count">'+conversations.length+'</span></div>';
-  if (!conversations.length) {
-    rentalHtml += '<div class="inbox-empty">No rental conversations yet.<small>Open a listed item and tap Message to start.</small><button class="btn btn-primary" data-action="browse-from-chat">Browse items</button></div>';
-  } else {
-    rentalHtml += conversations.map(function(c) {
-      var other = c.renterId === me().id ? c.item.owner : c.renter;
-      var last = c.messages && c.messages[0];
-      var unread = c.unreadCount || 0;
-      var unreadBadge = unread > 0 ? '<span class="unread-badge">'+unread+'</span>' : '';
-      return '<button class="conversation-item '+(activeConversationId===c.id?'active':'')+'" data-action="open-conversation" data-id="'+esc(c.id)+'"><strong>'+esc(other.name)+' '+unreadBadge+'</strong><span>'+esc(c.item.title)+'</span><small>'+esc(last?last.body:'Start a conversation')+'</small></button>';
-    }).join('');
+  var list=$('#conversationList'); if(!list)return;
+  var previousScroll=list.scrollTop, combined=[];
+  conversations.forEach(function(c){
+    var other=c.renterId===me().id?c.item.owner:c.renter,last=c.messages&&c.messages[0];
+    combined.push({id:c.id,type:'rental',other:other,title:c.item.title,last:last,updatedAt:c.updatedAt||c.createdAt,unread:c.unreadCount||0,archived:!!c.archivedAt});
+  });
+  directChats.forEach(function(c){
+    var other=c.starterId===me().id?c.receiver:c.starter,last=c.messages&&c.messages[0];
+    combined.push({id:c.id,type:'direct',other:other,title:'Personal chat',last:last,updatedAt:c.updatedAt||c.createdAt,unread:0});
+  });
+  combined.sort(function(a,b){return new Date(b.updatedAt)-new Date(a.updatedAt)});
+  if(!combined.length){
+    list.innerHTML='<div class="inbox-empty"><strong>Your inbox is clear</strong><small>Start from a listed item or find a student by Gmail username.</small><button class="btn btn-primary" data-action="browse-from-chat">Browse items</button></div>';return;
   }
-  rentalHtml += '</section>';
-
-  var personalHtml = '<section class="inbox-group"><div class="inbox-group-heading"><span>Personal chats</span><span class="inbox-count">'+directChats.length+'</span></div>';
-  if (!directChats.length) {
-    personalHtml += '<div class="inbox-empty compact">No approved personal chats yet.</div>';
-  } else {
-    personalHtml += directChats.map(function(c) {
-      var other = c.starterId === me().id ? c.receiver : c.starter;
-      var last = c.messages && c.messages[0];
-      return '<button class="conversation-item '+(activeDirectChatId===c.id?'active':'')+'" data-action="open-direct-chat" data-id="'+esc(c.id)+'"><strong>'+esc(other.name)+'</strong><span>Personal message</span><small>'+esc(last?last.body:'You are connected')+'</small></button>';
-    }).join('');
-  }
-  personalHtml += '</section>';
-  list.innerHTML = rentalHtml + personalHtml;
-  list.scrollTop = previousScroll;
+  list.innerHTML=combined.map(function(x){
+    var active=x.type==='rental'?activeConversationId===x.id:activeDirectChatId===x.id;
+    var badge=x.unread?'<span class="unread-badge">'+x.unread+'</span>':'';
+    var preview=x.last?x.last.body:(x.archived?'Rental returned · choose item to message again':'You are connected');
+    return '<button class="conversation-item '+(active?'active':'')+'" data-action="'+(x.type==='rental'?'open-conversation':'open-direct-chat')+'" data-id="'+esc(x.id)+'"><strong>'+esc(x.other.name)+' '+badge+'</strong><span>'+esc(x.title)+'</span><small>'+esc(preview)+'</small></button>';
+  }).join('');
+  list.scrollTop=previousScroll;
 }
 function renderDirectRequests() {
-  var el = $('#directRequests');
-  if (!el) return;
-  var incoming = directRequests.filter(function(r){return r.receiverId===me().id && r.status==='pending'});
-  var outgoing = directRequests.filter(function(r){return r.senderId===me().id && r.status==='pending'});
-  var html = '<div class="direct-section-title">Message requests ('+incoming.length+')</div>';
-  if (!incoming.length) html += '<div class="direct-empty">No pending requests.</div>';
-  html += incoming.map(function(r){
-    return '<div class="direct-request-row"><div><strong>'+esc(r.sender.name)+'</strong><small>'+esc(r.sender.college||'College not provided')+'</small></div><div class="direct-request-actions"><button class="btn btn-primary" data-action="decide-direct-request" data-id="'+esc(r.id)+'" data-decision="approved">Approve</button><button class="btn" data-action="decide-direct-request" data-id="'+esc(r.id)+'" data-decision="declined">Decline</button></div></div>';
-  }).join('');
-  if(outgoing.length) html += '<div class="direct-empty">Sent requests: '+outgoing.length+' awaiting approval.</div>';
-  el.innerHTML = html;
+  var el=$('#directRequests');if(!el)return;
+  var incoming=directRequests.filter(function(r){return r.receiverId===me().id&&r.status==='pending'});
+  var outgoing=directRequests.filter(function(r){return r.senderId===me().id&&r.status==='pending'});
+  el.innerHTML='<button type="button" class="request-inbox-trigger" data-action="show-message-requests"><span>Requests</span><span class="request-count">'+incoming.length+'</span></button>'+
+    (outgoing.length?'<small class="sent-request-note">'+outgoing.length+' sent request'+(outgoing.length===1?'':'s')+' awaiting approval</small>':'');
+  var modal=$('#messageRequestsList');
+  if(modal)modal.innerHTML=incoming.length?incoming.map(function(r){
+    return '<div class="request-popup-row"><div class="request-person"><strong>'+esc(r.sender.name)+'</strong><small>'+esc(r.sender.college||'College not provided')+'</small></div><div class="request-popup-actions"><button class="btn btn-primary btn-sm" data-action="decide-direct-request" data-id="'+esc(r.id)+'" data-decision="approved">Approve</button><button class="btn btn-sm" data-action="decide-direct-request" data-id="'+esc(r.id)+'" data-decision="declined">Decline</button></div></div>';
+  }).join(''):'<div class="inbox-empty compact">No new message requests.</div>';
 }
 async function searchDirectUsers(value) {
   var box = $('#directSearchResults');
@@ -1458,7 +1467,8 @@ var messagesHtml = (data.messages || []).map(function(m) {
 }).join('') || '<p class="chat-placeholder">No messages yet. Say hello!</p>';
     if (chatBox.innerHTML !== messagesHtml) chatBox.innerHTML = messagesHtml;
 
-    $('#chatForm').hidden = false;
+    $('#chatForm').hidden = !!c.archivedAt;
+    if(c.archivedAt) chatBox.insertAdjacentHTML('beforeend','<p class="chat-placeholder rental-archived-note">This rental has been returned. Choose the item again from Browse to start messaging.</p>');
     if (wasAtBottom) {
       chatBox.scrollTop = chatBox.scrollHeight;
     }
@@ -1933,16 +1943,25 @@ case 'send-direct-request':
   } catch(error) { toast(error.message); }
   break;
 
-case 'decide-direct-request':
-  try {
-    await api('/messages/requests/'+encodeURIComponent(id),{
-      method:'PATCH',
-      body:JSON.stringify({decision:el.getAttribute('data-decision')})
-    });
-    await loadConversations();
-    toast(el.getAttribute('data-decision')==='approved'?'Request approved. You can now message.':'Request declined.');
-  } catch(error) { toast(error.message); }
-  break;
+case 'show-message-requests':
+      if(!$('#dlgMessageRequests').open)$('#dlgMessageRequests').showModal();
+      break;
+
+    case 'decide-direct-request':
+      try {
+        var decision=el.getAttribute('data-decision');
+        var pendingRequest=directRequests.find(function(r){return r.id===id});
+        await api('/messages/requests/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({decision:decision})});
+        await loadConversations();
+        if(decision==='approved'){
+          var peerId=pendingRequest.senderId;
+          var approved=directChats.find(function(chat){return (chat.starterId===me().id&&chat.receiverId===peerId)||(chat.receiverId===me().id&&chat.starterId===peerId)});
+          $('#dlgMessageRequests').close();
+          if(approved){goToView('messages');await openDirectChat(approved.id);}
+          toast('Request approved. Chat is now in your inbox.');
+        }else toast('Request declined.');
+      } catch(error) { toast(error.message); }
+      break;
 
 case 'message-owner':
   try {
