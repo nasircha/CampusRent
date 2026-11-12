@@ -975,6 +975,32 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
  .chat-window{height:56dvh!important;min-height:340px!important}
 }
 
+
+/* Lock messaging panel dimensions so selecting a chat never resizes the layout */
+.chat-layout{height:calc(100dvh - 175px)!important;min-height:580px!important}
+.chat-sidebar,.chat-window{min-height:0!important}
+@media(max-width:760px){
+ .messages-view{height:auto!important;min-height:0!important}
+ .chat-layout{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;height:auto!important;min-height:0!important}
+ .chat-sidebar{
+   flex:0 0 300px!important;height:300px!important;min-height:300px!important;
+   max-height:300px!important;overflow:hidden!important;
+ }
+ #conversationList{flex:1 1 auto!important;min-height:0!important;height:auto!important;max-height:none!important;overflow-y:auto!important}
+ .chat-window{
+   flex:0 0 min(58dvh,560px)!important;
+   height:min(58dvh,560px)!important;min-height:350px!important;
+   max-height:min(58dvh,560px)!important;overflow:hidden!important;
+ }
+}
+@media(max-width:420px){
+ .chat-sidebar{flex-basis:285px!important;height:285px!important;min-height:285px!important;max-height:285px!important}
+ .chat-window{
+   flex-basis:56dvh!important;height:56dvh!important;
+   min-height:340px!important;max-height:56dvh!important;
+ }
+}
+
 </style>
 
 <header class="top">
