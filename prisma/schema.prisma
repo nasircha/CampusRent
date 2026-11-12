@@ -22,6 +22,11 @@ model User {
   rentalsAsRenter Rental[] @relation("RentalRenter")
   conversationsAsRenter Conversation[] @relation("ConversationRenter")
   messagesSent         Message[]      @relation("MessageSender")
+  directRequestsSent   DirectMessageRequest[] @relation("DirectRequestSender")
+  directRequestsReceived DirectMessageRequest[] @relation("DirectRequestReceiver")
+  directChatsStarted   DirectChat[] @relation("DirectChatStarter")
+  directChatsReceived  DirectChat[] @relation("DirectChatReceiver")
+  directMessagesSent   DirectChatMessage[] @relation("DirectMessageSender")
   @@index([createdAt])
 }
 
@@ -118,4 +123,43 @@ model Message {
   sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
+}
+
+model DirectMessageRequest {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  status     String   @default("pending")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  sender     User @relation("DirectRequestSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User @relation("DirectRequestReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  @@unique([senderId, receiverId])
+  @@index([receiverId, status, createdAt])
+  @@index([senderId, status, createdAt])
+}
+
+model DirectChat {
+  id         String   @id @default(cuid())
+  starterId  String
+  receiverId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  starter    User @relation("DirectChatStarter", fields: [starterId], references: [id], onDelete: Cascade)
+  receiver   User @relation("DirectChatReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  messages   DirectChatMessage[]
+  @@unique([starterId, receiverId])
+  @@index([receiverId, updatedAt])
+}
+
+model DirectChatMessage {
+  id        String   @id @default(cuid())
+  chatId    String
+  senderId  String
+  body      String   @db.VarChar(2000)
+  createdAt DateTime @default(now())
+  seenAt    DateTime?
+  chat      DirectChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender    User @relation("DirectMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  @@index([chatId, createdAt])
 }
