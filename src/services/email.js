@@ -1,22 +1,27 @@
 
 async function sendOtpEmail(to, otp) {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.BREVO_SENDER_EMAIL;
 
-  if (!apiKey) {
-    throw new Error('RESEND_API_KEY is missing');
+  if (!apiKey || !senderEmail) {
+    throw new Error('Brevo environment variables are missing');
   }
 
-  const response = await fetch('https://api.resend.com/emails', {
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
+      accept: 'application/json',
+      'api-key': apiKey,
+      'content-type': 'application/json'
     },
     body: JSON.stringify({
-      from: 'CampusRent <onboarding@resend.dev>',
-      to: [to],
+      sender: {
+        name: 'CampusRent',
+        email: senderEmail
+      },
+      to: [{ email: to }],
       subject: 'Your CampusRent OTP',
-      html: `
+      htmlContent: `
         <div style="font-family:Arial;padding:20px">
           <h2>CampusRent Verification</h2>
           <p>Your verification code is:</p>
@@ -28,14 +33,14 @@ async function sendOtpEmail(to, otp) {
     })
   });
 
-  const result = await response.json();
-
   if (!response.ok) {
-    console.error('Resend API error:', response.status, result);
+    const error = await response.text();
+    console.error('Brevo API error:', response.status, error);
     throw new Error('Email delivery failed');
   }
 
-  return { messageId: result.id };
+  const result = await response.json();
+  return { messageId: result.messageId };
 }
 
 module.exports = { sendOtpEmail };
