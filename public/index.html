@@ -1820,13 +1820,24 @@ function showView(space, messages) {
 function goToView(view){
   var nextHash='#'+String(view||'browse').replace(/^#/,'');
   if(location.hash!==nextHash){
-    history.pushState({campusRentView:nextHash},'',location.pathname+location.search+nextHash);
+    // Keep one in-app history entry instead of stacking every visited section.
+    history.replaceState({campusRentView:nextHash},'',location.pathname+location.search+nextHash);
   }
   route();
 }
 
-// Let the browser's native Back/Forward buttons navigate between visited views.
-window.addEventListener('popstate',route);
+// One navigation guard: Back from any section returns to Browse.
+// From Browse, the next Back remains the browser's normal Back action.
+(function(){
+  history.replaceState({campusRentPrevious:true},'',location.href);
+  history.pushState({campusRentHome:true},'',location.href);
+  window.addEventListener('popstate',function(){
+    if(location.hash!=='#browse'){
+      history.replaceState({campusRentHome:true},'',location.pathname+location.search+'#browse');
+    }
+    route();
+  });
+})();
 
 function route() {
   var space = location.hash === '#my-space';
