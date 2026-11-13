@@ -18,6 +18,7 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   items        Item[]   @relation("ItemOwner")
+  itemRatings  ItemRating[]
   rentalsAsOwner  Rental[] @relation("RentalOwner")
   rentalsAsRenter Rental[] @relation("RentalRenter")
   conversationsAsRenter Conversation[] @relation("ConversationRenter")
@@ -45,6 +46,7 @@ model Item {
   updatedAt DateTime @updatedAt
   ownerId   String
   owner     User     @relation("ItemOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  ratings   ItemRating[]
   rentals   Rental[]
   conversations Conversation[]
   @@index([status, cat, createdAt])
@@ -175,4 +177,19 @@ model UserActivity {
 
   @@index([event, createdAt])
   @@index([email, createdAt])
+}
+
+
+model ItemRating {
+  id        String   @id @default(cuid())
+  itemId    String
+  userId    String
+  stars     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, userId])
+  @@index([userId, updatedAt])
 }
