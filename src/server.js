@@ -23,6 +23,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/bootstrap', require('./routes/bootstrap'));
 app.use('/api/items', require('./routes/items'));
+app.use('/api/ratings', require('./routes/ratings'));
 app.use('/api/rentals', require('./routes/rentals'));
 app.use('/api/messages', require('./routes/messages'));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), { maxAge: '7d', immutable: true }));
