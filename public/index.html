@@ -2132,7 +2132,11 @@ document.addEventListener('click', async function(e) {
       await sendRequest(id);
       break;
 
-    case 'gallery-photo':\n      var galleryMain=$('#itemGalleryMain');if(galleryMain){var galleryIt=itemById(id),galleryPhotos=galleryIt&&(galleryIt.photos&&galleryIt.photos.length?galleryIt.photos:(galleryIt.photo?[galleryIt.photo]:[])),galleryIndex=Number(el.getAttribute('data-index'));if(galleryPhotos&&galleryPhotos[galleryIndex]){galleryMain.src=galleryPhotos[galleryIndex];document.querySelectorAll('.gallery-thumb').forEach(function(t){t.classList.toggle('active',t===el)})}}\n      break;\n\n    case 'rate-star':
+    case 'gallery-photo':
+      var galleryMain=$('#itemGalleryMain');if(galleryMain){var galleryIt=itemById(id),galleryPhotos=galleryIt&&(galleryIt.photos&&galleryIt.photos.length?galleryIt.photos:(galleryIt.photo?[galleryIt.photo]:[])),galleryIndex=Number(el.getAttribute('data-index'));if(galleryPhotos&&galleryPhotos[galleryIndex]){galleryMain.src=galleryPhotos[galleryIndex];document.querySelectorAll('.gallery-thumb').forEach(function(t){t.classList.toggle('active',t===el)})}}
+      break;
+
+    case 'rate-star':
       if(!me()){openAuth('login','Log in to rate this item.');break;}
       try{
         var rated=await api('/ratings/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify({stars:Number(el.getAttribute('data-stars'))})});
