@@ -4,12 +4,12 @@ const crypto = require('crypto');
 const { z } = require('zod');
 const prisma = require('../db');
 const { requireAuth, isAdminEmail } = require('../middleware/auth');
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: Number(process.env.MAX_UPLOAD_MB || 5) * 1024 * 1024 }, fileFilter: (_req, file, cb) => cb(/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype) ? null : new Error('Upload a JPEG, PNG, WebP, or GIF image.'), /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: Number(process.env.MAX_UPLOAD_MB || 5) * 1024 * 1024, files: 6 }, fileFilter: (_req, file, cb) => cb(/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype) ? null : new Error('Upload a JPEG, PNG, WebP, or GIF image.'), /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) });
 const itemInput = z.object({ title: z.string().trim().min(3).max(70), cat: z.enum(['calc','pens','lab','books','tech','other']), cond: z.enum(['New','Like new','Good','Worn but works']), price: z.coerce.number().int().min(1).max(5000), deposit: z.coerce.number().int().min(0).max(20000), loc: z.string().trim().min(2).max(60), desc: z.string().trim().max(400).optional().default('') });
 const publicItem = { owner: { select: { id: true, name: true } } };
 router.get('/', async (req, res, next) => { try { const items = await prisma.item.findMany({ where: { status: { in: ['available','rented'] } }, include: publicItem, orderBy: { createdAt: 'desc' } }); res.json({ items: items.map(formatItem) }); } catch (e) { next(e); } });
 router.get('/:id', async (req, res, next) => { try { const item = await prisma.item.findUnique({ where: { id: req.params.id }, include: publicItem }); if (!item || item.status === 'deleted') return res.status(404).json({ error: 'Listing not found.' }); res.json({ item: formatItem(item) }); } catch (e) { next(e); } });
-router.post('/', requireAuth, upload.single('photo'), async (req, res, next) => { try { const parsed = itemInput.safeParse(req.body); if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message }); const photo = req.file ? await uploadPhoto(req.file) : ''; const item = await prisma.item.create({ data: { ...parsed.data, ownerId: req.user.id, photo }, include: publicItem }); res.status(201).json({ item: formatItem(item) }); } catch (e) { next(e); } });
+router.post('/', requireAuth, upload.fields([{ name: 'photos', maxCount: 5 }, { name: 'photo', maxCount: 1 }]), async (req, res, next) => { try { const parsed = itemInput.safeParse(req.body); if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message }); const files = (req.files && req.files.photos) || (req.files && req.files.photo) || []; if (files.length > 5) return res.status(400).json({ error: 'You can upload up to 5 photos.' }); const photos = await Promise.all(files.map(uploadPhoto)); const photo = photos[0] || ''; const item = await prisma.item.create({ data: { ...parsed.data, ownerId: req.user.id, photo, photos }, include: publicItem }); res.status(201).json({ item: formatItem(item) }); } catch (e) { next(e); } });
 async function uploadPhoto(file) {
   const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
   if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
@@ -51,5 +51,5 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
     res.json({ ok: true });
   } catch (e) { next(e); }
 });
-function formatItem(i) { return { id: i.id, title: i.title, cat: i.cat, cond: i.cond, price: i.price, deposit: i.deposit, loc: i.loc, desc: i.desc, photo: i.photo, status: i.status, createdAt: i.createdAt, ownerId: i.ownerId, ownerName: i.owner?.name || '' }; }
+function formatItem(i) { return { id: i.id, title: i.title, cat: i.cat, cond: i.cond, price: i.price, deposit: i.deposit, loc: i.loc, desc: i.desc, photo: i.photo, photos: i.photos && i.photos.length ? i.photos : (i.photo ? [i.photo] : []), status: i.status, createdAt: i.createdAt, ownerId: i.ownerId, ownerName: i.owner?.name || '' }; }
 module.exports = router;
