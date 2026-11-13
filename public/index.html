@@ -1753,11 +1753,12 @@ async function loadItemRating(id){
     var it=itemById(id);
     if(it){it.ratingAverage=data.average;it.ratingCount=data.count}
     var stars='';
-    if(me()&&it&&it.ownerId!==me().id){
+    if(data.canRate&&it&&it.ownerId!==me().id){
       for(var n=1;n<=5;n++)stars+='<button type="button" class="rating-star '+(data.myRating>=n?'selected':'')+'" data-action="rate-star" data-id="'+id+'" data-stars="'+n+'" aria-label="Rate '+n+' stars">★</button>';
-      panel.innerHTML='<div><strong>★ '+Number(data.average).toFixed(1)+'</strong> <span>('+data.count+' ratings)</span></div><div class="rating-editor"><span>'+(data.myRating?'Your rating · edit':'Rate this item')+'</span><div>'+stars+'</div></div>';
+      panel.innerHTML='<div><strong>★ '+Number(data.average).toFixed(1)+'</strong> <span>('+data.count+' ratings)</span></div><div class="rating-editor"><span>'+(data.myRating?'Your rating · edit':'Rate after return')+'</span><div>'+stars+'</div></div>';
     }else{
-      panel.innerHTML='<div><strong>★ '+Number(data.average).toFixed(1)+'</strong> <span>('+data.count+' ratings)</span></div>'+(me()&&it&&it.ownerId===me().id?'<small>You cannot rate your own listing.</small>':'<small><button class="rating-login" data-action="open-login">Log in to rate this item</button></small>');
+      var note=data.isOwner?'You cannot rate your own listing.':!me()?'Log in with the account used to rent this item.':'Rating unlocks after the owner marks your rental as returned.';
+      panel.innerHTML='<div><strong>★ '+Number(data.average).toFixed(1)+'</strong> <span>('+data.count+' ratings)</span></div><small>'+note+'</small>';
     }
   }catch(error){if($('#itemRatingPanel'))$('#itemRatingPanel').textContent='Ratings could not be loaded.'}
 }
