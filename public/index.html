@@ -78,7 +78,7 @@
 .nav-alert-badge{position:absolute;top:-5px;right:-7px;width:9px;height:9px;padding:0;border:2px solid #111;border-radius:50%;background:#ef3340;font-size:0;line-height:0;box-shadow:0 0 0 1px rgba(239,51,64,.18)}
 .nav-alert-badge[hidden]{display:none}
 #chatForm.is-sending button[type="submit"]{opacity:.65;pointer-events:none;cursor:wait}
-</style></head><body>
+.item-rating-summary{display:block;margin-top:5px;color:#f5c518;font-size:12px;font-weight:700}.item-rating-summary span{color:var(--muted);font-weight:400}.item-rating-panel{margin:14px 0;padding:13px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}.item-rating-panel>div:first-child{font-size:15px}.item-rating-panel>div:first-child strong{color:#f5c518}.item-rating-panel>div:first-child span,.item-rating-panel small{color:var(--muted);font-size:12px}.rating-editor{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px}.rating-editor>div{display:flex;gap:3px}.rating-star{border:0;background:transparent;color:#777;font-size:25px;line-height:1;padding:2px;cursor:pointer}.rating-star.selected{color:#f5c518}.rating-login{border:0;padding:0;background:transparent;color:#f5c518;text-decoration:underline;cursor:pointer}</style></head><body>
 <div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
   <div class="loader-card">
     <div class="loader-mark" aria-hidden="true">C</div>
@@ -1694,7 +1694,7 @@ function renderHeader(){var u=me(),a=$('#authArea'),notify=typeof Notification!=
 function visibleItems(){var u=me();var college=function(v){return String(v||'').trim().toLowerCase().replace(/\\s+/g,' ')};var myCollege=college(u&&u.college);return state.items.filter(function(i){if(i.status==='paused')return false;if(u&&u.isAdmin)return true;if(!myCollege)return true;return college(i.ownerCollege)===myCollege})}
 function renderReadout(){var v=visibleItems(),out=v.filter(function(i){return i.status==='rented'}).length;$('#rdOpen').textContent=v.length;$('#rdOut').textContent=out}
 function renderKeys(){var v=visibleItems(),html='<button class="key" data-action="key" data-cat="all" aria-pressed="'+(ui.cat==='all')+'">All<span class="n">'+v.length+'</span></button>';CATS.forEach(function(c){var n=v.filter(function(i){return i.cat===c.id}).length;html+='<button class="key" data-action="key" data-cat="'+c.id+'" aria-pressed="'+(ui.cat===c.id)+'">'+esc(c.label)+'<span class="n">'+n+'</span></button>'});$('#keys').innerHTML=html}
-function renderGrid(){var q=ui.q.trim().toLowerCase(),list=visibleItems().filter(function(i){if(ui.cat!=='all'&&i.cat!==ui.cat)return false;if(!q)return true;return (i.title+' '+(i.desc||'')+' '+i.loc+' '+catLabel(i.cat)).toLowerCase().indexOf(q)>-1});list.sort(function(a,b){return ui.sort==='low'?a.price-b.price:ui.sort==='high'?b.price-a.price:new Date(b.createdAt)-new Date(a.createdAt)});$('#count').textContent=list.length+(list.length===1?' item':' items');if(!list.length){$('#grid').innerHTML='<li style="grid-column:1/-1"><div class="empty"><p>No items match your search.</p><button class="btn btn-sm" data-action="clear-filters">Clear filters</button></div></li>';return}$('#grid').innerHTML=list.map(function(i){return '<li><button class="card" data-action="open-item" data-id="'+i.id+'"><span class="img">'+imgHtml(i)+'</span><span class="body"><span class="t">'+esc(i.title)+'</span><span class="m">'+esc(catLabel(i.cat))+' &middot; '+esc(i.cond)+' &middot; '+esc(i.loc)+'</span><span class="m">Listed by <strong>'+esc(i.ownerName||'CampusRent user')+'</strong></span><span class="foot"><span class="lcd">'+inr(i.price)+'/day</span>'+statusPill(i)+'</span></span></button></li>'}).join('')}
+function renderGrid(){var q=ui.q.trim().toLowerCase(),list=visibleItems().filter(function(i){if(ui.cat!=='all'&&i.cat!==ui.cat)return false;if(!q)return true;return (i.title+' '+(i.desc||'')+' '+i.loc+' '+catLabel(i.cat)).toLowerCase().indexOf(q)>-1});list.sort(function(a,b){return ui.sort==='low'?a.price-b.price:ui.sort==='high'?b.price-a.price:new Date(b.createdAt)-new Date(a.createdAt)});$('#count').textContent=list.length+(list.length===1?' item':' items');if(!list.length){$('#grid').innerHTML='<li style="grid-column:1/-1"><div class="empty"><p>No items match your search.</p><button class="btn btn-sm" data-action="clear-filters">Clear filters</button></div></li>';return}$('#grid').innerHTML=list.map(function(i){return '<li><button class="card" data-action="open-item" data-id="'+i.id+'"><span class="img">'+imgHtml(i)+'</span><span class="body"><span class="t">'+esc(i.title)+'</span><span class="m">'+esc(catLabel(i.cat))+' &middot; '+esc(i.cond)+' &middot; '+esc(i.loc)+'</span><span class="m">Listed by <strong>'+esc(i.ownerName||'CampusRent user')+'</strong></span><span class="item-rating-summary">★ '+(Number(i.ratingAverage)||0).toFixed(1)+' <span>('+Number(i.ratingCount||0)+' ratings)</span></span><span class="foot"><span class="lcd">'+inr(i.price)+'/day</span>'+statusPill(i)+'</span></span></button></li>'}).join('')}
 function renderBrowse(){renderReadout();renderKeys();renderGrid()}
 
 function openItem(id) {
@@ -1733,12 +1733,33 @@ function openItem(id) {
     '<div class="facts"><span class="lcd">' + inr(it.price) + '/day</span><span class="pill">Deposit ' + inr(it.deposit) + '</span><span class="pill">' + esc(it.cond) + '</span><span class="pill">' + esc(catLabel(it.cat)) + '</span></div>' +
     (it.desc ? '<p>' + esc(it.desc) + '</p>' : '') +
     '<p class="muted">Pickup: ' + esc(it.loc) + '<br>Listed by ' + esc(it.ownerName) + '</p>' +
+    '<div id="itemRatingPanel" class="item-rating-panel"><strong>★ '+(Number(it.ratingAverage)||0).toFixed(1)+'</strong> · '+Number(it.ratingCount||0)+' ratings</div>' +
     form + messageBtn + btn;
 
   var dlg = $('#dlgItem');
   if (!dlg.open) dlg.showModal();
+  loadItemRating(it.id);
 
   if (form) updateSum(it);
+}
+
+async function loadItemRating(id){
+  var panel=$('#itemRatingPanel');
+  if(!panel)return;
+  panel.innerHTML='<span class="muted">Loading ratings...</span>';
+  try{
+    var data=await api('/ratings/'+encodeURIComponent(id));
+    if(!$('#dlgItem').open||!$('#itemRatingPanel'))return;
+    var it=itemById(id);
+    if(it){it.ratingAverage=data.average;it.ratingCount=data.count}
+    var stars='';
+    if(me()&&it&&it.ownerId!==me().id){
+      for(var n=1;n<=5;n++)stars+='<button type="button" class="rating-star '+(data.myRating>=n?'selected':'')+'" data-action="rate-star" data-id="'+id+'" data-stars="'+n+'" aria-label="Rate '+n+' stars">★</button>';
+      panel.innerHTML='<div><strong>★ '+Number(data.average).toFixed(1)+'</strong> <span>('+data.count+' ratings)</span></div><div class="rating-editor"><span>'+(data.myRating?'Your rating · edit':'Rate this item')+'</span><div>'+stars+'</div></div>';
+    }else{
+      panel.innerHTML='<div><strong>★ '+Number(data.average).toFixed(1)+'</strong> <span>('+data.count+' ratings)</span></div>'+(me()&&it&&it.ownerId===me().id?'<small>You cannot rate your own listing.</small>':'<small><button class="rating-login" data-action="open-login">Log in to rate this item</button></small>');
+    }
+  }catch(error){if($('#itemRatingPanel'))$('#itemRatingPanel').textContent='Ratings could not be loaded.'}
 }
 
 function updateSum(it){var d=parseInt($('#iDays').value,10);if(!(d>=1))d=0;$('#iSum').innerHTML='<div><span>Rent ('+d+(d===1?' day':' days')+' &times; '+inr(it.price)+')</span><span>'+inr(d*it.price)+'</span></div><div><span>Refundable deposit</span><span>'+inr(it.deposit)+'</span></div><div><span>Pay at handover</span><span>'+inr(d*it.price+it.deposit)+'</span></div>'}
@@ -2108,6 +2129,18 @@ document.addEventListener('click', async function(e) {
 
     case 'rent':
       await sendRequest(id);
+      break;
+
+    case 'rate-star':
+      if(!me()){openAuth('login','Log in to rate this item.');break;}
+      try{
+        var rated=await api('/ratings/'+encodeURIComponent(id),{method:'PUT',body:JSON.stringify({stars:Number(el.getAttribute('data-stars'))})});
+        var ratedItem=itemById(id);
+        if(ratedItem){ratedItem.ratingAverage=rated.average;ratedItem.ratingCount=rated.count}
+        await loadItemRating(id);
+        renderGrid();
+        toast('Your rating is saved. You can edit it anytime.');
+      }catch(error){toast(error.message)}
       break;
 
     case 'key':
