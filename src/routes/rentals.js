@@ -4,7 +4,7 @@ const { z } = require('zod');
 const prisma = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { encryptCollegeId, decryptCollegeId } = require('../services/college-id');
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024, files: 1 }, fileFilter: (_req, file, cb) => cb(/^image\/(jpeg|png|webp)$/.test(file.mimetype) ? null : new Error('Upload a JPEG, PNG, WebP, or GIF image.'), /^image\/(jpeg|png|webp)$/.test(file.mimetype)) });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024, files: 1 }, fileFilter: (_req, file, cb) => cb(/^image\/(jpeg|png|webp)$/.test(file.mimetype) ? null : new Error('Upload a JPEG, PNG, or WebP image.'), /^image\/(jpeg|png|webp)$/.test(file.mimetype)) });
 router.use(requireAuth);
 
 // Lightweight count for the navigation badge; avoids loading every rental.
