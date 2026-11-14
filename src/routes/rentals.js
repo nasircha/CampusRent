@@ -3,6 +3,16 @@ const { z } = require('zod');
 const prisma = require('../db');
 const { requireAuth } = require('../middleware/auth');
 router.use(requireAuth);
+
+// Lightweight count for the navigation badge; avoids loading every rental.
+router.get('/notifications', async (req, res, next) => {
+  try {
+    const pendingCount = await prisma.rental.count({
+      where: { ownerId: req.user.id, status: 'pending' }
+    });
+    res.json({ pendingCount });
+  } catch (error) { next(error); }
+});
 router.post('/', async (req, res, next) => {
   try {
     const parsed = z.object({ itemId: z.string().min(1), days: z.number().int().min(1).max(30), start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), note: z.string().max(120).optional().default('') }).safeParse(req.body);
