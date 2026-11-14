@@ -131,7 +131,7 @@ router.patch('/:id/:action', async (req, res, next) => {
       if (action === 'accept') {
         if (rental.ownerId !== req.user.id) throw Object.assign(new Error('Only the listing owner can accept this request.'), { status: 403 });
         if (rental.status !== 'pending') throw Object.assign(new Error('This request is no longer pending.'), { status: 409 });
-        if (!rental.collegeId || rental.collegeId.status !== 'verified') throw Object.assign(new Error('Verify the student College ID before accepting this request.'), { status: 409 });
+        if (rental.collegeId && rental.collegeId.status !== 'verified') throw Object.assign(new Error('Verify the student College ID before accepting this request.'), { status: 409 });
         const item = await tx.item.findUnique({ where: { id: rental.itemId } });
         if (!item || item.status !== 'available') throw Object.assign(new Error('This item is no longer available.'), { status: 409 });
         await tx.item.update({ where: { id: item.id }, data: { status: 'rented' } });
