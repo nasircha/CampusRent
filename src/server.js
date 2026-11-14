@@ -32,7 +32,7 @@ app.get('*path', (_req, res) => res.sendFile(path.join(__dirname, '../public/ind
 app.use((err, _req, res, _next) => {
   console.error(err);
   if (err.code === 'LIMIT_FILE_SIZE') return res.status(413).json({ error: `Photo must be smaller than ${process.env.MAX_UPLOAD_MB || 5} MB.` });
-  if (err.message === 'Upload a JPEG, PNG, WebP, or GIF image.') return res.status(400).json({ error: err.message });
+  if (err.message === 'Upload a JPEG, PNG, or WebP image.') return res.status(400).json({ error: err.message });
   if (err instanceof SyntaxError && 'body' in err) return res.status(400).json({ error: 'Invalid request body.' });
   res.status(err.status || 500).json({ error: err.status ? err.message : 'Something went wrong. Please try again.' });
 });
