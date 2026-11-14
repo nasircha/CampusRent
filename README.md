@@ -10,6 +10,7 @@ CampusRent keeps the original black-and-yellow HTML/CSS interface and uses a Nod
 - Image uploads (JPEG, PNG, WebP, GIF; 5 MB default) stored in `uploads/`.
 - Listing pause/resume/delete, rental request, accept/decline/cancel, and mark returned.
 - Owner-only and renter-only authorization checks on mutations.
+- Private College ID uploads encrypted with AES-256-GCM, reusable saved IDs, per-rental ID snapshots, and owner-only verification.
 - Transactional accept/return flows to avoid accepting two pending requests for the same item.
 - API rate limiting on auth routes, Helmet security headers, input validation, and server-side price calculation.
 - No auto-approved demo listings or fake users.
@@ -66,7 +67,7 @@ For a locally installed PostgreSQL server instead of Docker, create a database n
 ## Production deployment
 
 1. Provision PostgreSQL and set `DATABASE_URL` to its connection string.
-2. Set `JWT_SECRET` to a unique random secret (32+ characters), `NODE_ENV=production`, and `PORT` if required by your host.
+2. Set `JWT_SECRET` to a unique random secret (32+ characters), `COLLEGE_ID_ENCRYPTION_KEY` to a base64-encoded 32-byte random key (or 64-character hex key), `NODE_ENV=production`, and `PORT` if required by your host. Keep the encryption key private and stable; losing or changing it makes saved College IDs unreadable.
 3. Deploy the Node project and run `npx prisma migrate deploy` as the release/deploy command.
 4. Ensure the `uploads/` directory is on persistent storage. The included local upload adapter writes to disk; ephemeral server filesystems will lose photos on redeploy. For horizontally scaled hosting, replace this adapter with S3, Cloudinary, or another shared object store.
 5. Use HTTPS. If the frontend is hosted on a different origin, set `CORS_ORIGIN` to the exact frontend origin(s), comma-separated.
@@ -90,7 +91,11 @@ All request and response bodies are JSON except `POST /api/items`, which uses `m
 | POST | `/api/items` | Signed in | Create listing with optional image upload |
 | PATCH | `/api/items/:id/status` | Owner | Pause/resume listing |
 | DELETE | `/api/items/:id` | Owner | Delete listing (retains history as hidden record if rentals exist) |
-| POST | `/api/rentals` | Signed in | Request to rent an available item |
+| GET | `/api/rentals/college-id/me` | Signed in | Check whether the current student has a saved College ID |
+| POST | `/api/rentals/college-id/me` | Signed in | Save or replace the student's encrypted College ID |
+| POST | `/api/rentals` | Signed in | Request to rent an available item with a saved or newly uploaded College ID |
+| GET | `/api/rentals/:id/college-id` | Listing owner only | View the private ID snapshot attached to that rental request |
+| PATCH | `/api/rentals/:id/college-id` | Listing owner only | Verify or reject the submitted College ID |
 | PATCH | `/api/rentals/:id/accept` | Owner | Accept request and mark item rented; other pending requests are declined |
 | PATCH | `/api/rentals/:id/decline` | Owner | Decline request |
 | PATCH | `/api/rentals/:id/cancel` | Renter | Cancel pending request |
@@ -100,6 +105,7 @@ All request and response bodies are JSON except `POST /api/items`, which uses `m
 
 - Passwords are hashed on the server with bcrypt (12 rounds); plaintext passwords are never stored.
 - The browser stores only the JWT in local storage. For a higher-security production deployment, consider migrating to secure, HttpOnly, SameSite cookies plus CSRF protection.
+- Rental acceptance is blocked by the API until the associated College ID snapshot has been verified by the listing owner.
 - Rent and deposit are recalculated by the API from the listing's stored price; the client cannot set the amount.
 - This project records rental workflow and amounts, but does not collect payments, hold deposits, or provide dispute resolution. Students settle payment directly at handover, as the original interface describes.
 - Rental dates are stored and displayed, but this initial implementation treats an accepted rental as occupying the item until the owner marks it returned. It does not yet implement a calendar of future overlapping reservations.
