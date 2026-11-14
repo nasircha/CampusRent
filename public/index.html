@@ -1380,6 +1380,7 @@ async function loadConversations() {
 function navSeenKey(type){
   return 'campusrent.navSeen.'+String(me()&&me().id||'guest')+'.'+type;
 }
+var pendingRentalCount=null;
 function navNotificationCount(type){
   if(type==='messages'){
     var unreadRental=conversations.reduce(function(total,c){return total+(Number(c.unreadCount)||0)},0);
@@ -1387,7 +1388,7 @@ function navNotificationCount(type){
     var pendingMessages=directRequests.filter(function(r){return r.receiverId===me().id&&r.status==='pending'}).length;
     return unreadRental+unreadDirect+pendingMessages;
   }
-  return state.rentals.filter(function(r){return r.ownerId===me().id&&r.status==='pending'}).length;
+  return pendingRentalCount===null?state.rentals.filter(function(r){return r.ownerId===me().id&&r.status==='pending'}).length:pendingRentalCount;
 }
 function markNavNotificationsSeen(type){
   if(!me())return;
@@ -1438,12 +1439,20 @@ function detectNewMessages(){
   knownUnreadByChat=current;
   fresh.forEach(function(x){messageNotification(x.name,x.body)});
 }
+var navRefreshInFlight=false;
 async function refreshNavNotifications(){
-  if(!me())return;
+  if(!me()||navRefreshInFlight||document.hidden)return;
+  navRefreshInFlight=true;
   try{
-    var results=await Promise.all([api('/bootstrap'),api('/messages'),api('/messages/direct'),api('/messages/requests')]);
+    var onMySpace=location.hash==='#my-space';
+    var results=await Promise.all([api(onMySpace?'/bootstrap':'/rentals/notifications'),api('/messages'),api('/messages/direct'),api('/messages/requests')]);
     if(!me())return;
-    state.rentals=results[0].rentals||state.rentals;
+    if(onMySpace){
+      state.rentals=results[0].rentals||state.rentals;
+      pendingRentalCount=state.rentals.filter(function(r){return r.ownerId===me().id&&r.status==='pending'}).length;
+    }else{
+      pendingRentalCount=Number(results[0].pendingCount)||0;
+    }
     conversations=results[1].conversations||[];
     directChats=results[2].chats||[];
     directRequests=results[3].requests||[];
@@ -1454,6 +1463,7 @@ async function refreshNavNotifications(){
     if(location.hash==='#messages'){renderConversations();renderDirectRequests();}
     if(location.hash==='#my-space')renderSpace();
   }catch(error){/* Keep the last known notification counts while offline. */}
+  finally{navRefreshInFlight=false;}
 }
 function renderConversations() {
   var list=$('#conversationList'); if(!list)return;
