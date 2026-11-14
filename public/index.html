@@ -1261,6 +1261,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
     <div class="field"><label for="profileName">Display Name</label><input id="profileName" name="name" autocomplete="name" maxlength="80" required></div>
     <div class="field"><label for="profileCollege">College or University</label><input id="profileCollege" type="text" readonly aria-readonly="true" placeholder="Not added"></div>
     <div class="field"><label for="profileEmail">Logged-in Email</label><input id="profileEmail" type="email" readonly aria-readonly="true"></div>
+    <div class="field"><label>My College ID</label><p class="hint">Upload once. You can reuse it for every rental request or replace it anytime.</p><input id="profileCollegeIdFile" type="file" accept="image/jpeg,image/png,image/webp"><p id="profileCollegeIdStatus" class="hint" role="status">Loading saved ID...</p><button type="button" class="btn btn-sm" data-action="save-college-id">Save / Update College ID</button></div>
     <p id="profileRole" class="hint" role="status" hidden></p>
     <p id="profileErr" class="err" role="alert"></p>
     <div class="logout-actions"><button type="button" class="btn" data-action="close">Cancel</button><button type="submit" class="btn btn-primary" id="profileSave">Save name</button></div>
@@ -1312,6 +1313,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 </dialog>
 
 <dialog id="dlgItem" aria-label="Item details"><div class="dlg" id="itemBody"></div></dialog>
+<dialog id="dlgCollegeId" aria-label="College ID review"><div class="dlg"><div class="dlg-head"><h2>College ID verification</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div><div id="collegeIdReviewBody"></div></div></dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -1330,7 +1332,7 @@ function catLabel(id){var c=CATS.find(function(x){return x.id===id});return c?c.
 function today(){var d=new Date(),off=d.getTimezoneOffset();return new Date(d.getTime()-off*60000).toISOString().slice(0,10)}
 function fmtDate(s){var d=new Date(s+'T00:00');return isNaN(d)?s:d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}
 var token=localStorage.getItem(TOKEN_KEY)||'',state={user:null,items:[],rentals:[]};
-var ui={q:'',cat:'all',sort:'new',tab:'listings',authMode:'login',otpSent:false,pending:null,photoFiles:[],photoUrl:'',confirmDel:null};
+var ui={q:'',cat:'all',sort:'new',tab:'listings',authMode:'login',otpSent:false,pending:null,photoFiles:[],photoUrl:'',confirmDel:null,collegeIdMode:'saved',collegeIdFile:null};
 async function api(path,opts){opts=opts||{};var headers=opts.headers||{};if(token)headers.Authorization='Bearer '+token;if(opts.body&&!(opts.body instanceof FormData))headers['Content-Type']='application/json';var res=await fetch(API+path,Object.assign({},opts,{headers:headers}));var data={};try{data=await res.json()}catch(e){}if(!res.ok){if(res.status===401&&token){token='';localStorage.removeItem(TOKEN_KEY);state.user=null;renderHeader()}throw new Error(data.error||'Request failed ('+res.status+')')}return data}
 var activeConversationId = null;
 var conversations = [];
@@ -1734,7 +1736,7 @@ function openItem(id) {
   } else {
     btn = '<button class="btn btn-primary" data-action="rent" data-id="' + it.id + '">Send rental request</button>';
 
-    form = '<div class="two"><div class="field"><label for="iDays">Days</label><input id="iDays" type="number" min="1" max="30" value="3" inputmode="numeric"></div><div class="field"><label for="iStart">Pickup date</label><input id="iStart" type="date" min="' + today() + '" value="' + today() + '"></div></div><div class="field"><label for="iNote">Note to the owner <span class="opt">(optional)</span></label><input id="iNote" maxlength="120" placeholder="e.g. Need it for the Maths exam on Monday"></div><div class="sum" id="iSum" aria-live="polite"></div><p id="iErr" class="err" role="alert"></p>';
+    form = '<div class="field" id="collegeIdChoice"><label>College ID <span class="opt">(required)</span></label><p class="hint" id="collegeIdSavedHint">Checking your saved College ID...</p><label><input type="radio" name="collegeIdMode" value="saved" checked> Use saved College ID</label><label><input type="radio" name="collegeIdMode" value="new"> Click or upload a new photo</label><input id="iCollegeIdFile" type="file" accept="image/jpeg,image/png,image/webp" hidden><p class="hint">Your ID is private and visible only to the owner of this item.</p></div><div class="two"><div class="field"><label for="iDays">Days</label><input id="iDays" type="number" min="1" max="30" value="3" inputmode="numeric"></div><div class="field"><label for="iStart">Pickup date</label><input id="iStart" type="date" min="' + today() + '" value="' + today() + '"></div></div><div class="field"><label for="iNote">Note to the owner <span class="opt">(optional)</span></label><input id="iNote" maxlength="120" placeholder="e.g. Need it for the Maths exam on Monday"></div><div class="sum" id="iSum" aria-live="polite"></div><p id="iErr" class="err" role="alert"></p>';
   }
 
   $('#itemBody').innerHTML =
@@ -1750,7 +1752,7 @@ function openItem(id) {
   if (!dlg.open) dlg.showModal();
   loadItemRating(it.id);
 
-  if (form) updateSum(it);
+  if (form) { updateSum(it); api('/rentals/college-id/me').then(function(d){ui.hasSavedCollegeId=d.exists;var hint=$('#collegeIdSavedHint');if(hint)hint.textContent=d.exists?'Saved College ID found. You can use it or upload a new one.':'No saved ID yet. Upload one now or add it in your profile.';var saved=document.querySelector('input[name="collegeIdMode"][value="saved"]');if(saved)saved.disabled=!d.exists;if(!d.exists){var fresh=document.querySelector('input[name="collegeIdMode"][value="new"]');if(fresh)fresh.checked=true;var input=$('#iCollegeIdFile');if(input)input.hidden=false}}).catch(function(){var hint=$('#collegeIdSavedHint');if(hint)hint.textContent='Could not check saved ID. Please try again.'}); }
 }
 
 async function loadItemRating(id){
@@ -1774,14 +1776,14 @@ async function loadItemRating(id){
 }
 
 function updateSum(it){var d=parseInt($('#iDays').value,10);if(!(d>=1))d=0;$('#iSum').innerHTML='<div><span>Rent ('+d+(d===1?' day':' days')+' &times; '+inr(it.price)+')</span><span>'+inr(d*it.price)+'</span></div><div><span>Refundable deposit</span><span>'+inr(it.deposit)+'</span></div><div><span>Pay at handover</span><span>'+inr(d*it.price+it.deposit)+'</span></div>'}
-async function sendRequest(id){var it=itemById(id),days=parseInt($('#iDays').value,10),start=$('#iStart').value,err=$('#iErr');if(!(days>=1&&days<=30)){err.textContent='Choose between 1 and 30 days.';return}if(!start||start<today()){err.textContent='Pick a pickup date from today onward.';return}try{await api('/rentals',{method:'POST',body:JSON.stringify({itemId:id,days:days,start:start,note:$('#iNote').value.trim()})});$('#dlgItem').close();ui.tab='rentals';await refresh();toast('Rental request sent to '+it.ownerName+'.');if(location.hash!=='#my-space')goToView('my-space')}catch(e){err.textContent=e.message}}
+async function sendRequest(id){var it=itemById(id),days=parseInt($('#iDays').value,10),start=$('#iStart').value,err=$('#iErr');if(!(days>=1&&days<=30)){err.textContent='Choose between 1 and 30 days.';return}if(!start||start<today()){err.textContent='Pick a pickup date from today onward.';return}var mode=document.querySelector('input[name="collegeIdMode"]:checked')?.value||'saved',file=$('#iCollegeIdFile')?.files?.[0];if(mode==='new'&&!file){err.textContent='Choose a new College ID photo.';return}if(mode==='saved'&&!ui.hasSavedCollegeId){err.textContent='Upload your College ID in your profile first.';return}try{var fd=new FormData();fd.append('itemId',id);fd.append('days',String(days));fd.append('start',start);fd.append('note',$('#iNote').value.trim());fd.append('collegeIdMode',mode);if(mode==='new')fd.append('collegeIdFile',file);await api('/rentals',{method:'POST',body:fd});$('#dlgItem').close();ui.tab='rentals';await refresh();toast('Rental request sent to '+it.ownerName+'.');if(location.hash!=='#my-space')goToView('my-space')}catch(e){err.textContent=e.message}}
 function tabBtn(id,label,n,hot){return '<button class="tab" role="tab" data-action="tab" data-tab="'+id+'" aria-selected="'+(ui.tab===id)+'">'+label+'</button>'}
 function emptyBox(msg,btn){return '<div class="empty"><p>'+msg+'</p>'+btn+'</div>'}
 function thumb(it,r){return '<span class="th">'+imgHtml(it||(r?{photo:r.photo,cat:r.cat}:null)||{cat:'other'})+'</span>'}
 function rentalMeta(r){return r.days+(r.days===1?' day':' days')+' from '+fmtDate(r.start)+' &middot; '+inr(r.rent)+' rent + '+inr(r.deposit)+' deposit'}
 function statusPillR(r){var s=STATUS[r.status]||['',''];return '<span class="pill '+s[1]+'">'+s[0]+'</span>'}
 function listingsHtml(mine){if(!mine.length)return emptyBox('You have not listed anything yet. Lend a calculator or drafter you are not using.','<button class="btn btn-primary" data-action="open-list">List your first item</button>');return '<ul class="list">'+mine.map(function(i){var acts='';if(i.status!=='rented'){acts+='<button class="btn btn-sm" data-action="toggle-pause" data-id="'+i.id+'">'+(i.status==='paused'?'Resume':'Pause')+'</button>';acts+=ui.confirmDel===i.id?'<button class="btn btn-sm btn-danger" data-action="delete-item" data-id="'+i.id+'">Confirm delete</button>':'<button class="btn btn-sm btn-danger" data-action="ask-delete" data-id="'+i.id+'">Delete</button>'}return '<li class="ri">'+thumb(i)+'<div><div class="tt">'+esc(i.title)+'</div><div class="mm">'+inr(i.price)+'/day &middot; deposit '+inr(i.deposit)+' &middot; '+esc(i.loc)+'</div></div><div class="acts">'+statusPill(i)+acts+'</div></li>'}).join('')+'</ul>'}
-function requestsHtml(list){if(!list.length)return emptyBox('No requests yet. When someone asks to rent one of your items, it shows up here.','');return '<ul class="list">'+list.map(function(r){var acts='';if(r.status==='pending')acts='<button class="btn btn-sm btn-primary" data-action="accept" data-id="'+r.id+'">Accept</button><button class="btn btn-sm" data-action="decline" data-id="'+r.id+'">Decline</button>';if(r.status==='accepted')acts='<button class="btn btn-sm btn-primary" data-action="returned" data-id="'+r.id+'">Mark returned</button>';var contact=(r.status==='accepted'||r.status==='returned')&&r.renterEmail?'<br>Contact: '+esc(r.renterEmail):'';return '<li class="ri">'+thumb(null,r)+'<div><div class="tt">'+esc(r.renterName)+' wants '+esc(r.itemTitle)+'</div><div class="mm">'+rentalMeta(r)+(r.note?'<br>&ldquo;'+esc(r.note)+'&rdquo;':'')+contact+'</div></div><div class="acts">'+statusPillR(r)+acts+'</div></li>'}).join('')+'</ul>'}
+function requestsHtml(list){if(!list.length)return emptyBox('No requests yet. When someone asks to rent one of your items, it shows up here.','');return '<ul class="list">'+list.map(function(r){var acts='';if(r.status==='pending')acts='<button class="btn btn-sm btn-primary" data-action="accept" data-id="'+r.id+'">Accept</button><button class="btn btn-sm" data-action="decline" data-id="'+r.id+'">Decline</button>';if(r.status==='accepted')acts='<button class="btn btn-sm btn-primary" data-action="returned" data-id="'+r.id+'">Mark returned</button>';var contact=(r.status==='accepted'||r.status==='returned')&&r.renterEmail?'<br>Contact: '+esc(r.renterEmail):'';var idAction=r.collegeIdStatus&&r.collegeIdStatus!=='missing'?'<button class="btn btn-sm" data-action="view-college-id" data-id="'+r.id+'">View College ID</button>':'<span class="hint">College ID missing</span>';var verification=r.collegeIdStatus==='verified'?'<span class="pill ok">ID verified</span>':r.collegeIdStatus==='rejected'?'<span class="pill">ID rejected</span>':'<span class="pill">ID pending</span>';if(r.status==='pending'&&r.collegeIdStatus==='verified')acts='<button class="btn btn-sm btn-primary" data-action="accept" data-id="'+r.id+'">Accept</button><button class="btn btn-sm" data-action="decline" data-id="'+r.id+'">Decline</button>';return '<li class="ri">'+thumb(null,r)+'<div><div class="tt">'+esc(r.renterName)+' wants '+esc(r.itemTitle)+'</div><div class="mm">'+rentalMeta(r)+(r.note?'<br>&ldquo;'+esc(r.note)+'&rdquo;':'')+contact+'<br>'+verification+'</div><div class="acts">'+idAction+'</div></div><div class="acts">'+statusPillR(r)+acts+'</div></li>''}).join('')+'</ul>'}
 function rentalsHtml(list){if(!list.length)return emptyBox('You have not rented anything yet.','<button class="btn btn-primary" data-action="go-browse">Browse gear</button>');return '<ul class="list">'+list.map(function(r){var acts='';if(r.status==='pending')acts='<button class="btn btn-sm" data-action="cancel" data-id="'+r.id+'">Cancel request</button>';var contact=(r.status==='accepted'||r.status==='returned')&&r.ownerEmail?'<br>Owner: '+esc(r.ownerEmail):'';return '<li class="ri">'+thumb(null,r)+'<div><div class="tt">'+esc(r.itemTitle)+'</div><div class="mm">From '+esc(r.ownerName)+' &middot; '+rentalMeta(r)+contact+'</div></div><div class="acts">'+statusPillR(r)+acts+'</div></li>'}).join('')+'</ul>'}
 function adminListingsHtml(items){if(!items.length)return emptyBox('No active listings to review.','');return '<ul class="list">'+items.map(function(i){var acts=ui.confirmDel===i.id?'<button class="btn btn-sm btn-danger" data-action="admin-delete-item" data-id="'+i.id+'">Confirm remove</button>':'<button class="btn btn-sm btn-danger" data-action="ask-admin-delete" data-id="'+i.id+'">Remove listing</button>';return '<li class="ri">'+thumb(i)+'<div><div class="tt">'+esc(i.title)+'</div><div class="mm">Uploaded by: <strong>'+esc(i.ownerName||'Unknown user')+'</strong> &middot; '+esc(i.ownerCollege||'College not provided')+' &middot; '+esc(i.loc)+' &middot; '+esc(i.status)+'</div></div><div class="acts">'+acts+'</div></li>'}).join('')+'</ul>'}
 var adminActivityData=null,adminActivityTimer=null,adminActivityLoading=false;
@@ -2073,7 +2075,7 @@ document.addEventListener('click', async function(e) {
         state.user=data.user;
         $('#profileName').value=data.user.name||'';
         $('#profileCollege').value=data.user.college&&data.user.college.trim()?data.user.college:'Not added';
-        $('#profileEmail').value=data.user.email||'';
+        $('#profileEmail').value=data.user.email||'';api('/rentals/college-id/me').then(function(d){ui.hasSavedCollegeId=d.exists;$('#profileCollegeIdStatus').textContent=d.exists?'Saved College ID is available. Last updated '+new Date(d.updatedAt).toLocaleDateString('en-IN'): 'No College ID saved yet.'}).catch(function(){ $('#profileCollegeIdStatus').textContent='Could not load College ID status.'});
         var owner=String(data.user.email||'').trim().toLowerCase()==='mdnasirhussain121@gmail.com';
         $('#profileRole').hidden=!owner;
         if(owner)$('#profileRole').textContent=data.user.isAdmin?'Super Admin: Enabled':'Super Admin: Not enabled';
@@ -2130,6 +2132,18 @@ document.addEventListener('click', async function(e) {
 
     case 'open-item':
       openItem(id);
+      break;
+
+    case 'save-college-id':
+      try{var idFile=$('#profileCollegeIdFile').files[0];if(!idFile){toast('Choose a College ID photo first.');break;}if(!/^image\\/(jpeg|png|webp)$/.test(idFile.type)||idFile.size>5*1024*1024){toast('Use a JPEG, PNG or WebP image up to 5 MB.');break;}var idFd=new FormData();idFd.append('file',idFile);await api('/rentals/college-id/me',{method:'POST',body:idFd});ui.hasSavedCollegeId=true;$('#profileCollegeIdFile').value='';$('#profileCollegeIdStatus').textContent='College ID saved securely. You can reuse it for future requests.';toast('College ID saved securely.');}catch(error){toast(error.message)}
+      break;
+
+    case 'view-college-id':
+      try{var response=await fetch(API+'/rentals/'+encodeURIComponent(id)+'/college-id',{headers:{Authorization:'Bearer '+token}});if(!response.ok){var payload={};try{payload=await response.json()}catch(_){}throw new Error(payload.error||'Could not load College ID.')}var imageBlob=await response.blob(),imageUrl=URL.createObjectURL(imageBlob),review=$('#collegeIdReviewBody'),rentalRow=state.rentals.find(function(r){return r.id===id});review.innerHTML='<p class="hint">This private photo is only available to the owner of this listing.</p><img src="'+imageUrl+'" alt="Student College ID" style="display:block;max-width:100%;max-height:65vh;margin:12px auto;border-radius:10px"><p class="hint">Verification status: '+esc(rentalRow?.collegeIdStatus||'pending')+'</p>'+(rentalRow?.collegeIdStatus==='verified'||rentalRow?.collegeIdStatus==='rejected'?'':'<div class="logout-actions"><button class="btn" data-action="decide-college-id" data-id="'+id+'" data-decision="rejected">Reject ID</button><button class="btn btn-primary" data-action="decide-college-id" data-id="'+id+'" data-decision="verified">Verify ID</button></div>');$('#dlgCollegeId').showModal();$('#dlgCollegeId').addEventListener('close',function(){URL.revokeObjectURL(imageUrl)},{once:true});}catch(error){toast(error.message)}
+      break;
+
+    case 'decide-college-id':
+      try{await api('/rentals/'+encodeURIComponent(id)+'/college-id',{method:'PATCH',body:JSON.stringify({decision:el.getAttribute('data-decision')})});$('#dlgCollegeId').close();await refresh();renderSpace();toast(el.getAttribute('data-decision')==='verified'?'College ID verified. You can now accept this request.':'College ID rejected.');}catch(error){toast(error.message)}
       break;
 
     case 'rent-login':
@@ -2301,7 +2315,7 @@ case 'tab':
   }
 });
 
-$('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){var btn=document.querySelector('[data-action="rent"]');if(btn){var it=itemById(btn.getAttribute('data-id'));if(it)updateSum(it)}}});$('#q').addEventListener('input',function(){ui.q=this.value;renderGrid()});$('#sort').addEventListener('change',function(){ui.sort=this.value;renderGrid()});window.addEventListener('storage', function(e) {
+$('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){var btn=document.querySelector('[data-action="rent"]');if(btn){var it=itemById(btn.getAttribute('data-id'));if(it)updateSum(it)}}});$('#itemBody').addEventListener('change',function(e){if(e.target.name==='collegeIdMode'){var input=$('#iCollegeIdFile');if(input)input.hidden=e.target.value!=='new';if(e.target.value==='new'&&input)input.focus()}});$('#q').addEventListener('input',function(){ui.q=this.value;renderGrid()});$('#sort').addEventListener('change',function(){ui.sort=this.value;renderGrid()});window.addEventListener('storage', function(e) {
   if (e.key !== TOKEN_KEY || e.newValue !== null) return;
   token = '';
   stopChatAutoRefresh();
