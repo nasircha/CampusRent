@@ -34,7 +34,7 @@
 'use strict';
 const API='/api',TOKEN_KEY='campusrent.token';
 const $=s=>document.querySelector(s);
-let posts=[],filter='all';
+let posts=[],filter='all';window.currentUserId='';
 async function api(path,options){
  options=options||{};const headers=options.headers||{};const token=localStorage.getItem(TOKEN_KEY)||'';if(token)headers.Authorization='Bearer '+token;
  if(options.body&&!(options.body instanceof FormData))headers['Content-Type']='application/json';
@@ -52,7 +52,7 @@ function render(){
  return '<article class="post"><div class="post-top"><span class="tag">'+(p.kind==='request'?'Help wanted':'Writing help offered')+'</span><span class="format">'+formatLabel(p.format)+'</span></div><h2>'+esc(p.title)+'</h2><div class="subject">'+esc(p.subject)+'</div><p class="description">'+esc(p.description)+'</p>'+sample+'<div class="byline">Posted by <strong>'+esc(p.userName)+'</strong>'+(p.college?' · '+esc(p.college):'')+'</div><div class="actions">'+(own?'<button class="btn" data-delete="'+esc(p.id)+'">Delete my post</button>':'<button class="btn primary" data-contact="'+esc(p.userId)+'">Contact through Messages</button>')+'</div></article>';
  }).join('');
 }
-async function load(){try{const data=await api('/assignments');posts=data.posts||[];render()}catch(error){$('#posts').innerHTML='<div class="empty">'+esc(error.message)+'</div>';}}
+async function load(){try{const data=await api('/assignments');posts=data.posts||[];try{const profile=await api('/auth/me');window.currentUserId=profile.user&&profile.user.id||'';}catch(_){window.currentUserId='';}render()}catch(error){$('#posts').innerHTML='<div class="empty">'+esc(error.message)+'</div>';}}
 $('#kind').addEventListener('change',()=>{$('#sample').required=$('#kind').value==='offer';$('#sampleRequired').textContent=$('#kind').value==='offer'?'(required for writing offers)':'(optional)';});
 $('#createBtn').addEventListener('click',()=>{if(!localStorage.getItem(TOKEN_KEY)){location.href='/?signup=1';return;}$('#error').textContent='';$('#createForm').reset();$('#sample').required=$('#kind').value==='offer';$('#createDialog').showModal();});
 document.querySelectorAll('[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{filter=btn.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===btn));render();}));
