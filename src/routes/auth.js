@@ -1,6 +1,8 @@
 
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { z } = require('zod');
 const prisma = require('../db');
@@ -9,6 +11,7 @@ const { requireAuth } = require('../middleware/auth');
 const { createOtp, verifyOtp } = require('../services/otp');
 const { sendOtpEmail } = require('../services/email');
 const { recordActivity } = require('../services/activity');
+const profileUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024, files: 1 }, fileFilter: (_req, file, cb) => cb(/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype) ? null : new Error('Upload a JPEG, PNG, WebP, or GIF image.'), /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) });
 
 const credentials = z.object({
   email: z.string().email().max(254).transform(v => v.toLowerCase().trim()),
@@ -287,17 +290,29 @@ router.post('/logout', requireAuth, async (req, res) => {
 });
 
 
+router.post('/me/photo', requireAuth, profileUpload.single('photo'), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'Choose a profile photo first.' });
+    const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) return res.status(503).json({ error: 'Profile photo storage is not configured yet.' });
+    const timestamp = Math.floor(Date.now() / 1000), folder = 'campusrent/profiles';
+    const signature = crypto.createHash('sha1').update(`folder=${folder}&timestamp=${timestamp}${CLOUDINARY_API_SECRET}`).digest('hex');
+    const form = new FormData();form.append('file', new Blob([req.file.buffer], { type: req.file.mimetype }), req.file.originalname);form.append('api_key', CLOUDINARY_API_KEY);form.append('timestamp', String(timestamp));form.append('folder', folder);form.append('signature', signature);
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(CLOUDINARY_CLOUD_NAME)}/image/upload`, { method: 'POST', body: form });const result = await response.json();
+    if (!response.ok || !result.secure_url) return res.status(502).json({ error: 'Photo upload failed. Please try again.' });
+    const user = await prisma.user.update({ where: { id: req.user.id }, data: { profilePhoto: result.secure_url }, select: { id: true, name: true, college: true, email: true, profilePhoto: true } });res.json({ user });
+  } catch (error) { next(error); }
+});
+
 router.patch('/me', requireAuth, async (req, res, next) => {
   try {
     const parsed = z.object({ name: z.string().trim().min(2, 'Name must be at least 2 characters.').max(80, 'Name must be 80 characters or fewer.') }).safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
-    const user = await prisma.user.update({ where: { id: req.user.id }, data: { name: parsed.data.name }, select: { id: true, name: true, college: true, email: true } });
+    const user = await prisma.user.update({ where: { id: req.user.id }, data: { name: parsed.data.name }, select: { id: true, name: true, college: true, email: true, profilePhoto: true } });
     res.json({ user });
   } catch (error) { next(error); }
 });
 
-router.get('/me', requireAuth, (req, res) => {
-  res.json({ user: req.user });
-});
+router.get('/me', requireAuth, async (req, res, next) => { try { const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { id: true, name: true, college: true, email: true, profilePhoto: true } }); res.json({ user: { ...user, isAdmin: req.user.isAdmin } }); } catch (error) { next(error); } });
 
 module.exports = router;
