@@ -82,6 +82,7 @@
 /* In-app Help Centre */
 .help-centre{max-width:900px}.help-heading{margin-bottom:24px}.help-kicker{color:var(--yellow);font:600 11px var(--font-mono);letter-spacing:.14em}.help-heading h1{font-size:clamp(2rem,5vw,3rem);margin:10px 0}.help-intro,.help-section p{color:var(--muted)}.help-section{margin:16px 0;padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:6px}.help-section h2{font-size:1.35rem;color:var(--yellow);margin-bottom:16px}.help-steps{list-style:none;padding:0;margin:0;display:grid;gap:14px;counter-reset:help}.help-steps li{counter-increment:help;display:grid;grid-template-columns:34px minmax(0,1fr);column-gap:12px}.help-steps li:before{content:counter(help);grid-row:span 2;width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--lcd-line);color:var(--yellow);border-radius:4px;font-family:var(--font-mono)}.help-steps li strong{font-size:14px}.help-steps li p{grid-column:2;margin-top:3px}.help-note{margin-top:16px;padding:12px;border-left:3px solid var(--yellow);background:var(--lcd-bg)}.help-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.help-grid article{padding:14px;border:1px solid var(--line);border-radius:4px}.help-grid h3{margin-bottom:6px}.help-muted{margin-top:12px}
 @media(max-width:600px){.help-section{padding:16px}.help-grid{grid-template-columns:1fr}}
+.assignment-centre{max-width:1000px}.assignment-heading{margin-bottom:22px}.assignment-heading h1{font-size:clamp(2rem,5vw,3rem);margin:8px 0}.assignment-filters{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}.assignment-filter{background:var(--surface-2);color:var(--fg)}.assignment-filter.active{border-color:var(--yellow);color:var(--yellow)}.assignment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.assignment-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;min-width:0}.assignment-card-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.assignment-tag{color:var(--yellow);font:700 11px var(--font-mono);letter-spacing:.08em;text-transform:uppercase}.assignment-format{color:var(--muted);font-size:12px}.assignment-card h2{font-size:18px;margin:10px 0 5px}.assignment-subject,.assignment-byline{color:var(--muted);font-size:13px}.assignment-description{white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0}.assignment-sample{display:inline-block;margin:5px 0;color:var(--yellow)}.assignment-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.assignment-empty{grid-column:1/-1;text-align:center;padding:38px 14px;border:1px dashed var(--line);border-radius:8px;color:var(--muted)}#dlgAssignment{width:min(560px,calc(100% - 24px));max-height:90vh;overflow:auto}#dlgAssignment .dlg{padding:22px}#dlgAssignment textarea{min-height:100px}#assignmentError{color:var(--bad);min-height:20px}@media(max-width:700px){.assignment-grid{grid-template-columns:1fr}.assignment-card{padding:15px}}
 </style></head><body>
 <div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
   <div class="loader-card">
@@ -1247,10 +1248,20 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
       <section class="help-section"><h2>How to list an item and earn</h2><ol class="help-steps"><li><strong>Select List an item</strong><p>Log in and choose List an item.</p></li><li><strong>Add clear details</strong><p>Enter the item name, category, condition, daily rent, deposit (if applicable), pickup spot and description. Add up to five clear photos.</p></li><li><strong>Manage requests</strong><p>Open My space to review incoming rental requests. Accept or decline requests and use Messages to coordinate with the renter.</p></li><li><strong>Mark the item returned</strong><p>After the item is physically returned, mark the rental as returned so the listing can become available again.</p></li></ol></section>
       <section class="help-section"><h2>What else can I do?</h2><div class="help-grid"><article><h3>My space</h3><p>Manage your listings, incoming requests, outgoing rentals and rental activity.</p></article><article><h3>Messages</h3><p>Chat with other students to discuss item details, pickup, handover and return arrangements.</p></article><article><h3>Ratings</h3><p>Share a rating after a rental has been completed and the item returned.</p></article><article><h3>College discovery</h3><p>CampusRent is designed for students across colleges. Add your college to your profile to help show relevant campus listings.</p></article></div></section>
       <section class="help-section"><h2>Important things to know</h2><p>CampusRent helps students discover items and manage rental requests. Students should agree directly on handover, payment, deposits and return arrangements. Payments are not collected or held by CampusRent. Inspect an item at handover, agree on its condition and terms, and meet in a safe, suitable campus location.</p><p class="help-muted">CampusRent is currently in a testing phase, so features and the interface may change.</p></section>
-      <button class="btn btn-primary" type="button" data-action="browse-from-chat">Back to Home</button>
-    </div>
-  </section>
-</main>
+      <section id="viewAssignments" class="space" hidden><div class="wrap assignment-centre">
+        <div class="assignment-heading"><p class="help-kicker">STUDENT COMMUNITY</p><h1>Assignments</h1><p class="help-intro">Need help with an assignment, or can you write handwritten or typed work for another student? Post here and connect through CampusRent Messages.</p><button class="btn btn-primary" id="assignmentCreateBtn" type="button">Create a post</button></div>
+        <div class="assignment-filters"><button class="btn assignment-filter active" data-assignment-filter="all" type="button">All posts</button><button class="btn assignment-filter" data-assignment-filter="request" type="button">Help wanted</button><button class="btn assignment-filter" data-assignment-filter="offer" type="button">Writing help offered</button></div>
+        <div id="assignmentPosts" class="assignment-grid" aria-live="polite"><p class="chat-placeholder">Loading assignment posts...</p></div><p class="help-muted">CampusRent only connects students. Discuss details directly through Messages. Payments and other arrangements remain between students.</p>
+      </div></section>
+      <dialog id="dlgAssignment"><form class="dlg" id="assignmentForm"><div class="dlg-head"><h2>Create an assignment post</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
+        <div class="field"><label for="assignmentKind">What do you want to do?</label><select id="assignmentKind" required><option value="request">I need assignment help</option><option value="offer">I can write assignments</option></select></div>
+        <div class="field"><label for="assignmentFormat">Work type</label><select id="assignmentFormat" required><option value="handwritten">Handwritten</option><option value="typed">Typed</option><option value="both">Both</option></select></div>
+        <div class="field"><label for="assignmentTitle">Title</label><input id="assignmentTitle" maxlength="90" required placeholder="e.g. Need help with Engineering Maths"></div>
+        <div class="field"><label for="assignmentSubject">Subject</label><input id="assignmentSubject" maxlength="60" required placeholder="e.g. Engineering Mathematics"></div>
+        <div class="field"><label for="assignmentDescription">Details</label><textarea id="assignmentDescription" maxlength="1200" required placeholder="Describe the help you need or the writing service you offer."></textarea></div>
+        <div class="field"><label for="assignmentSample">Demo sample photo or PDF <span id="assignmentSampleHint" class="hint">(required for writing offers)</span></label><input id="assignmentSample" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"><p class="hint">Maximum 5 MB. Handwriting demo photo or typed-work PDF. Do not upload personal information.</p></div>
+        <p class="auth-err" id="assignmentError" role="alert"></p><button class="btn btn-primary" id="assignmentSubmit" type="submit">Publish post</button></form></dialog>
+    </main>
 
 <footer>
   <div class="wrap">
@@ -1833,58 +1844,34 @@ function renderAdminActivityWithFilters(q,kind){var panel=$('#adminActivityPanel
 
 function renderSpace(){var u=me();if(!u)return;var isPlatformOwner=String(u.email||'').trim().toLowerCase()==='mdnasirhussain121@gmail.com';var mine=state.items.filter(function(i){return i.ownerId===u.id}),incoming=state.rentals.filter(function(r){return r.ownerId===u.id}),outgoing=state.rentals.filter(function(r){return r.renterId===u.id}),out=incoming.filter(function(r){return r.status==='accepted'}).length,pend=incoming.filter(function(r){return r.status==='pending'}).length;var h='<div class="sec-head"><h1>Hi, '+esc(u.name.split(' ')[0])+'</h1><button class="btn btn-primary" data-action="open-list">List an item</button></div><div class="stats"><div class="readout"><div class="row"><span class="k">Total added items</span><span class="v">'+mine.length+'</span></div></div><div class="readout"><div class="row"><span class="k">Out on rent</span><span class="v">'+out+'</span></div></div></div><div class="tabs" role="tablist">'+tabBtn('listings','My listings',mine.length,false)+tabBtn('requests','Requests to me',incoming.length,pend>0)+tabBtn('rentals','My rentals',outgoing.length,false)+(isPlatformOwner?tabBtn('admin','Admin review',state.items.length,false)+tabBtn('activity','User activity','NEW',false):'')+'</div>';h+=ui.tab==='admin'&&isPlatformOwner?adminListingsHtml(state.items):ui.tab==='activity'&&isPlatformOwner?'<div id="adminActivityPanel" class="empty">Loading user activity...</div>':ui.tab==='listings'?listingsHtml(mine):ui.tab==='requests'?requestsHtml(incoming):rentalsHtml(outgoing);$('#spaceBody').innerHTML=h;if(ui.tab==='activity'&&isPlatformOwner){if(adminActivityData)renderAdminActivity();loadAdminActivity();startAdminActivityLive()}else stopAdminActivityLive()}
 
-function showView(space, messages, help) {
-  messages = !!messages;
-  help = !!help;
-  var previousView=document.querySelector('#viewMsgs:not([hidden]),#viewSpace:not([hidden]),#viewHelp:not([hidden]),#viewBrowse:not([hidden])');
-  var nextView=space?$('#viewSpace'):messages?$('#viewMsgs'):help?$('#viewHelp'):$('#viewBrowse');
-  var previousName=previousView&&previousView.id||'viewBrowse';
-  var nextName=nextView&&nextView.id||'viewBrowse';
-  var viewOrder={viewBrowse:0,viewMsgs:1,viewSpace:2,viewHelp:3};
+var assignmentPosts=[],assignmentFilter="all";
+function assignmentFormatLabel(value){return value==="handwritten"?"Handwritten":value==="typed"?"Typed":"Handwritten & typed";}
+async function loadAssignmentPosts(){var box=$("#assignmentPosts");if(!box)return;box.innerHTML="<p class=\"chat-placeholder\">Loading assignment posts...</p>";try{var data=await api("/assignments");assignmentPosts=data.posts||[];renderAssignmentPosts()}catch(error){box.innerHTML="<div class=\"assignment-empty\">"+esc(error.message)+"</div>"}}
+function renderAssignmentPosts(){var box=$("#assignmentPosts");if(!box)return;var list=assignmentPosts.filter(function(p){return assignmentFilter==="all"||p.kind===assignmentFilter});if(!list.length){box.innerHTML="<div class=\"assignment-empty\">No posts here yet. Be the first to create one.</div>";return;}box.innerHTML=list.map(function(p){var own=me()&&me().id===p.userId;var sample=p.sampleUrl?("<a class=\"assignment-sample\" href=\""+esc(p.sampleUrl)+"\" target=\"_blank\" rel=\"noopener\">View sample: "+esc(p.sampleName||"Open sample")+"</a>"):"";return "<article class=\"assignment-card\"><div class=\"assignment-card-top\"><span class=\"assignment-tag\">"+(p.kind==="request"?"Help wanted":"Writing help offered")+"</span><span class=\"assignment-format\">"+assignmentFormatLabel(p.format)+"</span></div><h2>"+esc(p.title)+"</h2><div class=\"assignment-subject\">"+esc(p.subject)+"</div><p class=\"assignment-description\">"+esc(p.description)+"</p>"+sample+"<div class=\"assignment-byline\">Posted by <strong>"+esc(p.userName)+"</strong>"+(p.college?" · "+esc(p.college):"")+"</div><div class=\"assignment-actions\">"+(own?"<button class=\"btn\" type=\"button\" data-assignment-delete=\""+esc(p.id)+"\">Delete my post</button>":"<button class=\"btn btn-primary\" type=\"button\" data-assignment-contact=\""+esc(p.userId)+"\">Contact through Messages</button>")+"</div></article>"}).join("")}
+$("#assignmentCreateBtn").addEventListener("click",function(){if(!me()){ui.pending=null;openAuth("login","Log in to create an assignment post.");return;}$("#assignmentForm").reset();$("#assignmentError").textContent="";$("#assignmentSample").required=$("#assignmentKind").value==="offer";$("#dlgAssignment").showModal()});
+$("#assignmentKind").addEventListener("change",function(){$("#assignmentSample").required=this.value==="offer";$("#assignmentSampleHint").textContent=this.value==="offer"?"(required for writing offers)":"(optional)"});
+document.querySelectorAll("[data-assignment-filter]").forEach(function(button){button.addEventListener("click",function(){assignmentFilter=this.getAttribute("data-assignment-filter");document.querySelectorAll("[data-assignment-filter]").forEach(function(item){item.classList.toggle("active",item===button)});renderAssignmentPosts()})});
+document.addEventListener("click",async function(event){var contact=event.target.closest("[data-assignment-contact]");if(contact){try{await api("/messages/requests",{method:"POST",body:JSON.stringify({userId:contact.getAttribute("data-assignment-contact")})});toast("Message request sent. They must approve it before you can chat.")}catch(error){toast(error.message)}return;}var del=event.target.closest("[data-assignment-delete]");if(del&&confirm("Delete this assignment post?")){try{await api("/assignments/"+encodeURIComponent(del.getAttribute("data-assignment-delete")),{method:"DELETE"});await loadAssignmentPosts();toast("Assignment post deleted.")}catch(error){toast(error.message)}}});
+$("#assignmentForm").addEventListener("submit",async function(event){event.preventDefault();$("#assignmentError").textContent="";var button=$("#assignmentSubmit");button.disabled=true;button.textContent="Publishing...";try{var form=new FormData();["kind","format","title","subject","description"].forEach(function(id){form.append(id,$("#assignment"+id.charAt(0).toUpperCase()+id.slice(1)).value.trim())});var file=$("#assignmentSample").files[0];if(file){if(file.size>5*1024*1024)throw new Error("Sample must be 5 MB or smaller.");form.append("sample",file)}await api("/assignments",{method:"POST",body:form});$("#dlgAssignment").close();await loadAssignmentPosts();toast("Your assignment post has been published.")}catch(error){$("#assignmentError").textContent=error.message}finally{button.disabled=false;button.textContent="Publish post"}});
+
+function showView(space, messages, help, assignments) {
+  messages=!!messages; help=!!help; assignments=!!assignments;
+  var previousView=document.querySelector('#viewMsgs:not([hidden]),#viewSpace:not([hidden]),#viewHelp:not([hidden]),#viewAssignments:not([hidden]),#viewBrowse:not([hidden])');
+  var nextView=space?$('#viewSpace'):messages?$('#viewMsgs'):help?$('#viewHelp'):assignments?$('#viewAssignments'):$('#viewBrowse');
+  var previousName=previousView&&previousView.id||'viewBrowse',nextName=nextView&&nextView.id||'viewBrowse';
+  var viewOrder={viewBrowse:0,viewMsgs:1,viewSpace:2,viewHelp:3,viewAssignments:4};
   var slideClass=viewOrder[nextName]>=viewOrder[previousName]?'view-slide-in-right':'view-slide-in-left';
-
-  if (!messages) stopChatAutoRefresh();
-
-  $('#viewBrowse').hidden = space || messages || help;
-  $('#viewSpace').hidden = !space;
-  $('#viewMsgs').hidden = !messages;
-  $('#viewHelp').hidden = !help;
-  if(previousName!==nextName&&nextView){
-    nextView.classList.remove('view-slide-in-left','view-slide-in-right');
-    void nextView.offsetWidth;
-    nextView.classList.add(slideClass);
-    nextView.addEventListener('animationend',function(){nextView.classList.remove('view-slide-in-left','view-slide-in-right')},{once:true});
-  }
-
-  if(messages)markNavNotificationsSeen('messages');
-  if(space)markNavNotificationsSeen('space');
-
-  ['navBrowse','navSpace','navMessages','navHelp'].forEach(function(id){var nav=$('#'+id);if(nav)nav.removeAttribute('aria-current')});
-  if (space) {
-    $('#navSpace').setAttribute('aria-current', 'page');
-    renderSpace();
-  } else if (messages) {
-    $('#navMessages').setAttribute('aria-current', 'page');
-    if (me()) {
-      if (!conversations.length) $('#conversationList').innerHTML = '<p class="chat-placeholder">Loading conversations...</p>';
-      if (!activeConversationId && !activeDirectChatId) {
-        $('#chatHeader').textContent = 'Select a conversation';
-        $('#chatMessages').innerHTML = '<p class="chat-placeholder">Your messages will appear here when you select a conversation.</p>';
-        $('#chatForm').hidden = true;
-      }
-      loadConversations().catch(function(error) {
-        $('#conversationList').innerHTML = '<p class="chat-placeholder">Could not load conversations. Please try again.</p>';
-        toast(error.message);
-      });
-    }
-  } else if (help) {
-    $('#navHelp').setAttribute('aria-current', 'page');
-  } else {
-    $('#navBrowse').setAttribute('aria-current', 'page');
-    renderBrowse();
-  }
-
-  window.scrollTo(0, 0);
+  if(!messages)stopChatAutoRefresh();
+  $('#viewBrowse').hidden=space||messages||help||assignments; $('#viewSpace').hidden=!space; $('#viewMsgs').hidden=!messages; $('#viewHelp').hidden=!help; $('#viewAssignments').hidden=!assignments;
+  if(previousName!==nextName&&nextView){nextView.classList.remove('view-slide-in-left','view-slide-in-right');void nextView.offsetWidth;nextView.classList.add(slideClass);nextView.addEventListener('animationend',function(){nextView.classList.remove('view-slide-in-left','view-slide-in-right')},{once:true});}
+  if(messages)markNavNotificationsSeen('messages'); if(space)markNavNotificationsSeen('space');
+  ['navBrowse','navSpace','navMessages','navHelp','navAssignments'].forEach(function(id){var nav=$('#'+id);if(nav)nav.removeAttribute('aria-current')});
+  if(space){$('#navSpace').setAttribute('aria-current','page');renderSpace();}
+  else if(messages){$('#navMessages').setAttribute('aria-current','page');if(me()){if(!conversations.length)$('#conversationList').innerHTML='<p class="chat-placeholder">Loading conversations...</p>';if(!activeConversationId&&!activeDirectChatId){$('#chatHeader').textContent='Select a conversation';$('#chatMessages').innerHTML='<p class="chat-placeholder">Your messages will appear here when you select a conversation.</p>';$('#chatForm').hidden=true;}loadConversations().catch(function(error){$('#conversationList').innerHTML='<p class="chat-placeholder">Could not load conversations. Please try again.</p>';toast(error.message);});}}
+  else if(help){$('#navHelp').setAttribute('aria-current','page');}
+  else if(assignments){$('#navAssignments').setAttribute('aria-current','page');loadAssignmentPosts();}
+  else{$('#navBrowse').setAttribute('aria-current','page');renderBrowse();}
+  window.scrollTo(0,0);
 }
 
 function goToView(view){
@@ -1913,6 +1900,7 @@ function route() {
   var space = location.hash === '#my-space';
   var messages = location.hash === '#messages';
   var help = location.hash === '#help';
+  var assignments = location.hash === '#assignments';
 
   if (space && !me()) {
     ui.pending = space ? 'space' : 'messages';
@@ -1921,7 +1909,7 @@ function route() {
     return;
   }
 
-  showView(space, messages, help);
+  showView(space, messages, help, assignments);
 }
 
 function openAuth(mode,hint){
@@ -2359,7 +2347,7 @@ document.addEventListener('click',function(event){
   var link=event.target.closest('a[href^="#"]');
   if(!link)return;
   var hash=link.getAttribute('href');
-  if(hash==='#browse'||hash==='#messages'||hash==='#my-space'||hash==='#help'){
+  if(hash==='#browse'||hash==='#messages'||hash==='#my-space'||hash==='#help'||hash==='#assignments'){
     event.preventDefault();
     goToView(hash);
   }
