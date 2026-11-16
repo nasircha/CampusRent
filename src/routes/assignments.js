@@ -29,9 +29,10 @@ router.get('/', async (_req, res, next) => {
 router.post('/', requireAuth, upload.single('sample'), async (req, res, next) => {
   try {
     const parsed = z.object({
-      category: z.enum(['Assignment', 'Lab File', 'Other'])
+      category: z.literal('Assignment'),
+      description: z.string().trim().max(500).optional().default('')
     }).safeParse(req.body || {});
-    if (!parsed.success) return res.status(400).json({ error: 'Choose Assignment, Lab File, or Other.' });
+    if (!parsed.success) return res.status(400).json({ error: 'Choose Assignment and add a description under 500 characters.' });
     if (!req.file) {
       return res.status(400).json({ error: 'Please upload a photo or PDF of your writing.' });
     }
@@ -41,7 +42,7 @@ router.post('/', requireAuth, upload.single('sample'), async (req, res, next) =>
       sampleName = req.file.originalname.slice(0, 120);
     }
     const post = await prisma.assignmentPost.create({
-      data: { kind: 'offer', format: 'both', title: parsed.data.category, subject: parsed.data.category, description: 'Available for writing help. Contact me through CampusRent Messages.', sampleUrl, sampleName, userId: req.user.id },
+      data: { kind: 'offer', format: 'both', title: parsed.data.category, subject: parsed.data.category, description: parsed.data.description || 'Available for writing help.', sampleUrl, sampleName, userId: req.user.id },
       include: { user: { select: { id: true, name: true, college: true } } }
     });
     res.status(201).json({ post: formatPost(post) });
