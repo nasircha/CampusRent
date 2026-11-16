@@ -1504,8 +1504,8 @@ function stopChatAutoRefresh() {
 
 async function loadConversations() {
   var list = $('#conversationList');
-  if (!conversations.length && list && !list.dataset.loaded) {
-    list.innerHTML = '<p class="chat-placeholder">Loading conversations...</p>';
+  if (list && !list.dataset.loaded && !list.children.length) {
+    list.innerHTML = '<div class="chat-empty">Your conversations will appear here.</div>';
   }
   var results = await Promise.all([
     api('/messages'),
@@ -1691,10 +1691,8 @@ async function openDirectChat(id, silent) {
     var same = activeDirectChatId === id;
     var box = $('#chatMessages');
     var wasAtBottom = !same || (box.scrollHeight-box.scrollTop-box.clientHeight<80);
-    if (!silent && !same) {
-      $('#chatHeader').textContent='Loading personal chat...';
-      $('#chatMessages').innerHTML='<p class="chat-placeholder">Loading messages...</p>';
-      $('#chatForm').hidden=true;
+    if (!silent && !same && !activeDirectChatId && !activeConversationId) {
+      $('#chatHeader').textContent='Personal message';
     }
     var data=await api('/messages/direct/'+encodeURIComponent(id)+'/messages');
     activeConversationId=null;
@@ -1719,10 +1717,8 @@ async function openConversation(id, silent) {
     var wasAtBottom = !sameConversation ||
       (chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 80);
 
-    if (!silent && !sameConversation) {
-      $('#chatHeader').textContent = 'Loading conversation...';
-      $('#chatMessages').innerHTML = '<p class="chat-placeholder">Loading messages...</p>';
-      $('#chatForm').hidden = true;
+    if (!silent && !sameConversation && !activeDirectChatId && !activeConversationId) {
+      $('#chatHeader').textContent = 'Conversation';
     }
     var data = await api('/messages/' + encodeURIComponent(id) + '/messages');
 
@@ -1939,8 +1935,27 @@ function renderAdminActivityWithFilters(q,kind){var panel=$('#adminActivityPanel
 function renderSpace(){var u=me();if(!u)return;var isPlatformOwner=String(u.email||'').trim().toLowerCase()==='mdnasirhussain121@gmail.com';var mine=state.items.filter(function(i){return i.ownerId===u.id}),incoming=state.rentals.filter(function(r){return r.ownerId===u.id}),outgoing=state.rentals.filter(function(r){return r.renterId===u.id}),out=incoming.filter(function(r){return r.status==='accepted'}).length,pend=incoming.filter(function(r){return r.status==='pending'}).length;var h='<div class="sec-head"><h1>Hi, '+esc(u.name.split(' ')[0])+'</h1><button class="btn btn-primary" data-action="open-list">List an item</button></div><div class="stats"><div class="readout"><div class="row"><span class="k">Total added items</span><span class="v">'+mine.length+'</span></div></div><div class="readout"><div class="row"><span class="k">Out on rent</span><span class="v">'+out+'</span></div></div></div><div class="tabs" role="tablist">'+tabBtn('listings','My listings',mine.length,false)+tabBtn('requests','Requests to me',incoming.length,pend>0)+tabBtn('rentals','My rentals',outgoing.length,false)+(isPlatformOwner?tabBtn('admin','Admin review',state.items.length,false)+tabBtn('activity','User activity','NEW',false):'')+'</div>';h+=ui.tab==='admin'&&isPlatformOwner?adminListingsHtml(state.items):ui.tab==='activity'&&isPlatformOwner?'<div id="adminActivityPanel" class="empty">Loading user activity...</div>':ui.tab==='listings'?listingsHtml(mine):ui.tab==='requests'?requestsHtml(incoming):rentalsHtml(outgoing);$('#spaceBody').innerHTML=h;if(ui.tab==='activity'&&isPlatformOwner){if(adminActivityData)renderAdminActivity();loadAdminActivity();startAdminActivityLive()}else stopAdminActivityLive()}
 
 var assignmentPosts=[];
+var assignmentPostsLoaded=false;
+var assignmentPostsLoading=null;
 
-async function loadAssignmentPosts(){var box=$("#assignmentPosts");if(!box)return;box.innerHTML="<p class=\"chat-placeholder\">Loading assignment posts...</p>";try{var data=await api("/assignments");assignmentPosts=data.posts||[];renderAssignmentPosts()}catch(error){box.innerHTML="<div class=\"assignment-empty\">"+esc(error.message)+"</div>"}}
+async function loadAssignmentPosts(){
+  var box=$("#assignmentPosts");
+  if(!box)return;
+  if(assignmentPostsLoading)return assignmentPostsLoading;
+  if(!assignmentPostsLoaded&&!assignmentPosts.length){
+    box.innerHTML='<div class="assignment-empty" aria-live="polite">No assignment posts yet.</div>';
+  }
+  assignmentPostsLoading=api("/assignments").then(function(data){
+    assignmentPosts=data.posts||[];
+    assignmentPostsLoaded=true;
+    renderAssignmentPosts();
+  }).catch(function(error){
+    if(!assignmentPostsLoaded&&!assignmentPosts.length){
+      box.innerHTML='<div class="assignment-empty">Could not load posts. Open Assignments again to retry.</div>';
+    }
+  }).finally(function(){assignmentPostsLoading=null});
+  return assignmentPostsLoading;
+}
 function renderAssignmentPosts(){
   var box=$("#assignmentPosts");
   if(!box)return;
