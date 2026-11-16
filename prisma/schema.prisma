@@ -9,6 +9,7 @@ datasource db {
 }
 
 model User {
+  accommodations Accommodation[]
   assignmentPosts AssignmentPost[]
   id           String   @id @default(cuid())
   name         String
@@ -213,4 +214,31 @@ model ItemRating {
 
   @@unique([itemId, userId])
   @@index([userId, updatedAt])
+}
+
+
+model Accommodation {
+  id           String   @id @default(cuid())
+  type         String
+  title        String
+  address      String
+  distanceKm   Float
+  price        Int
+  priceUnit    String   @default("BED")
+  totalRooms   Int      @default(1)
+  vacantRooms  Int      @default(0)
+  totalBeds    Int      @default(0)
+  vacantBeds   Int      @default(0)
+  description  String   @default("")
+  contactPhone String   @default("")
+  photos       String[] @default([])
+  college      String
+  status       String   @default("available")
+  ownerId      String
+  owner        User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([college, type, status, createdAt])
+  @@index([ownerId, status])
 }
