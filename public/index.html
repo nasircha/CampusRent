@@ -2161,8 +2161,13 @@ $('#profileForm').addEventListener('submit',async function(e){
   try{if(photo){var fd=new FormData();fd.append('photo',photo);var uploaded=await api('/auth/me/photo',{method:'POST',body:fd});state.user=uploaded.user;}var data=await api('/auth/me',{method:'PATCH',body:JSON.stringify({name:name})});state.user=data.user;renderHeader();$('#dlgProfile').close();toast('Profile updated successfully.');if(location.hash==='#my-space')renderSpace();}
   catch(ex){$('#profileErr').textContent=ex.message;}finally{save.disabled=false;save.textContent='Save profile';}
 });
+var authSubmitting=false;
 $('#authForm').addEventListener('submit',async function(e){
   e.preventDefault();
+  if(authSubmitting)return;
+  authSubmitting=true;
+  var authButton=$('#authSubmit');authButton.disabled=true;
+  try{
   var su=ui.authMode==='signup',
       err=function(m){$('#authErr').textContent=m},
       name=$('#aName').value.trim(),
@@ -2252,6 +2257,7 @@ $('#authForm').addEventListener('submit',async function(e){
   }catch(ex){
     err(ex.message);
   }
+  }finally{authSubmitting=false;authButton.disabled=false;}
 });
 function openList(){if(!me()){ui.pending='list';openAuth('signup','Create an account to list your first item.');return}ui.photoFiles=[];ui.photoUrl='';$('#listForm').reset();$('#lPreviews').innerHTML='';$('#listErr').textContent='';if(!$('#dlgList').open)$('#dlgList').showModal()}
 $('#lPhoto').addEventListener('change',function(){var files=Array.from(this.files||[]),box=$('#lPreviews');box.innerHTML='';ui.photoFiles=[];if(files.length>5){this.value='';$('#listErr').textContent='You can select a maximum of 5 photos.';return}for(var f of files){if(!/^image\/(jpeg|png|webp|gif)$/.test(f.type)){this.value='';ui.photoFiles=[];box.innerHTML='';$('#listErr').textContent='Use JPEG, PNG, WebP or GIF photos.';return}if(f.size>5*1024*1024){this.value='';ui.photoFiles=[];box.innerHTML='';$('#listErr').textContent='Each photo must be 5 MB or smaller.';return}}ui.photoFiles=files;files.forEach(function(file,index){var wrap=document.createElement('div');wrap.className='photo-preview-tile';var img=document.createElement('img');img.src=URL.createObjectURL(file);img.alt='Selected product photo '+(index+1);wrap.appendChild(img);var label=document.createElement('small');label.textContent=index===0?'Cover':'Photo '+(index+1);wrap.appendChild(label);box.appendChild(wrap)});$('#listErr').textContent=''});
