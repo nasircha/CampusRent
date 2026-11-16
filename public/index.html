@@ -1561,7 +1561,7 @@ function today(){var d=new Date(),off=d.getTimezoneOffset();return new Date(d.ge
 function fmtDate(s){var d=new Date(s+'T00:00');return isNaN(d)?s:d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})}
 var token=localStorage.getItem(TOKEN_KEY)||'',state={user:null,items:[],rentals:[]};
 var ui={q:'',cat:'all',sort:'new',tab:'listings',authMode:'login',otpSent:false,pending:null,photoFiles:[],photoUrl:'',confirmDel:null};
-async function api(path,opts){opts=opts||{};var headers=opts.headers||{};if(token)headers.Authorization='Bearer '+token;if(opts.body&&!(opts.body instanceof FormData))headers['Content-Type']='application/json';var res=await fetch(API+path,Object.assign({},opts,{headers:headers}));var data={};try{data=await res.json()}catch(e){}if(!res.ok){if(res.status===401&&token){token='';localStorage.removeItem(TOKEN_KEY);state.user=null;renderHeader()}throw new Error(data.error||'Request failed ('+res.status+')')}return data}
+async function api(path,opts){opts=opts||{};var headers=opts.headers||{};if(token)headers.Authorization='Bearer '+token;if(opts.body&&!(opts.body instanceof FormData))headers['Content-Type']='application/json';var controller=typeof AbortController!=='undefined'?new AbortController():null;var timeout=window.setTimeout(function(){if(controller)controller.abort()},15000);var request=Object.assign({},opts,{headers:headers});if(controller)request.signal=controller.signal;var res;try{res=await fetch(API+path,request)}catch(fetchError){if(fetchError&&fetchError.name==='AbortError')throw new Error('Server is taking too long. Please try again.');throw new Error('Could not connect. Check your internet and try again.')}finally{window.clearTimeout(timeout)}var data={};try{data=await res.json()}catch(e){}if(!res.ok){if(res.status===401&&token){token='';localStorage.removeItem(TOKEN_KEY);state.user=null;renderHeader()}throw new Error(data.error||'Request failed ('+res.status+')')}return data}
 var activeConversationId = null;
 var conversations = [];
 var directChats = [];
@@ -1590,21 +1590,18 @@ function stopChatAutoRefresh() {
 
 async function loadConversations() {
   var list = $('#conversationList');
-  if (list && !list.dataset.loaded && !list.children.length) {
-    list.innerHTML = '<div class="chat-empty">Your conversations will appear here.</div>';
+  if (list && !list.dataset.loaded && !list.children.length) list.innerHTML = '<div class="chat-empty">Your conversations will appear here.</div>';
+  var endpoints = ['/messages','/messages/direct','/messages/requests'];
+  var results = await Promise.all(endpoints.map(async function(path){try{return {ok:true,data:await api(path)}}catch(error){return {ok:false,error:error}}}));
+  conversations = results[0].ok ? (results[0].data.conversations || []) : [];
+  directChats = results[1].ok ? (results[1].data.chats || []) : [];
+  directRequests = results[2].ok ? (results[2].data.requests || []) : [];
+  if (list) {
+    list.dataset.loaded = 'true';
+    if (!results.some(function(r){return r.ok;})) list.innerHTML = '<div class="chat-empty">Messages could not load. <button class="btn btn-sm" type="button" data-action="retry-messages">Try again</button></div>';
+    else if (results.some(function(r){return !r.ok;})) list.insertAdjacentHTML('beforeend','<div class="chat-load-note">Some chats could not load. <button class="btn btn-sm" type="button" data-action="retry-messages">Retry</button></div>');
   }
-  var results = await Promise.all([
-    api('/messages'),
-    api('/messages/direct'),
-    api('/messages/requests')
-  ]);
-  conversations = results[0].conversations || [];
-  directChats = results[1].chats || [];
-  directRequests = results[2].requests || [];
-  if (list) list.dataset.loaded = 'true';
-  renderConversations();
-  renderDirectRequests();
-  updateNavNotificationBadges();
+  renderConversations();renderDirectRequests();updateNavNotificationBadges();
 }
 
 function navSeenKey(type){
@@ -1795,7 +1792,7 @@ async function openDirectChat(id, silent) {
     $('#chatForm').hidden=false;
     if(wasAtBottom) box.scrollTop=box.scrollHeight;
     if(!silent) await loadConversations();
-  } catch(error) { if(!silent) toast(error.message); }
+  } catch(error) { if(!silent){$('#chatMessages').innerHTML='<p class="chat-placeholder">'+esc(error.message)+' <button class="btn btn-sm" type="button" data-action="retry-active-chat">Try again</button></p>';toast(error.message);} }
 }
 async function openConversation(id, silent) {
   try {
@@ -1854,7 +1851,7 @@ var messagesHtml = (data.messages || []).map(function(m) {
     }
     if (!silent) await loadConversations();
   } catch (error) {
-    if (!silent) toast(error.message);
+    if (!silent) { $('#chatMessages').innerHTML='<p class="chat-placeholder">'+esc(error.message)+' <button class="btn btn-sm" type="button" data-action="retry-active-chat">Try again</button></p>'; toast(error.message); }
   }
 }
 
@@ -2279,6 +2276,8 @@ document.addEventListener('click', async function(e) {
   var id = el.getAttribute('data-id');
 
   switch (a) {
+    case 'retry-messages': loadConversations().catch(function(error){toast(error.message)}); break;
+    case 'retry-active-chat': if(activeDirectChatId)openDirectChat(activeDirectChatId);else if(activeConversationId)openConversation(activeConversationId); break;
     case 'open-login':
       openAuth('login');
       break;
