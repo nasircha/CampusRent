@@ -42,7 +42,7 @@ router.post('/', requireAuth, upload.array('photos', 5), async (req, res, next) 
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
     const photos = await Promise.all((req.files || []).map(uploadPhoto));
     const stay = await prisma.accommodation.create({
-      data: { type: parsed.data.type, title: parsed.data.title, address: parsed.data.address, distanceKm: 0, price: 0, priceUnit: 'ROOM', totalRooms: 1, vacantRooms: 1, totalBeds: 0, vacantBeds: 0, contactPhone: '', description: JSON.stringify({ ownerName: parsed.data.ownerName, facilities: parsed.data.facilities, gateTiming: parsed.data.gateTiming }), photos: [], college: req.user.college, ownerId: req.user.id, status: 'pending' },
+      data: { type: parsed.data.type, title: parsed.data.title, address: parsed.data.address, distanceKm: 0, price: 0, priceUnit: 'ROOM', totalRooms: 1, vacantRooms: 1, totalBeds: 0, vacantBeds: 0, contactPhone: '', description: JSON.stringify({ ownerName: parsed.data.ownerName, facilities: parsed.data.facilities, gateTiming: parsed.data.gateTiming }), photos, college: req.user.college, ownerId: req.user.id, status: 'pending' },
       include: { owner: { select: { id: true, name: true } } }
     });
     res.status(201).json({ stay: { ...formatStay(stay), ownerName: parsed.data.ownerName, facilities: parsed.data.facilities, gateTiming: parsed.data.gateTiming } });
