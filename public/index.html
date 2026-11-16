@@ -2433,6 +2433,7 @@ if(!navigator.onLine)showNetworkOffline();
     }
   }
   route();
+  if(new URLSearchParams(location.search).get('signup')==='1')openAuth('signup');
   await refreshNavNotifications();
   window.setInterval(refreshNavNotifications,15000);
 })();
