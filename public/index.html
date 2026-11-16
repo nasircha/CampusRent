@@ -1111,6 +1111,70 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 .view-slide-in-right{animation:campusViewFromRight .24s ease-out both}
 .view-slide-in-left{animation:campusViewFromLeft .24s ease-out both}
 @media(prefers-reduced-motion:reduce){.view-slide-in-right,.view-slide-in-left{animation:none}}
+
+/* Premium minimal homepage refresh */
+.top{background:rgba(12,12,12,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(255,255,255,.09)}
+.top .wrap{max-width:1440px;min-height:76px;padding-top:12px;padding-bottom:12px;gap:14px 28px}
+.brand{font-size:1.55rem;letter-spacing:-.055em}
+.brand svg{width:38px;height:38px;border-radius:50%;background:transparent}
+.nav{gap:8px;margin-left:auto}
+.nav a{border:0;border-radius:999px;padding:11px 17px;color:#dedede;transition:background .2s,color .2s}
+.nav a[aria-current="page"]{background:var(--yellow);color:#171500}
+.nav a:hover{background:rgba(255,214,10,.12);color:var(--yellow)}
+.auth{margin-left:8px}
+.premium-hero{position:relative;overflow:hidden;padding:62px 0 38px;background:radial-gradient(ellipse at 77% 48%,rgba(255,214,10,.12),transparent 32%),linear-gradient(110deg,#101010 0%,#141414 58%,#0b0b0b 100%)}
+.premium-hero:before,.premium-hero:after{content:"";position:absolute;width:180px;height:180px;opacity:.14;background-image:radial-gradient(#aaa 1.2px,transparent 1.2px);background-size:18px 18px;pointer-events:none}
+.premium-hero:before{left:0;top:20px}.premium-hero:after{right:0;top:0}
+.premium-hero-inner{position:relative;z-index:1;max-width:1320px;min-height:410px;display:grid;grid-template-columns:1.08fr .92fr;gap:34px;align-items:center}
+.hero-eyebrow{color:var(--yellow);font:600 11px var(--font-mono);letter-spacing:.18em;margin-bottom:15px}
+.hero-copy h1{font-size:clamp(3.5rem,8vw,6.2rem);letter-spacing:-.075em;font-weight:850;line-height:.98}
+.hero-yellow{color:var(--yellow)}
+.hero-copy h2{font-size:clamp(1.65rem,3.6vw,2.8rem);margin-top:12px;letter-spacing:-.035em}
+.hero-copy h2 i{color:var(--yellow);font-style:normal}
+.hero-copy .sub{max-width:510px;font-size:1.12rem;line-height:1.7;margin-top:17px;color:#c2c2c2}
+.hero-copy .cta{margin-top:25px;gap:13px}
+.hero-copy .btn{min-height:52px;padding:0 24px;border-radius:999px;font-size:15px}
+.hero-outline{border-color:#ddd}
+.hero-outline span{color:var(--yellow);font-size:22px}
+.hero-stats{display:flex;gap:0;margin-top:32px}
+.hero-stats>div{display:grid;gap:2px;padding:0 23px;border-left:1px solid #555}
+.hero-stats>div:first-child{padding-left:0;border-left:0}
+.hero-stats strong{font-size:1.2rem;color:#fff}.hero-stats span{font-size:12px;color:#aaa}
+.hero-art{position:relative;min-height:390px;overflow:hidden;border-radius:20px;background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,0)),radial-gradient(circle at 55% 40%,#4a4210 0,#19170d 35%,#111 70%);border:1px solid rgba(255,255,255,.08)}
+.hero-sun{position:absolute;width:330px;height:330px;border-radius:50%;background:var(--yellow);right:13%;top:8%;box-shadow:0 0 100px rgba(255,214,10,.15)}
+.hero-campus{position:absolute;bottom:0;left:0;right:0;height:52%;background:linear-gradient(180deg,transparent,#202020);display:flex;align-items:flex-end;justify-content:center;gap:10px;padding:0 30px}
+.hero-campus span{height:80%;width:14%;border:2px solid #777;background:linear-gradient(90deg,#444,#777,#333);clip-path:polygon(0 15%,50% 0,100% 15%,100% 100%,0 100%);opacity:.65}
+.hero-campus span:nth-child(2),.hero-campus span:nth-child(4){height:64%}
+.hero-device{position:absolute;width:47%;height:47%;right:25%;bottom:12%;transform:rotate(-10deg);filter:drop-shadow(0 20px 25px rgba(0,0,0,.5))}
+.device-top{height:83%;border:8px solid #444;border-bottom:15px solid #777;border-radius:14px 14px 5px 5px;background:linear-gradient(135deg,#262a2e,#070809);box-shadow:inset 0 0 0 2px #888}
+.device-screen{position:absolute;inset:10px 10px 22px;background:linear-gradient(135deg,#222,#070707)}
+.device-base{height:12%;margin:0 -8%;background:linear-gradient(#aaa,#444);clip-path:polygon(7% 0,93% 0,100% 100%,0 100%);border-radius:0 0 9px 9px}
+.hero-note{position:absolute;right:5%;top:23%;display:grid;gap:3px;transform:rotate(-8deg);text-align:right}
+.hero-note strong{font-size:1.1rem}.hero-note em{font-size:1.2rem;color:var(--yellow);font-weight:700}
+.hero-art-label{position:absolute;bottom:18px;left:22px;color:#aaa;font:500 10px var(--font-mono);letter-spacing:.2em}
+.trust-strip{max-width:1320px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:0;margin-bottom:34px;padding:20px 28px;background:linear-gradient(110deg,#1c1c1c,#171717);border:1px solid #292929;border-radius:22px}
+.trust-strip>div{display:flex;align-items:center;justify-content:center;gap:14px;padding:4px 12px;border-right:1px solid #4a4a4a}
+.trust-strip>div:last-child{border:0}
+.trust-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:rgba(255,214,10,.12);color:var(--yellow);font-size:25px}
+.trust-strip span{display:grid;gap:3px}.trust-strip strong{font-size:15px}.trust-strip small{font-size:12px;color:var(--muted)}
+#browse-grid{max-width:1320px;padding-top:8px}
+#viewBrowse>.wrap:not(#browse-grid){max-width:1320px}
+#viewBrowse .sec-head{padding:0 0 16px}
+#viewBrowse .sec-head h2{font-size:1.8rem;letter-spacing:-.035em}
+#viewBrowse .grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+#viewBrowse .card{border-radius:15px;background:#191919;border-color:#303030;transition:transform .2s,border-color .2s,box-shadow .2s}
+#viewBrowse .card:hover{transform:translateY(-4px);border-color:var(--yellow);box-shadow:0 14px 35px rgba(0,0,0,.25)}
+#viewBrowse .card .img{aspect-ratio:1.22;background:#242424}
+#viewBrowse .card .body{padding:14px 15px 16px}
+#viewBrowse .card .t{font-size:1rem}
+.home-assignment-promo{max-width:1320px;margin-top:32px;margin-bottom:30px;padding:25px 30px;border:1px solid #343434;border-radius:18px;background:radial-gradient(circle at 90% 50%,rgba(255,214,10,.12),transparent 28%),#191919;display:flex;align-items:center;justify-content:space-between;gap:22px}
+.home-assignment-promo h2{font-size:1.65rem;margin-bottom:8px}.home-assignment-promo p:not(.hero-eyebrow){color:var(--muted);max-width:650px}
+.home-assignment-promo .btn{border-radius:999px;white-space:nowrap;padding:15px 22px}
+.how{max-width:1320px}
+@media(max-width:820px){.premium-hero-inner{grid-template-columns:1fr;gap:26px}.hero-art{min-height:300px}.premium-hero{padding-top:42px}.hero-copy h1{font-size:clamp(3.2rem,13vw,5rem)}}
+@media(max-width:700px){.top .wrap{min-height:0;gap:7px 12px}.brand{font-size:1.2rem}.brand svg{width:30px;height:30px}.nav{order:3;width:100%;margin:0;overflow-x:auto;gap:3px}.nav a{padding:9px 12px;font-size:13px}.auth{margin-left:auto}.premium-hero{padding:36px 0 25px}.premium-hero-inner{gap:20px}.hero-art{min-height:245px}.hero-sun{width:230px;height:230px}.hero-stats>div{padding:0 12px}.trust-strip{grid-template-columns:1fr;padding:12px 16px;gap:0;border-radius:15px;margin-bottom:24px}.trust-strip>div{justify-content:flex-start;border-right:0;border-bottom:1px solid #444;padding:12px 4px}.trust-strip>div:last-child{border-bottom:0}.home-assignment-promo{align-items:flex-start;flex-direction:column;padding:20px}.home-assignment-promo .btn{width:100%}}
+@media(max-width:380px){.hero-copy .btn{padding:0 16px}.hero-stats{gap:0}.hero-stats strong{font-size:1rem}.hero-stats span{font-size:10px}}
+
 </style>
 
 <script>(function(){function sizeTopbar(){var h=document.querySelector(".top"),m=document.querySelector("main");if(h&&m)m.style.paddingTop=h.offsetHeight+"px"}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",sizeTopbar);else sizeTopbar();window.addEventListener("load",sizeTopbar);window.addEventListener("resize",sizeTopbar);})();</script>
@@ -1157,21 +1221,35 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 
 <main>
   <section id="viewBrowse">
-    <div class="hero">
-      <div class="wrap">
-        <div>
-          <h1>Rent what you need for exams. <span class="hl">Earn from what you don't.</span></h1>
-          <p class="sub">Borrow scientific calculators, exam pens, drafters and lab gear from students on your campus. Lend your own when it sits unused and earn rent for every day it is out.</p>
+    <div class="hero premium-hero">
+      <div class="wrap premium-hero-inner">
+        <div class="hero-copy">
+          <p class="hero-eyebrow">THE STUDENT MARKETPLACE</p>
+          <h1>Campus<span class="hero-yellow">Rent</span></h1>
+          <h2>Rent <i>•</i> Share <i>•</i> Connect</h2>
+          <p class="sub">The ultimate student marketplace for your campus needs. Find what you need, lend what you own, and connect with students around you.</p>
           <div class="cta">
-            <button class="btn btn-primary" data-action="scroll-grid">Browse gear</button>
-            <button class="btn" data-action="open-list">List an item</button>
+            <button class="btn btn-primary" data-action="scroll-grid"><span aria-hidden="true">⌕</span> Browse Items</button>
+            <button class="btn hero-outline" data-action="open-list"><span aria-hidden="true">＋</span> List an Item</button>
+          </div>
+          <div class="hero-stats">
+            <div><strong id="rdOpen">0</strong><span>Items listed</span></div>
+            <div><strong id="rdOut">0</strong><span>Currently rented</span></div>
+            <div><strong>Across</strong><span>Campus community</span></div>
           </div>
         </div>
-        <div class="readout" aria-label="Live listing counts">
-          <div class="row"><span class="k">Total added items</span><span class="v" id="rdOpen">0</span></div>
-          <div class="row"><span class="k">Out on rent</span><span class="v" id="rdOut">0</span></div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-sun"></div><div class="hero-campus"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="hero-device"><div class="device-top"></div><div class="device-screen"></div><div class="device-base"></div></div>
+          <div class="hero-note"><strong>Smart choices.</strong><em>Better campus life.</em></div>
+          <div class="hero-art-label">MADE FOR STUDENTS</div>
         </div>
       </div>
+    </div>
+    <div class="wrap trust-strip">
+      <div><b class="trust-icon">✓</b><span><strong>Trusted by Students</strong><small>Student-to-student marketplace</small></span></div>
+      <div><b class="trust-icon">↗</b><span><strong>Easy to Use</strong><small>Find and list items in minutes</small></span></div>
+      <div><b class="trust-icon">⌁</b><span><strong>Campus Community</strong><small>Connect with fellow students</small></span></div>
     </div>
 
     <div class="wrap tools" id="browse-grid">
@@ -1187,9 +1265,13 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
     </div>
 
     <div class="wrap">
-      <div class="sec-head"><h2>Available on campus</h2><span class="muted" id="count"></span></div>
+      <div class="sec-head"><h2>Popular Items</h2><span class="muted" id="count"></span></div>
       <ul class="grid" id="grid"></ul>
     </div>
+    <section class="wrap home-assignment-promo">
+      <div><p class="hero-eyebrow">STUDENT COMMUNITY</p><h2>Need help with Assignments?</h2><p>Find students offering assignment-writing help, view their sample, and connect through CampusRent Messages.</p></div>
+      <a class="btn btn-primary" href="#assignments">Explore Assignments <span aria-hidden="true">→</span></a>
+    </section>
 
     <section class="wrap how" aria-labelledby="howT">
       <h2 id="howT">How it works</h2>
