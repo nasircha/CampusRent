@@ -130,7 +130,8 @@ router.post('/verify-otp', async (req, res, next) => {
         id: true,
         name: true,
         college: true,
-        email: true
+        email: true,
+        profilePhoto: true
       }
     });
 
@@ -269,7 +270,8 @@ router.post('/login', async (req, res, next) => {
       id: user.id,
       name: user.name,
       college: user.college,
-      email: user.email
+      email: user.email,
+      profilePhoto: user.profilePhoto || ''
     };
 
     await recordActivity(safe, 'login');
