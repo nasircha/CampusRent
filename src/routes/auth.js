@@ -11,7 +11,7 @@ const { requireAuth } = require('../middleware/auth');
 const { createOtp, verifyOtp } = require('../services/otp');
 const { sendOtpEmail } = require('../services/email');
 const { recordActivity } = require('../services/activity');
-const profileUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024, files: 1 }, fileFilter: (_req, file, cb) => cb(/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype) ? null : new Error('Upload a JPEG, PNG, WebP, or GIF image.'), /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) });
+const profileUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024, files: 1 }, fileFilter: (_req, file, cb) => cb(/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype) ? null : new Error('Upload a JPEG, PNG, WebP, or GIF image.'), /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) });
 
 const credentials = z.object({
   email: z.string().email().max(254).transform(v => v.toLowerCase().trim()),
@@ -302,7 +302,7 @@ router.post('/me/photo', requireAuth, profileUpload.single('photo'), async (req,
     const form = new FormData();form.append('file', new Blob([req.file.buffer], { type: req.file.mimetype }), req.file.originalname);form.append('api_key', CLOUDINARY_API_KEY);form.append('timestamp', String(timestamp));form.append('folder', folder);form.append('signature', signature);
     const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(CLOUDINARY_CLOUD_NAME)}/image/upload`, { method: 'POST', body: form });const result = await response.json();
     if (!response.ok || !result.secure_url) return res.status(502).json({ error: 'Photo upload failed. Please try again.' });
-    const user = await prisma.user.update({ where: { id: req.user.id }, data: { profilePhoto: result.secure_url }, select: { id: true, name: true, college: true, email: true, profilePhoto: true } });res.json({ user });
+    const user = await prisma.user.update({ where: { id: req.user.id }, data: { profilePhoto: result.secure_url.replace('/upload/', '/upload/c_fill,g_face,w_160,h_160,f_auto,q_auto/') }, select: { id: true, name: true, college: true, email: true, profilePhoto: true } });res.json({ user });
   } catch (error) { next(error); }
 });
 
