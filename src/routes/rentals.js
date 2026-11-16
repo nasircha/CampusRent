@@ -21,6 +21,9 @@ router.post('/', async (req, res, next) => {
     const date = new Date(`${start}T00:00:00.000Z`); if (Number.isNaN(date.getTime()) || date.toISOString().slice(0,10) !== start) return res.status(400).json({ error: 'Choose a valid pickup date.' });
     const today = new Date(); today.setUTCHours(0,0,0,0); if (date < today) return res.status(400).json({ error: 'Pickup date cannot be in the past.' });
     const result = await prisma.$transaction(async tx => {
+      // Lock this student's request for this item to prevent concurrent duplicates.
+      const lockKey = req.user.id + ':' + itemId;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
       // Serializable isolation prevents concurrent duplicate pending requests.
       const existing = await tx.rental.findFirst({
         where: { itemId, renterId: req.user.id, status: 'pending' },
