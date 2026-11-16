@@ -20,7 +20,7 @@ const credentials = z.object({
 
 const signup = credentials.extend({
   name: z.string().trim().min(2).max(80),
-  college: z.string().trim().max(100).optional().default('')
+  college: z.literal('Integral University Lucknow')
 });
 
 const verifySignup = signup.extend({
