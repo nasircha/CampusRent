@@ -2110,7 +2110,7 @@ async function loadStays(){
 function renderStays(){
   var box=$('#stayListings');if(!box)return;
   var rows=stayData.filter(function(s){return stayFilter==='ALL'||s.type===stayFilter});
-  if(!rows.length){box.innerHTML='<div class="stay-empty">No '+(stayFilter==='ALL'?'accommodation':stayFilter.toLowerCase()+' listings')+' yet. Be the first to list a place.</div>';return}
+  if(!rows.length){var heading=stayFilter==='ALL'?'No PG, hostel or flat listings yet': 'No '+stayFilter.toLowerCase()+' listings yet';box.innerHTML='<div class="stay-empty"><div style="font-size:34px;margin-bottom:10px">⌂</div><strong style="display:block;color:var(--fg);font-size:18px;margin-bottom:8px">'+heading+'</strong><p style="max-width:460px;margin:0 auto 16px;line-height:1.6">Be the first student to share a PG, hostel or flat near Integral University. Once someone posts a place, it will appear here.</p><button class="btn btn-primary" type="button" data-action="create-stay">＋ List a place</button></div>';return}
   box.innerHTML=rows.map(function(s){
     var cover=s.photos&&s.photos[0]?'<img src="'+esc(s.photos[0])+'" alt="'+esc(s.title)+'" loading="lazy">':'<span class="stay-cover-placeholder">⌂</span>';
     var rentUnit=s.priceUnit==='BED'?'per bed / month':'whole place / month';
@@ -2369,6 +2369,7 @@ document.addEventListener('click', async function(e) {
     case 'retry-messages': loadConversations().catch(function(error){toast(error.message)}); break;
     case 'retry-assignments': loadAssignmentPosts().catch(function(error){toast(error.message)}); break;
     case 'retry-stays': loadStays(); break;
+    case 'create-stay': openStayForm(); break;
     case 'delete-stay':
       if(!confirm('Remove your accommodation listing?'))break;
       try{await api('/stays/'+encodeURIComponent(id),{method:'DELETE'});await loadStays();toast('Your listing has been removed.')}catch(error){toast(error.message)}
