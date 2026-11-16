@@ -9,6 +9,7 @@ datasource db {
 }
 
 model User {
+  assignmentPosts AssignmentPost[]
   id           String   @id @default(cuid())
   name         String
   college      String   @default("")
@@ -78,6 +79,24 @@ model Rental {
   @@index([ownerId, status, createdAt])
   @@index([renterId, status, createdAt])
   @@index([itemId, status, start])
+}
+
+
+model AssignmentPost {
+  id          String   @id @default(cuid())
+  kind        String
+  format      String
+  title       String
+  subject     String
+  description String   @db.VarChar(1200)
+  sampleUrl   String   @default("")
+  sampleName  String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([kind, createdAt])
+  @@index([userId, createdAt])
 }
 
 enum OtpChannel {
