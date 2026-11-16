@@ -1555,17 +1555,13 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 
 <dialog id="dlgStay"><form class="dlg" id="stayForm" novalidate>
   <div class="dlg-head"><h2>List your place</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
-  <div class="field"><label for="stayType">Type</label><select id="stayType" required><option value="PG">PG</option><option value="HOSTEL">Hostel</option><option value="FLAT">Flat</option></select></div>
-  <div class="field"><label for="stayTitle">Listing name</label><input id="stayTitle" maxlength="80" placeholder="e.g. Sunrise Boys PG" required></div>
-  <div class="field"><label for="stayAddress">Full address / area</label><input id="stayAddress" maxlength="180" placeholder="Area, road, landmark, city" required></div>
-  <div class="field"><label for="stayDistance">Approx. distance from Integral University (km)</label><input id="stayDistance" type="number" min=".1" max="100" step=".1" placeholder="e.g. 2.5" required><small class="hint">Please enter the approximate distance; students can verify the route on Maps.</small></div>
-  <div class="two"><div class="field"><label for="stayPriceUnit">Rent charged</label><select id="stayPriceUnit"><option value="BED">Per bed / month</option><option value="ROOM">Whole room / flat per month</option></select></div><div class="field"><label for="stayPrice">Monthly rent (₹)</label><input id="stayPrice" type="number" min="500" max="500000" placeholder="3500" required></div></div>
-  <div class="two"><div class="field"><label for="stayTotalRooms">Total rooms</label><input id="stayTotalRooms" type="number" min="1" max="100" value="1" required></div><div class="field"><label for="stayVacantRooms">Vacant rooms</label><input id="stayVacantRooms" type="number" min="0" max="100" value="1" required></div></div>
-  <div class="two" id="stayBedFields"><div class="field"><label for="stayTotalBeds">Total beds</label><input id="stayTotalBeds" type="number" min="0" max="200" value="1"></div><div class="field"><label for="stayVacantBeds">Available beds</label><input id="stayVacantBeds" type="number" min="0" max="200" value="1"></div></div>
-  <div class="field"><label for="stayPhone">Owner contact number</label><input id="stayPhone" type="tel" maxlength="20" placeholder="+91 98765 43210" required></div>
-  <div class="field"><label for="stayDescription">Details (optional)</label><textarea id="stayDescription" maxlength="800" placeholder="Facilities, food, rules, furnished/unfurnished..."></textarea></div>
-  <div class="field"><label for="stayPhotos">Photos (up to 5, optional)</label><input id="stayPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple><div id="stayPreviews" class="photo-previews"></div></div>
-  <p id="stayError" class="err" role="alert"></p><button class="btn btn-primary" id="staySubmit" type="submit">Publish place</button>
+  <div class="field"><label for="stayType">Type</label><select id="stayType"><option value="HOSTEL">Hostel</option><option value="PG">PG</option><option value="FLAT">Flat</option></select></div>
+  <div class="field"><label for="stayTitle">Hostel / PG / Flat name</label><input id="stayTitle" maxlength="80" placeholder="e.g. Sunrise Boys Hostel" required></div>
+  <div class="field"><label for="stayAddress">Location</label><input id="stayAddress" maxlength="180" placeholder="Area, landmark or full address" required></div>
+  <div class="field"><label for="stayOwnerName">Owner name</label><input id="stayOwnerName" maxlength="80" placeholder="Enter owner name" required></div>
+  <div class="field"><label for="stayFacilities">Facilities</label><textarea id="stayFacilities" maxlength="600" placeholder="e.g. Wi-Fi, water cooler, washing machine, food, parking..."></textarea></div>
+  <div class="field"><label for="stayGateTiming">Gate timing</label><select id="stayGateTiming"><option value="">Select gate timing</option><option value="No time restriction">No time restriction</option><option value="Gate closes at 10 PM">Gate closes at 10 PM</option><option value="Gate closes at 11 PM">Gate closes at 11 PM</option><option value="Gate closes at 12 AM">Gate closes at 12 AM</option><option value="Gate closes at 1 AM">Gate closes at 1 AM</option><option value="Other / ask owner">Other / ask owner</option></select></div>
+  <p id="stayError" class="err" role="alert"></p><button class="btn btn-primary" id="staySubmit" type="submit">Submit for approval</button>
 </form></dialog>
 <dialog id="dlgItem" aria-label="Item details"><div class="dlg" id="itemBody"></div></dialog>
 
@@ -2138,35 +2134,20 @@ function renderStays(){
 }
 function openStayForm(){
  if(!me()){openAuth('login','Log in to list your PG, hostel or flat.');return}
- $('#stayForm').reset();stayFiles=[];$('#stayPreviews').innerHTML='';$('#stayError').textContent='';updateStayFormFields();$('#dlgStay').showModal();
+ $('#stayForm').reset();$('#stayError').textContent='';$('#dlgStay').showModal();
 }
-function updateStayFormFields(){
- var type=$('#stayType').value,unit=$('#stayPriceUnit');
- if(type==='FLAT'){unit.value='ROOM';unit.disabled=true}
- else{unit.disabled=false}
- var showBeds=type!=='FLAT'&&unit.value==='BED';$('#stayBedFields').hidden=!showBeds;
- if(!showBeds){$('#stayTotalBeds').value=0;$('#stayVacantBeds').value=0}
- else{if(Number($('#stayTotalBeds').value)<1)$('#stayTotalBeds').value=1;if(Number($('#stayVacantBeds').value)>Number($('#stayTotalBeds').value))$('#stayVacantBeds').value=$('#stayTotalBeds').value}
-}
-$('#stayType').addEventListener('change',updateStayFormFields);
-$('#stayPriceUnit').addEventListener('change',function(){updateStayFormFields()});
-$('#stayPhotos').addEventListener('change',function(){
- var files=Array.from(this.files||[]),box=$('#stayPreviews');box.innerHTML='';stayFiles=[];
- if(files.length>5){this.value='';$('#stayError').textContent='You can upload up to 5 photos.';return}
- for(var file of files){if(!/^image\/(jpeg|png|webp|gif)$/.test(file.type)||file.size>5*1024*1024){this.value='';$('#stayError').textContent='Use JPEG, PNG, WebP or GIF photos up to 5 MB each.';return}}
- stayFiles=files;files.forEach(function(file,i){var tile=document.createElement('div');tile.className='photo-preview-tile';var img=document.createElement('img');img.src=URL.createObjectURL(file);img.alt='Place photo '+(i+1);tile.appendChild(img);var small=document.createElement('small');small.textContent=i===0?'Cover':'Photo '+(i+1);tile.appendChild(small);box.appendChild(tile)});$('#stayError').textContent='';
-});
 $('#stayForm').addEventListener('submit',async function(e){
  e.preventDefault();var err=$('#stayError'),button=$('#staySubmit');
- var type=$('#stayType').value,unit=$('#stayPriceUnit').value,totalRooms=Number($('#stayTotalRooms').value),vacantRooms=Number($('#stayVacantRooms').value),totalBeds=type==='FLAT'?0:Number($('#stayTotalBeds').value),vacantBeds=type==='FLAT'?0:Number($('#stayVacantBeds').value);
- if(!$('#stayTitle').value.trim()||!$('#stayAddress').value.trim())return err.textContent='Enter the listing name and full address.';
- if(vacantRooms>totalRooms||vacantBeds>totalBeds)return err.textContent='Available rooms or beds cannot exceed the total.';
- if(type!=='FLAT'&&unit==='BED'&&totalBeds<1)return err.textContent='Enter the total number of beds.';
- var fd=new FormData();fd.append('type',type);fd.append('title',$('#stayTitle').value.trim());fd.append('address',$('#stayAddress').value.trim());fd.append('distanceKm',$('#stayDistance').value);fd.append('price',$('#stayPrice').value);fd.append('priceUnit',unit);fd.append('totalRooms',String(totalRooms));fd.append('vacantRooms',String(vacantRooms));fd.append('totalBeds',String(totalBeds));fd.append('vacantBeds',String(vacantBeds));fd.append('contactPhone',$('#stayPhone').value.trim());fd.append('description',$('#stayDescription').value.trim());stayFiles.forEach(function(file){fd.append('photos',file)});
- button.disabled=true;button.textContent='Publishing...';
+ var title=$('#stayTitle').value.trim(),address=$('#stayAddress').value.trim(),ownerName=$('#stayOwnerName').value.trim();
+ if(title.length<3)return err.textContent='Enter a place name of at least 3 characters.';
+ if(address.length<3)return err.textContent='Enter the location.';
+ if(ownerName.length<2)return err.textContent='Enter the owner name.';
+ var details={ownerName:ownerName,facilities:$('#stayFacilities').value.trim(),gateTiming:$('#stayGateTiming').value};
+ var fd=new FormData();fd.append('type',$('#stayType').value);fd.append('title',title);fd.append('address',address);fd.append('ownerName',ownerName);fd.append('facilities',details.facilities);fd.append('gateTiming',details.gateTiming);
+ button.disabled=true;button.textContent='Submitting...';
  try{await api('/stays',{method:'POST',body:fd});$('#dlgStay').close();await loadStays();toast('Submitted for admin approval. It will appear after approval.')}
  catch(error){err.textContent=error.message}
- finally{button.disabled=false;button.textContent='Publish place'}
+ finally{button.disabled=false;button.textContent='Submit for approval'}
 });
 
 function showView(space, messages, help, assignments, stays) {
