@@ -1303,7 +1303,6 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <a id="navBrowse" href="#browse">Home</a>
   <a id="navStays" href="#stays">Hostel &amp; Flats</a>
   <a id="navMessages" href="#messages">Messages<span class="nav-alert-badge" id="messagesNavBadge" hidden></span></a>
-  <a id="navSpace" href="#my-space">My space<span class="nav-alert-badge" id="spaceNavBadge" hidden></span></a>
   <a id="navAssignments" href="#assignments">Assignments</a>
   <a id="navHelp" href="#help">Help</a>
 </nav>
@@ -1322,8 +1321,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
           <p class="sub">The ultimate student marketplace for your campus needs. Find what you need, lend what you own, and connect with students around you.</p>
           <div class="cta">
             <button class="btn btn-primary" data-action="scroll-grid"><span aria-hidden="true">⌕</span> Browse Items</button>
-            <button class="btn hero-outline" data-action="open-list"><span aria-hidden="true">＋</span> List an Item</button>
-          </div>
+            </div>
           <div class="hero-stats">
             <div><strong id="rdOpen">0</strong><span>Items listed</span></div>
             <div><strong id="rdOut">0</strong><span>Currently rented</span></div>
@@ -1952,7 +1950,7 @@ function phSvg(cat){return '<svg viewBox="0 0 120 90" fill="none" stroke="curren
 function imgHtml(it){var photos=it&&it.photos&&it.photos.length?it.photos:(it&&it.photo?[it.photo]:[]);if(photos.length)return '<img src="'+esc(photos[0])+'" alt="" loading="lazy">';return '<span class="ph">'+phSvg(it?it.cat:'other')+'</span>'}
 function statusPill(it){if(it.status==='rented')return '<span class="pill">Rented out</span>';if(it.status==='paused')return '<span class="pill">Paused</span>';return '<span class="pill ok">Available</span>'}
 function avatarMarkup(user,cls){var name=String(user&&user.name||'Student'),photo=user&&user.profilePhoto;return '<span class="'+(cls||'avatar')+'">'+(photo?'<img src="'+esc(photo)+'" alt="">':esc(name.trim().charAt(0).toUpperCase()||'S'))+'</span>'}
-function renderHeader(){var u=me(),a=$('#authArea');if(u){a.innerHTML='<button type="button" class="who" data-action="edit-profile" title="Your profile">'+avatarMarkup(u,'avatar')+'<span class="nm">'+esc(u.name)+'</span></button><button class="btn btn-sm btn-primary" data-action="open-list">List an item</button>'}else a.innerHTML='<button class="btn btn-sm" data-action="open-login">Log in</button><button class="btn btn-sm btn-primary" data-action="open-signup">Sign up</button>'}
+function renderHeader(){var u=me(),a=$('#authArea');if(u){a.innerHTML='<button type="button" class="who" data-action="edit-profile" title="Your profile">'+avatarMarkup(u,'avatar')+'<span class="nm">'+esc(u.name)+'</span></button><a class="btn btn-sm btn-primary" href="#my-space">My Space</a>'}else a.innerHTML='<button class="btn btn-sm" data-action="open-login">Log in</button><button class="btn btn-sm btn-primary" data-action="open-signup">Sign up</button>'}
 function visibleItems(){var u=me();var college=function(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,' ')};var myCollege=college(u&&u.college);return state.items.filter(function(i){if(i.status==='paused')return false;if(u&&u.isAdmin)return true;if(!myCollege)return true;return college(i.ownerCollege)===myCollege})}
 function renderReadout(){var v=visibleItems(),out=v.filter(function(i){return i.status==='rented'}).length;$('#rdOpen').textContent=v.length;$('#rdOut').textContent=out}
 function renderKeys(){var v=visibleItems(),html='<button class="key" data-action="key" data-cat="all" aria-pressed="'+(ui.cat==='all')+'">All<span class="n">'+v.length+'</span></button>';CATS.forEach(function(c){var n=v.filter(function(i){return i.cat===c.id}).length;html+='<button class="key" data-action="key" data-cat="'+c.id+'" aria-pressed="'+(ui.cat===c.id)+'">'+esc(c.label)+'<span class="n">'+n+'</span></button>'});$('#keys').innerHTML=html}
@@ -2162,7 +2160,7 @@ function showView(space, messages, help, assignments, stays) {
   $('#viewBrowse').hidden=space||messages||help||assignments||stays; $('#viewSpace').hidden=!space; $('#viewMsgs').hidden=!messages; $('#viewHelp').hidden=!help; $('#viewAssignments').hidden=!assignments; $('#viewStays').hidden=!stays;
   if(previousName!==nextName&&nextView){nextView.classList.remove('view-slide-in-left','view-slide-in-right');void nextView.offsetWidth;nextView.classList.add(slideClass);nextView.addEventListener('animationend',function(){nextView.classList.remove('view-slide-in-left','view-slide-in-right')},{once:true});}
   if(messages)markNavNotificationsSeen('messages'); if(space)markNavNotificationsSeen('space');
-  ['navBrowse','navSpace','navMessages','navHelp','navAssignments','navStays'].forEach(function(id){var nav=$('#'+id);if(nav)nav.removeAttribute('aria-current')});
+  ['navBrowse','navMessages','navHelp','navAssignments','navStays'].forEach(function(id){var nav=$('#'+id);if(nav)nav.removeAttribute('aria-current')});
   if(space){$('#navSpace').setAttribute('aria-current','page');renderSpace();}
   else if(messages){$('#navMessages').setAttribute('aria-current','page');if(me()){if(!conversations.length)$('#conversationList').innerHTML='<div class="chat-empty">Your conversations will appear here.</div>';if(!activeConversationId&&!activeDirectChatId){$('#chatHeader').textContent='Select a conversation';$('#chatMessages').innerHTML='<p class="chat-placeholder">Your messages will appear here when you select a conversation.</p>';$('#chatForm').hidden=true;}loadConversations().catch(function(error){$('#conversationList').innerHTML='<p class="chat-placeholder">Could not load conversations. Please try again.</p>';toast(error.message);});}}
   else if(help){$('#navHelp').setAttribute('aria-current','page');}
