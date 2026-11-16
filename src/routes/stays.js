@@ -25,7 +25,7 @@ const input = z.object({
   totalBeds: z.coerce.number().int().min(0).max(200),
   vacantBeds: z.coerce.number().int().min(0).max(200),
   description: z.string().trim().max(800).optional().default(''),
-  contactPhone: z.string().trim().max(20).optional().default('')
+  contactPhone: z.string().trim().min(7).max(20)
 }).superRefine((v, ctx) => {
   if (v.vacantRooms > v.totalRooms) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Vacant rooms cannot exceed total rooms.', path: ['vacantRooms'] });
   if (v.vacantBeds > v.totalBeds) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Vacant beds cannot exceed total beds.', path: ['vacantBeds'] });
