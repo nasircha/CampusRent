@@ -78,7 +78,11 @@
 .nav-alert-badge{position:absolute;top:-5px;right:-7px;width:9px;height:9px;padding:0;border:2px solid #111;border-radius:50%;background:#ef3340;font-size:0;line-height:0;box-shadow:0 0 0 1px rgba(239,51,64,.18)}
 .nav-alert-badge[hidden]{display:none}
 #chatForm.is-sending button[type="submit"]{opacity:.65;pointer-events:none;cursor:wait}
-.item-rating-summary{display:block;margin-top:5px;color:#f5c518;font-size:12px;font-weight:700}.item-rating-summary span{color:var(--muted);font-weight:400}.item-rating-panel{margin:14px 0;padding:13px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}.item-rating-panel>div:first-child{font-size:15px}.item-rating-panel>div:first-child strong{color:#f5c518}.item-rating-panel>div:first-child span,.item-rating-panel small{color:var(--muted);font-size:12px}.rating-editor{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px}.rating-editor>div{display:flex;gap:3px}.rating-star{border:0;background:transparent;color:#777;font-size:25px;line-height:1;padding:2px;cursor:pointer}.rating-star.selected{color:#f5c518}.rating-login{border:0;padding:0;background:transparent;color:#f5c518;text-decoration:underline;cursor:pointer} .photo-previews{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.photo-preview-tile{min-width:0}.photo-preview-tile img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:7px;border:1px solid var(--line)}.photo-preview-tile small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.item-photo-thumbs{display:flex;gap:8px;overflow-x:auto;padding:3px 1px 8px}.gallery-thumb{flex:0 0 64px;width:64px;height:64px;padding:0;border:2px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface);cursor:pointer}.gallery-thumb.active{border-color:var(--yellow)}.gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block}@media(max-width:420px){.photo-previews{grid-template-columns:repeat(3,minmax(0,1fr))}}\n</style></head><body>
+.item-rating-summary{display:block;margin-top:5px;color:#f5c518;font-size:12px;font-weight:700}.item-rating-summary span{color:var(--muted);font-weight:400}.item-rating-panel{margin:14px 0;padding:13px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}.item-rating-panel>div:first-child{font-size:15px}.item-rating-panel>div:first-child strong{color:#f5c518}.item-rating-panel>div:first-child span,.item-rating-panel small{color:var(--muted);font-size:12px}.rating-editor{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px}.rating-editor>div{display:flex;gap:3px}.rating-star{border:0;background:transparent;color:#777;font-size:25px;line-height:1;padding:2px;cursor:pointer}.rating-star.selected{color:#f5c518}.rating-login{border:0;padding:0;background:transparent;color:#f5c518;text-decoration:underline;cursor:pointer} .photo-previews{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.photo-preview-tile{min-width:0}.photo-preview-tile img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:7px;border:1px solid var(--line)}.photo-preview-tile small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.item-photo-thumbs{display:flex;gap:8px;overflow-x:auto;padding:3px 1px 8px}.gallery-thumb{flex:0 0 64px;width:64px;height:64px;padding:0;border:2px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface);cursor:pointer}.gallery-thumb.active{border-color:var(--yellow)}.gallery-thumb img{width:100%;height:100%;object-fit:cover;display:block}@media(max-width:420px){.photo-previews{grid-template-columns:repeat(3,minmax(0,1fr))}}\n
+/* In-app Help Centre */
+.help-centre{max-width:900px}.help-heading{margin-bottom:24px}.help-kicker{color:var(--yellow);font:600 11px var(--font-mono);letter-spacing:.14em}.help-heading h1{font-size:clamp(2rem,5vw,3rem);margin:10px 0}.help-intro,.help-section p{color:var(--muted)}.help-section{margin:16px 0;padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:6px}.help-section h2{font-size:1.35rem;color:var(--yellow);margin-bottom:16px}.help-steps{list-style:none;padding:0;margin:0;display:grid;gap:14px;counter-reset:help}.help-steps li{counter-increment:help;display:grid;grid-template-columns:34px minmax(0,1fr);column-gap:12px}.help-steps li:before{content:counter(help);grid-row:span 2;width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--lcd-line);color:var(--yellow);border-radius:4px;font-family:var(--font-mono)}.help-steps li strong{font-size:14px}.help-steps li p{grid-column:2;margin-top:3px}.help-note{margin-top:16px;padding:12px;border-left:3px solid var(--yellow);background:var(--lcd-bg)}.help-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.help-grid article{padding:14px;border:1px solid var(--line);border-radius:4px}.help-grid h3{margin-bottom:6px}.help-muted{margin-top:12px}
+@media(max-width:600px){.help-section{padding:16px}.help-grid{grid-template-columns:1fr}}
+</style></head><body>
 <div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
   <div class="loader-card">
     <div class="loader-mark" aria-hidden="true">C</div>
@@ -1143,7 +1147,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <a id="navBrowse" href="#browse">Home</a>
   <a id="navMessages" href="#messages">Messages<span class="nav-alert-badge" id="messagesNavBadge" hidden></span></a>
   <a id="navSpace" href="#my-space">My space<span class="nav-alert-badge" id="spaceNavBadge" hidden></span></a>
-  <a href="/help.html">Help</a>
+  <a id="navHelp" href="#help">Help</a>
 </nav>
     <div class="auth" id="authArea"></div>
   </div>
@@ -1233,13 +1237,25 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <section id="viewSpace" class="space" hidden>
     <div class="wrap" id="spaceBody"></div>
   </section>
+
+  <section id="viewHelp" class="space" hidden>
+    <div class="wrap help-centre">
+      <div class="help-heading"><p class="help-kicker">CAMPUSRENT SUPPORT</p><h1>Help Centre</h1><p class="help-intro">CampusRent is a student-to-student marketplace for borrowing and lending useful campus items. Find something you need for classes or exams, or list an item you own and earn rent when another student borrows it.</p></div>
+      <section class="help-section"><h2>How to create an account</h2><ol class="help-steps"><li><strong>Open Sign up</strong><p>Select Sign up in the top navigation.</p></li><li><strong>Enter your details</strong><p>Provide your full name, email address and a password with at least 8 characters. You can also add your college or university name.</p></li><li><strong>Verify your email</strong><p>Check your inbox or spam folder for the 6-digit OTP, enter it and submit.</p></li><li><strong>Start using CampusRent</strong><p>Once your email is verified, your account is created. Log in with your email and password whenever you return.</p></li></ol><p class="help-note">Keep your password private. Never share an email OTP or password with anyone.</p></section>
+      <section class="help-section"><h2>How to rent an item</h2><ol class="help-steps"><li><strong>Browse available items</strong><p>Explore the home page, use categories or search to find calculators, stationery, drafting tools, lab equipment, books, electronics and more.</p></li><li><strong>Check the listing</strong><p>Review photos, condition, daily rent, refundable deposit (if any), and pickup location.</p></li><li><strong>Send a rental request</strong><p>Choose your rental dates and submit a request. The owner can accept or decline it. A request is not confirmed until accepted.</p></li><li><strong>Coordinate and return</strong><p>Use Messages to agree on handover details. Return the item as agreed and coordinate with the owner to complete the return.</p></li></ol></section>
+      <section class="help-section"><h2>How to list an item and earn</h2><ol class="help-steps"><li><strong>Select List an item</strong><p>Log in and choose List an item.</p></li><li><strong>Add clear details</strong><p>Enter the item name, category, condition, daily rent, deposit (if applicable), pickup spot and description. Add up to five clear photos.</p></li><li><strong>Manage requests</strong><p>Open My space to review incoming rental requests. Accept or decline requests and use Messages to coordinate with the renter.</p></li><li><strong>Mark the item returned</strong><p>After the item is physically returned, mark the rental as returned so the listing can become available again.</p></li></ol></section>
+      <section class="help-section"><h2>What else can I do?</h2><div class="help-grid"><article><h3>My space</h3><p>Manage your listings, incoming requests, outgoing rentals and rental activity.</p></article><article><h3>Messages</h3><p>Chat with other students to discuss item details, pickup, handover and return arrangements.</p></article><article><h3>Ratings</h3><p>Share a rating after a rental has been completed and the item returned.</p></article><article><h3>College discovery</h3><p>CampusRent is designed for students across colleges. Add your college to your profile to help show relevant campus listings.</p></article></div></section>
+      <section class="help-section"><h2>Important things to know</h2><p>CampusRent helps students discover items and manage rental requests. Students should agree directly on handover, payment, deposits and return arrangements. Payments are not collected or held by CampusRent. Inspect an item at handover, agree on its condition and terms, and meet in a safe, suitable campus location.</p><p class="help-muted">CampusRent is currently in a testing phase, so features and the interface may change.</p></section>
+      <button class="btn btn-primary" type="button" data-action="browse-from-chat">Back to Home</button>
+    </div>
+  </section>
 </main>
 
 <footer>
   <div class="wrap">
     <div class="footer-help">
       <strong>Help &amp; Support</strong>
-      <p><a href="/help.html">Help Centre – How to Use CampusRent</a></p>
+      <p><a href="#help">Help Centre – How to Use CampusRent</a></p>
     </div>
     <div class="footer-credit">
       <strong>CampusRent</strong>
@@ -1816,20 +1832,22 @@ function renderAdminActivityWithFilters(q,kind){var panel=$('#adminActivityPanel
 
 function renderSpace(){var u=me();if(!u)return;var isPlatformOwner=String(u.email||'').trim().toLowerCase()==='mdnasirhussain121@gmail.com';var mine=state.items.filter(function(i){return i.ownerId===u.id}),incoming=state.rentals.filter(function(r){return r.ownerId===u.id}),outgoing=state.rentals.filter(function(r){return r.renterId===u.id}),out=incoming.filter(function(r){return r.status==='accepted'}).length,pend=incoming.filter(function(r){return r.status==='pending'}).length;var h='<div class="sec-head"><h1>Hi, '+esc(u.name.split(' ')[0])+'</h1><button class="btn btn-primary" data-action="open-list">List an item</button></div><div class="stats"><div class="readout"><div class="row"><span class="k">Total added items</span><span class="v">'+mine.length+'</span></div></div><div class="readout"><div class="row"><span class="k">Out on rent</span><span class="v">'+out+'</span></div></div></div><div class="tabs" role="tablist">'+tabBtn('listings','My listings',mine.length,false)+tabBtn('requests','Requests to me',incoming.length,pend>0)+tabBtn('rentals','My rentals',outgoing.length,false)+(isPlatformOwner?tabBtn('admin','Admin review',state.items.length,false)+tabBtn('activity','User activity','NEW',false):'')+'</div>';h+=ui.tab==='admin'&&isPlatformOwner?adminListingsHtml(state.items):ui.tab==='activity'&&isPlatformOwner?'<div id="adminActivityPanel" class="empty">Loading user activity...</div>':ui.tab==='listings'?listingsHtml(mine):ui.tab==='requests'?requestsHtml(incoming):rentalsHtml(outgoing);$('#spaceBody').innerHTML=h;if(ui.tab==='activity'&&isPlatformOwner){if(adminActivityData)renderAdminActivity();loadAdminActivity();startAdminActivityLive()}else stopAdminActivityLive()}
 
-function showView(space, messages) {
+function showView(space, messages, help) {
   messages = !!messages;
-  var previousView=document.querySelector('#viewMsgs:not([hidden]),#viewSpace:not([hidden]),#viewBrowse:not([hidden])');
-  var nextView=space?$('#viewSpace'):messages?$('#viewMsgs'):$('#viewBrowse');
+  help = !!help;
+  var previousView=document.querySelector('#viewMsgs:not([hidden]),#viewSpace:not([hidden]),#viewHelp:not([hidden]),#viewBrowse:not([hidden])');
+  var nextView=space?$('#viewSpace'):messages?$('#viewMsgs'):help?$('#viewHelp'):$('#viewBrowse');
   var previousName=previousView&&previousView.id||'viewBrowse';
   var nextName=nextView&&nextView.id||'viewBrowse';
-  var viewOrder={viewBrowse:0,viewMsgs:1,viewSpace:2};
+  var viewOrder={viewBrowse:0,viewMsgs:1,viewSpace:2,viewHelp:3};
   var slideClass=viewOrder[nextName]>=viewOrder[previousName]?'view-slide-in-right':'view-slide-in-left';
 
   if (!messages) stopChatAutoRefresh();
 
-  $('#viewBrowse').hidden = space || messages;
+  $('#viewBrowse').hidden = space || messages || help;
   $('#viewSpace').hidden = !space;
   $('#viewMsgs').hidden = !messages;
+  $('#viewHelp').hidden = !help;
   if(previousName!==nextName&&nextView){
     nextView.classList.remove('view-slide-in-left','view-slide-in-right');
     void nextView.offsetWidth;
@@ -1840,15 +1858,12 @@ function showView(space, messages) {
   if(messages)markNavNotificationsSeen('messages');
   if(space)markNavNotificationsSeen('space');
 
+  ['navBrowse','navSpace','navMessages','navHelp'].forEach(function(id){var nav=$('#'+id);if(nav)nav.removeAttribute('aria-current')});
   if (space) {
     $('#navSpace').setAttribute('aria-current', 'page');
-    $('#navBrowse').removeAttribute('aria-current');
-    $('#navMessages').removeAttribute('aria-current');
     renderSpace();
   } else if (messages) {
     $('#navMessages').setAttribute('aria-current', 'page');
-    $('#navBrowse').removeAttribute('aria-current');
-    $('#navSpace').removeAttribute('aria-current');
     if (me()) {
       if (!conversations.length) $('#conversationList').innerHTML = '<p class="chat-placeholder">Loading conversations...</p>';
       if (!activeConversationId && !activeDirectChatId) {
@@ -1861,10 +1876,10 @@ function showView(space, messages) {
         toast(error.message);
       });
     }
+  } else if (help) {
+    $('#navHelp').setAttribute('aria-current', 'page');
   } else {
     $('#navBrowse').setAttribute('aria-current', 'page');
-    $('#navSpace').removeAttribute('aria-current');
-    $('#navMessages').removeAttribute('aria-current');
     renderBrowse();
   }
 
@@ -1896,6 +1911,7 @@ function goToView(view){
 function route() {
   var space = location.hash === '#my-space';
   var messages = location.hash === '#messages';
+  var help = location.hash === '#help';
 
   if (space && !me()) {
     ui.pending = space ? 'space' : 'messages';
@@ -1904,7 +1920,7 @@ function route() {
     return;
   }
 
-  showView(space, messages);
+  showView(space, messages, help);
 }
 
 function openAuth(mode,hint){
@@ -2342,7 +2358,7 @@ document.addEventListener('click',function(event){
   var link=event.target.closest('a[href^="#"]');
   if(!link)return;
   var hash=link.getAttribute('href');
-  if(hash==='#browse'||hash==='#messages'||hash==='#my-space'){
+  if(hash==='#browse'||hash==='#messages'||hash==='#my-space'||hash==='#help'){
     event.preventDefault();
     goToView(hash);
   }
