@@ -8,7 +8,7 @@ router.get('/', async (req, res, next) => {
     let user = null;
     const header = req.headers.authorization || '';
     if (header.startsWith('Bearer ')) {
-      try { const p = jwt.verify(header.slice(7), process.env.JWT_SECRET); user = await prisma.user.findUnique({ where: { id: p.sub }, select: { id: true, name: true, college: true, email: true } }); if (user) user = { ...user, isAdmin: isAdminEmail(user.email) }; } catch (_) { user = null; }
+      try { const p = jwt.verify(header.slice(7), process.env.JWT_SECRET); user = await prisma.user.findUnique({ where: { id: p.sub }, select: { id: true, name: true, college: true, email: true, profilePhoto: true } }); if (user) user = { ...user, isAdmin: isAdminEmail(user.email) }; } catch (_) { user = null; }
     }
     const itemWhere = user && user.isAdmin ? { status: { not: 'deleted' } } : user ? { OR: [{ status: { in: ['available','rented'] } }, { ownerId: user.id, status: 'paused' }] } : { status: { in: ['available','rented'] } };
     const items = await prisma.item.findMany({ where: itemWhere, include: { owner: { select: { id: true, name: true, college: true } } }, orderBy: { createdAt: 'desc' } });
