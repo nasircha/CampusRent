@@ -20,13 +20,26 @@ router.post('/', async (req, res, next) => {
     const { itemId, days, start, note } = parsed.data;
     const date = new Date(`${start}T00:00:00.000Z`); if (Number.isNaN(date.getTime()) || date.toISOString().slice(0,10) !== start) return res.status(400).json({ error: 'Choose a valid pickup date.' });
     const today = new Date(); today.setUTCHours(0,0,0,0); if (date < today) return res.status(400).json({ error: 'Pickup date cannot be in the past.' });
-    const rental = await prisma.$transaction(async tx => {
+    const result = await prisma.$transaction(async tx => {
+      // Serialize requests from the same student for the same listing.
+      // This prevents rapid double-clicks and concurrent browser retries from creating duplicates.
+      const lockKey = req.user.id + ':' + itemId;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+
+      const existing = await tx.rental.findFirst({
+        where: { itemId, renterId: req.user.id, status: 'pending' },
+        include: { renter: { select: { name: true, email: true } }, owner: { select: { name: true, email: true } } },
+        orderBy: { createdAt: 'desc' }
+      });
+      if (existing) return { rental: existing, duplicate: true };
+
       const item = await tx.item.findUnique({ where: { id: itemId } });
       if (!item || item.status !== 'available') throw Object.assign(new Error('This item is no longer available.'), { status: 409 });
       if (item.ownerId === req.user.id) throw Object.assign(new Error('You cannot request your own listing.'), { status: 400 });
-      return tx.rental.create({ data: { itemId, renterId: req.user.id, ownerId: item.ownerId, itemTitle: item.title, cat: item.cat, photo: item.photo, price: item.price, days, rent: days * item.price, deposit: item.deposit, start: date, note }, include: { renter: { select: { name: true, email: true } }, owner: { select: { name: true, email: true } } } });
+      const rental = await tx.rental.create({ data: { itemId, renterId: req.user.id, ownerId: item.ownerId, itemTitle: item.title, cat: item.cat, photo: item.photo, price: item.price, days, rent: days * item.price, deposit: item.deposit, start: date, note }, include: { renter: { select: { name: true, email: true } }, owner: { select: { name: true, email: true } } } });
+      return { rental, duplicate: false };
     }, { isolationLevel: 'Serializable' });
-    res.status(201).json({ rental: formatRental(rental) });
+    res.status(result.duplicate ? 200 : 201).json({ rental: formatRental(result.rental), alreadyRequested: result.duplicate });
   } catch (e) { if (e.code === 'P2034') return res.status(409).json({ error: 'The item availability changed. Refresh and try again.' }); next(e); }
 });
 router.patch('/:id/:action', async (req, res, next) => {
