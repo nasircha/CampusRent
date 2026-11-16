@@ -38,6 +38,22 @@ async function createOtp(channel, destination) {
   const code = generateOtp();
   const codeHash = hashOtp(channel, destination, code);
 
+  // Prevent repeated OTP emails for the same address within 60 seconds.
+  const recent = await prisma.otpChallenge.findFirst({
+    where: {
+      channel,
+      destination,
+      createdAt: { gt: new Date(Date.now() - 60 * 1000) }
+    },
+    orderBy: { createdAt: 'desc' },
+    select: { id: true }
+  });
+  if (recent) {
+    const error = new Error('Please wait 60 seconds before requesting another OTP.');
+    error.status = 429;
+    throw error;
+  }
+
   // Previous unused OTPs ko invalidate karo.
   await prisma.otpChallenge.updateMany({
     where: {
