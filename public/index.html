@@ -2425,12 +2425,21 @@ if(!navigator.onLine)showNetworkOffline();
 
 (async function init(){
   var loader = $('#appLoader');
+  var startupTimer;
   try {
-    await refresh();
+    await Promise.race([
+      refresh(),
+      new Promise(function(_, reject) {
+        startupTimer = window.setTimeout(function() {
+          reject(new Error('CampusRent is taking too long to respond. Please try again.'));
+        }, 15000);
+      })
+    ]);
   } catch (e) {
     renderHeader();
-    toast('Could not connect to CampusRent server. Start the backend and refresh.');
+    toast(e && e.message ? e.message : 'Could not connect to CampusRent server. Please refresh.');
   } finally {
+    if (startupTimer) window.clearTimeout(startupTimer);
     if (loader) {
       loader.classList.add('is-hidden');
       window.setTimeout(function(){ loader.remove(); }, 320);
