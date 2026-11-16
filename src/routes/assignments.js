@@ -17,7 +17,7 @@ const upload = multer({
 router.get('/', async (_req, res, next) => {
   try {
     const posts = await prisma.assignmentPost.findMany({
-      where: { kind: { in: ['request', 'offer'] } },
+      where: { kind: 'offer' },
       include: { user: { select: { id: true, name: true, college: true } } },
       orderBy: { createdAt: 'desc' },
       take: 100
@@ -29,14 +29,13 @@ router.get('/', async (_req, res, next) => {
 router.post('/', requireAuth, upload.single('sample'), async (req, res, next) => {
   try {
     const parsed = z.object({
-      kind: z.enum(['request', 'offer']),
       format: z.enum(['handwritten', 'typed', 'both']),
       title: z.string().trim().min(4).max(90),
       subject: z.string().trim().min(2).max(60),
       description: z.string().trim().min(10).max(1200)
     }).safeParse(req.body || {});
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
-    if (parsed.data.kind === 'offer' && !req.file) {
+    if (!req.file) {
       return res.status(400).json({ error: 'Writers offering help must upload a sample photo or PDF.' });
     }
     let sampleUrl = '', sampleName = '';
@@ -45,7 +44,7 @@ router.post('/', requireAuth, upload.single('sample'), async (req, res, next) =>
       sampleName = req.file.originalname.slice(0, 120);
     }
     const post = await prisma.assignmentPost.create({
-      data: { ...parsed.data, sampleUrl, sampleName, userId: req.user.id },
+      data: { ...parsed.data, kind: 'offer', sampleUrl, sampleName, userId: req.user.id },
       include: { user: { select: { id: true, name: true, college: true } } }
     });
     res.status(201).json({ post: formatPost(post) });
