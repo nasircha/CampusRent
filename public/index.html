@@ -1346,7 +1346,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 <section id="viewAssignments" class="space" hidden><div class="wrap assignment-centre">
         <div class="assignment-heading"><p class="help-kicker">STUDENT COMMUNITY</p><h1>Assignments</h1><p class="help-intro">Writers can choose what they write and share a sample. Students can view the sample and contact them through CampusRent Messages to discuss the details.</p><button class="btn btn-primary" id="assignmentCreateBtn" type="button">Create a post</button></div>
         
-        <div id="assignmentPosts" class="assignment-grid" aria-live="polite"><p class="chat-placeholder">Loading assignment posts...</p></div><p class="help-muted">CampusRent only connects students. Discuss details directly through Messages. Payments and other arrangements remain between students.</p>
+        <div id="assignmentPosts" class="assignment-grid" aria-live="polite"><div class="assignment-empty">No assignment posts yet.</div></div><p class="help-muted">CampusRent only connects students. Discuss details directly through Messages. Payments and other arrangements remain between students.</p>
       </div></section>
       <dialog id="dlgAssignment"><form class="dlg" id="assignmentForm"><div class="dlg-head"><h2>Create an assignment post</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
         
@@ -1996,7 +1996,7 @@ function showView(space, messages, help, assignments) {
   if(messages)markNavNotificationsSeen('messages'); if(space)markNavNotificationsSeen('space');
   ['navBrowse','navSpace','navMessages','navHelp','navAssignments'].forEach(function(id){var nav=$('#'+id);if(nav)nav.removeAttribute('aria-current')});
   if(space){$('#navSpace').setAttribute('aria-current','page');renderSpace();}
-  else if(messages){$('#navMessages').setAttribute('aria-current','page');if(me()){if(!conversations.length)$('#conversationList').innerHTML='<p class="chat-placeholder">Loading conversations...</p>';if(!activeConversationId&&!activeDirectChatId){$('#chatHeader').textContent='Select a conversation';$('#chatMessages').innerHTML='<p class="chat-placeholder">Your messages will appear here when you select a conversation.</p>';$('#chatForm').hidden=true;}loadConversations().catch(function(error){$('#conversationList').innerHTML='<p class="chat-placeholder">Could not load conversations. Please try again.</p>';toast(error.message);});}}
+  else if(messages){$('#navMessages').setAttribute('aria-current','page');if(me()){if(!conversations.length)$('#conversationList').innerHTML='<div class="chat-empty">Your conversations will appear here.</div>';if(!activeConversationId&&!activeDirectChatId){$('#chatHeader').textContent='Select a conversation';$('#chatMessages').innerHTML='<p class="chat-placeholder">Your messages will appear here when you select a conversation.</p>';$('#chatForm').hidden=true;}loadConversations().catch(function(error){$('#conversationList').innerHTML='<p class="chat-placeholder">Could not load conversations. Please try again.</p>';toast(error.message);});}}
   else if(help){$('#navHelp').setAttribute('aria-current','page');}
   else if(assignments){$('#navAssignments').setAttribute('aria-current','page');loadAssignmentPosts();}
   else{$('#navBrowse').setAttribute('aria-current','page');renderBrowse();}
