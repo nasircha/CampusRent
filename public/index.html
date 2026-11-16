@@ -288,6 +288,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:var(--yellow);color:var(--ink);font-weight:700;padding:11px 16px;border-radius:4px;max-width:calc(100% - 32px);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60}
 .toast.on{opacity:1;transform:translate(-50%,0)}
+.welcome-dialog{max-width:520px}.welcome-dialog .hint{font-size:14px;line-height:1.65}.welcome-points{display:grid;gap:10px;margin:16px 0}.welcome-points p{padding:11px 12px;border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--muted);font-size:13px}.welcome-points strong{color:var(--yellow)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 
 
@@ -1142,6 +1143,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <a id="navBrowse" href="#browse">Home</a>
   <a id="navMessages" href="#messages">Messages<span class="nav-alert-badge" id="messagesNavBadge" hidden></span></a>
   <a id="navSpace" href="#my-space">My space<span class="nav-alert-badge" id="spaceNavBadge" hidden></span></a>
+  <a href="/help.html">Help</a>
 </nav>
     <div class="auth" id="authArea"></div>
   </div>
@@ -1235,6 +1237,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 
 <footer>
   <div class="wrap">
+  <p><a href="/help.html">Help &amp; How to Use CampusRent</a></p>
   <p>Developed by Nasir Hussain</p>
   <p style="color: #b00; font-size: 0.9em;">⚠️ Testing phase — features may change.</p>
   </div> 
@@ -1288,6 +1291,19 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
     <button class="btn btn-primary" id="authSubmit" type="submit">Log in</button>
     <p class="switch"><span id="authSwitchText">New here?</span> <button type="button" class="linkbtn" id="authSwitch" data-action="switch-auth">Create an account</button></p>
   </form>
+</dialog>
+
+<dialog id="dlgWelcome" aria-labelledby="welcomeTitle">
+  <div class="dlg welcome-dialog">
+    <div class="dlg-head"><h2 id="welcomeTitle">Welcome to CampusRent!</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
+    <p class="hint">CampusRent is a student-to-student rental marketplace. Find useful items for your studies, or list items you own and earn rent when other students borrow them.</p>
+    <div class="welcome-points">
+      <p><strong>Need something?</strong> Browse available items, open a listing, and send a rental request.</p>
+      <p><strong>Have something to share?</strong> List your item, set a daily rent and pickup details, then respond to requests.</p>
+      <p><strong>Stay connected.</strong> Use Messages to coordinate pickup and return details with the other student.</p>
+    </div>
+    <div class="logout-actions"><a class="btn" href="/help.html">How to use CampusRent</a><button type="button" class="btn btn-primary" data-action="close">Got it</button></div>
+  </div>
 </dialog>
 
 <dialog id="dlgList" aria-labelledby="listTitle">
@@ -1913,7 +1929,7 @@ $('#forgotPasswordBtn').addEventListener('click',function(e){
   $('#authSubmit').textContent='Send OTP';
   $('#authErr').textContent='';
 });
-async function afterAuth(){await refresh();var p=ui.pending;ui.pending=null;$('#authForm').reset();$('#dlgAuth').close();toast('Welcome, '+me().name.split(' ')[0]+'.');if(p==='space'){if(location.hash==='#my-space')route();else goToView('my-space')}else if(p==='list')openList();else if(p&&p.item)openItem(p.item);else if(location.hash==='#my-space')route()}
+async function afterAuth(isNewSignup){await refresh();var p=ui.pending;ui.pending=null;$('#authForm').reset();$('#dlgAuth').close();toast('Welcome, '+me().name.split(' ')[0]+'.');if(p==='space'){if(location.hash==='#my-space')route();else goToView('my-space')}else if(p==='list')openList();else if(p&&p.item)openItem(p.item);else if(location.hash==='#my-space')route();if(isNewSignup){if(!$('#dlgWelcome').open)$('#dlgWelcome').showModal()}}
 $('#profileForm').addEventListener('submit',async function(e){
   e.preventDefault();
   var name=$('#profileName').value.trim();
@@ -2014,7 +2030,7 @@ $('#authForm').addEventListener('submit',async function(e){
 
     token=data.token;
     localStorage.setItem(TOKEN_KEY,token);
-    await afterAuth();
+    await afterAuth(su);
   }catch(ex){
     err(ex.message);
   }
