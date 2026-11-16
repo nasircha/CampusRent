@@ -41,8 +41,8 @@ router.get('/requests', async (req, res, next) => {
     const rows = await prisma.directMessageRequest.findMany({
       where: { OR: [{ receiverId: req.user.id }, { senderId: req.user.id }] },
       include: {
-        sender: { select: { id: true, name: true, college: true } },
-        receiver: { select: { id: true, name: true, college: true } }
+        sender: { select: { id: true, name: true, college: true, profilePhoto: true } },
+        receiver: { select: { id: true, name: true, college: true, profilePhoto: true } }
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -104,8 +104,8 @@ router.get('/direct', async (req, res, next) => {
     const chats = await prisma.directChat.findMany({
       where: { OR: [{ starterId: req.user.id }, { receiverId: req.user.id }] },
       include: {
-        starter: { select: { id: true, name: true, college: true } },
-        receiver: { select: { id: true, name: true, college: true } },
+        starter: { select: { id: true, name: true, college: true, profilePhoto: true } },
+        receiver: { select: { id: true, name: true, college: true, profilePhoto: true } },
         messages: { orderBy: { createdAt: 'desc' }, take: 1 }
       },
       orderBy: { updatedAt: 'desc' }
@@ -132,12 +132,12 @@ router.get('/direct/:id/messages', async (req, res, next) => {
     });
     const messages = await prisma.directChatMessage.findMany({
       where: { chatId: chat.id },
-      include: { sender: { select: { id: true, name: true } } },
+      include: { sender: { select: { id: true, name: true, profilePhoto: true } } },
       orderBy: { createdAt: 'asc' }
     });
     const otherId = chat.starterId === req.user.id ? chat.receiverId : chat.starterId;
     const other = await prisma.user.findUnique({
-      where: { id: otherId }, select: { id: true, name: true, college: true }
+      where: { id: otherId }, select: { id: true, name: true, college: true, profilePhoto: true }
     });
     res.json({ chat, other, messages });
   } catch (error) { next(error); }
@@ -153,7 +153,7 @@ router.post('/direct/:id/messages', async (req, res, next) => {
     const message = await prisma.$transaction(async tx => {
       const created = await tx.directChatMessage.create({
         data: { chatId: chat.id, senderId: req.user.id, body: parsed.data.body },
-        include: { sender: { select: { id: true, name: true } } }
+        include: { sender: { select: { id: true, name: true, profilePhoto: true } } }
       });
       await tx.directChat.update({ where: { id: chat.id }, data: { updatedAt: new Date() } });
       return created;
@@ -180,15 +180,15 @@ router.get('/', async (req, res, next) => {
             title: true,
             photo: true,
             ownerId: true,
-            owner: { select: { id: true, name: true } }
+            owner: { select: { id: true, name: true, profilePhoto: true } }
           }
         },
-        renter: { select: { id: true, name: true } },
+        renter: { select: { id: true, name: true, profilePhoto: true } },
         messages: {
           orderBy: { createdAt: 'desc' },
           take: 1,
           include: {
-            sender: { select: { id: true, name: true } }
+            sender: { select: { id: true, name: true, profilePhoto: true } }
           }
         }
       },
@@ -269,7 +269,7 @@ router.post('/', async (req, res, next) => {
             title: true,
             photo: true,
             ownerId: true,
-            owner: { select: { id: true, name: true } }
+            owner: { select: { id: true, name: true, profilePhoto: true } }
           }
         }
       }
@@ -293,10 +293,10 @@ router.get('/:id/messages', async (req, res, next) => {
             id: true,
             title: true,
             ownerId: true,
-            owner: { select: { id: true, name: true } }
+            owner: { select: { id: true, name: true, profilePhoto: true } }
           }
         },
-        renter: { select: { id: true, name: true } }
+        renter: { select: { id: true, name: true, profilePhoto: true } }
       }
     });
 
@@ -332,7 +332,7 @@ router.get('/:id/messages', async (req, res, next) => {
     const messages = await prisma.message.findMany({
       where: { conversationId: conversation.id },
       include: {
-        sender: { select: { id: true, name: true } }
+        sender: { select: { id: true, name: true, profilePhoto: true } }
       },
       orderBy: { createdAt: 'asc' }
     });
@@ -386,7 +386,7 @@ router.post('/:id/messages', async (req, res, next) => {
           body: parsed.data.body
         },
         include: {
-          sender: { select: { id: true, name: true } }
+          sender: { select: { id: true, name: true, profilePhoto: true } }
         }
       });
 
