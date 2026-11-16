@@ -1847,7 +1847,27 @@ function renderSpace(){var u=me();if(!u)return;var isPlatformOwner=String(u.emai
 var assignmentPosts=[];
 
 async function loadAssignmentPosts(){var box=$("#assignmentPosts");if(!box)return;box.innerHTML="<p class=\"chat-placeholder\">Loading assignment posts...</p>";try{var data=await api("/assignments");assignmentPosts=data.posts||[];renderAssignmentPosts()}catch(error){box.innerHTML="<div class=\"assignment-empty\">"+esc(error.message)+"</div>"}}
-function renderAssignmentPosts(){var box=$("#assignmentPosts");if(!box)return;var list=assignmentPosts.filter(function(p){return p.kind==="offer"});if(!list.length){box.innerHTML="<div class=\\"assignment-empty\\">No writers have posted yet.</div>";return;}box.innerHTML=list.map(function(p){var own=me()&&me().id===p.userId;var sample=p.sampleUrl?( /\\.(jpe?g|png|webp)(?:$|\\?)/i.test(p.sampleUrl)?("<a class=\\"assignment-sample\\" href=\\""+esc(p.sampleUrl)+"\\" target=\\"_blank\\" rel=\\"noopener\\"><img class=\\"assignment-sample-image\\" src=\\""+esc(p.sampleUrl)+"\\" alt=\\"Writing sample by "+esc(p.userName)+"\\"></a>"):"<a class=\\"assignment-sample\\" href=\\""+esc(p.sampleUrl)+"\\" target=\\"_blank\\" rel=\\"noopener\\">View PDF writing sample</a>"):"";return "<article class=\\"assignment-card\\"><span class=\\"assignment-tag\\">"+esc(p.title)+"</span>"+sample+"<div class=\\"assignment-byline\\">Posted by <strong>"+esc(p.userName)+"</strong>"+(p.college?" · "+esc(p.college):"")+"</div><div class=\\"assignment-actions\\">"+(own?"<button class=\\"btn\\" type=\\"button\\" data-assignment-delete=\\""+esc(p.id)+"\\">Delete my post</button>":"<button class=\\"btn btn-primary\\" type=\\"button\\" data-assignment-contact=\\""+esc(p.userId)+"\\">Contact through Messages</button>")+"</div></article>"}).join("")}
+function renderAssignmentPosts(){
+  var box=$("#assignmentPosts");
+  if(!box)return;
+  var list=assignmentPosts.filter(function(p){return p.kind==="offer"});
+  if(!list.length){
+    box.innerHTML='<div class="assignment-empty">No writers have posted yet.</div>';
+    return;
+  }
+  box.innerHTML=list.map(function(p){
+    var own=me()&&me().id===p.userId;
+    var sample="";
+    if(p.sampleUrl){
+      if(/\.(jpe?g|png|webp)(?:$|\?)/i.test(p.sampleUrl)){
+        sample='<a class="assignment-sample" href="'+esc(p.sampleUrl)+'" target="_blank" rel="noopener"><img class="assignment-sample-image" src="'+esc(p.sampleUrl)+'" alt="Writing sample by '+esc(p.userName)+'"></a>';
+      }else{
+        sample='<a class="assignment-sample" href="'+esc(p.sampleUrl)+'" target="_blank" rel="noopener">View PDF writing sample</a>';
+      }
+    }
+    return '<article class="assignment-card"><span class="assignment-tag">'+esc(p.title)+'</span>'+sample+'<div class="assignment-byline">Posted by <strong>'+esc(p.userName)+'</strong>'+(p.college?' · '+esc(p.college):'')+'</div><div class="assignment-actions">'+(own?'<button class="btn" type="button" data-assignment-delete="'+esc(p.id)+'">Delete my post</button>':'<button class="btn btn-primary" type="button" data-assignment-contact="'+esc(p.userId)+'">Contact through Messages</button>')+'</div></article>';
+  }).join("");
+}
 $("#assignmentCreateBtn").addEventListener("click",function(){if(!me()){ui.pending=null;openAuth("login","Log in to create an assignment post.");return;}$("#assignmentForm").reset();$("#assignmentError").textContent="";$("#assignmentPosterName").value=me().name||"";$("#assignmentSample").required=true;$("#dlgAssignment").showModal()});
 
 
