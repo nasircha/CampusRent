@@ -168,6 +168,10 @@
 /* Messages contrast and profile photo controls */
 .inbox-tab.active{background:#242630!important;border-color:var(--yellow)!important;color:#fff!important}.inbox-tab.active b{color:var(--yellow)!important}
 .profile-photo-field{display:flex;align-items:center;gap:15px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}.profile-photo-preview{display:grid;place-items:center;flex:0 0 64px;width:64px;min-width:64px;max-width:64px;height:64px;min-height:64px;max-height:64px;aspect-ratio:1/1;border-radius:4px;overflow:hidden;background:#343643;color:#fff;font-size:24px;font-weight:800}.profile-photo-preview img{display:block;width:64px;height:64px;max-width:64px;max-height:64px;object-fit:cover;object-position:center}.profile-photo-controls{display:grid;gap:7px;min-width:0}.profile-photo-controls label{font-weight:700;font-size:13px}.profile-photo-controls input{max-width:100%;font-size:12px}.profile-photo-controls small{color:var(--muted);font-size:11px}.who .avatar img{display:block;width:30px;height:30px;max-width:30px;max-height:30px;object-fit:cover;object-position:center;border-radius:4px}.conversation-avatar img{display:block;width:43px;height:43px;max-width:43px;max-height:43px;object-fit:cover;object-position:center;border-radius:50%}.conversation-avatar{overflow:hidden}
+
+/* Hostel, PG and flat discovery */
+.stay-centre{max-width:1200px}.stay-heading{margin-bottom:22px}.stay-heading h1{font-size:clamp(2rem,5vw,3rem);margin:8px 0}.stay-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:20px}.stay-filters{display:flex;gap:8px;flex-wrap:wrap}.stay-filter{padding:9px 16px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);font-weight:700;cursor:pointer}.stay-filter.active{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}.stay-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}.stay-card{overflow:hidden;border:1px solid #303137;border-radius:14px;background:#17181c}.stay-cover{height:190px;background:#24252d;display:grid;place-items:center;overflow:hidden}.stay-cover img{width:100%;height:100%;object-fit:cover}.stay-cover-placeholder{color:#d5ad58;font-size:42px}.stay-card-body{padding:15px}.stay-card h2{font-size:18px;margin:8px 0}.stay-type{color:#d9b65f;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.stay-meta{color:#a7a8b1;font-size:13px;margin-top:6px;line-height:1.5}.stay-price{font-size:20px;font-weight:850;color:#ffe082;margin-top:12px}.stay-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.stay-actions .btn{flex:1}.stay-empty{grid-column:1/-1;text-align:center;padding:35px 15px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}.stay-footnote{margin-top:20px;color:var(--muted);font-size:12px}.stay-detail-photo{width:100%;max-height:300px;object-fit:cover;border-radius:9px}.stay-detail-title{font-size:22px}.stay-owner{padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}#dlgStay{width:min(620px,calc(100% - 24px));max-height:92dvh}#dlgStay .dlg{padding:20px}@media(max-width:600px){.stay-grid{grid-template-columns:1fr}.stay-cover{height:205px}.stay-toolbar{align-items:stretch}.stay-toolbar>#stayCreateBtn{width:100%}.stay-filters{overflow-x:auto;flex-wrap:nowrap}.stay-filter{white-space:nowrap}}
+
 </style></head><body>
 <div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
   <div class="loader-card">
@@ -1297,6 +1301,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
     </a>
     <nav class="nav" aria-label="Main">
   <a id="navBrowse" href="#browse">Home</a>
+  <a id="navStays" href="#stays">Hostel &amp; Flats</a>
   <a id="navMessages" href="#messages">Messages<span class="nav-alert-badge" id="messagesNavBadge" hidden></span></a>
   <a id="navSpace" href="#my-space">My space<span class="nav-alert-badge" id="spaceNavBadge" hidden></span></a>
   <a id="navAssignments" href="#assignments">Assignments</a>
@@ -1364,6 +1369,17 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
       <a class="btn btn-primary" href="#assignments">Explore Assignments <span aria-hidden="true">→</span></a>
     </section>
 
+  <section id="viewStays" class="space" hidden>
+    <div class="wrap stay-centre">
+      <div class="stay-heading"><p class="help-kicker">STUDENT ACCOMMODATION</p><h1>Find Your Stay</h1><p class="help-intro">PG, hostels and flats near your college. Compare rent, vacancies and location before contacting the owner.</p>
+        <div class="stay-toolbar"><div class="stay-filters" role="group" aria-label="Accommodation type">
+          <button class="stay-filter active" data-stay-filter="ALL" type="button">All</button><button class="stay-filter" data-stay-filter="PG" type="button">PG</button><button class="stay-filter" data-stay-filter="HOSTEL" type="button">Hostel</button><button class="stay-filter" data-stay-filter="FLAT" type="button">Flat</button>
+        </div><button class="btn btn-primary" id="stayCreateBtn" type="button">＋ List a place</button></div>
+      </div>
+      <div id="stayListings" class="stay-grid" aria-live="polite"><div class="stay-empty">Loading accommodation...</div></div>
+      <p class="stay-footnote">Distance is provided by the listing owner and should be checked before visiting. Confirm rent, availability and terms directly with the owner.</p>
+    </div>
+  </section>
     <section class="wrap how" aria-labelledby="howT">
       <h2 id="howT">How it works</h2>
       <ol>
@@ -1537,6 +1553,20 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   </form>
 </dialog>
 
+<dialog id="dlgStay"><form class="dlg" id="stayForm" novalidate>
+  <div class="dlg-head"><h2>List your place</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
+  <div class="field"><label for="stayType">Type</label><select id="stayType" required><option value="PG">PG</option><option value="HOSTEL">Hostel</option><option value="FLAT">Flat</option></select></div>
+  <div class="field"><label for="stayTitle">Listing name</label><input id="stayTitle" maxlength="80" placeholder="e.g. Sunrise Boys PG" required></div>
+  <div class="field"><label for="stayAddress">Full address / area</label><input id="stayAddress" maxlength="180" placeholder="Area, road, landmark, city" required></div>
+  <div class="field"><label for="stayDistance">Approx. distance from Integral University (km)</label><input id="stayDistance" type="number" min=".1" max="100" step=".1" placeholder="e.g. 2.5" required><small class="hint">Please enter the approximate distance; students can verify the route on Maps.</small></div>
+  <div class="two"><div class="field"><label for="stayPriceUnit">Rent charged</label><select id="stayPriceUnit"><option value="BED">Per bed / month</option><option value="ROOM">Whole room / flat per month</option></select></div><div class="field"><label for="stayPrice">Monthly rent (₹)</label><input id="stayPrice" type="number" min="500" max="500000" placeholder="3500" required></div></div>
+  <div class="two"><div class="field"><label for="stayTotalRooms">Total rooms</label><input id="stayTotalRooms" type="number" min="1" max="100" value="1" required></div><div class="field"><label for="stayVacantRooms">Vacant rooms</label><input id="stayVacantRooms" type="number" min="0" max="100" value="1" required></div></div>
+  <div class="two" id="stayBedFields"><div class="field"><label for="stayTotalBeds">Total beds</label><input id="stayTotalBeds" type="number" min="0" max="200" value="1"></div><div class="field"><label for="stayVacantBeds">Available beds</label><input id="stayVacantBeds" type="number" min="0" max="200" value="1"></div></div>
+  <div class="field"><label for="stayPhone">Owner contact number</label><input id="stayPhone" type="tel" maxlength="20" placeholder="+91 98765 43210"></div>
+  <div class="field"><label for="stayDescription">Details (optional)</label><textarea id="stayDescription" maxlength="800" placeholder="Facilities, food, rules, furnished/unfurnished..."></textarea></div>
+  <div class="field"><label for="stayPhotos">Photos (up to 5, optional)</label><input id="stayPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple><div id="stayPreviews" class="photo-previews"></div></div>
+  <p id="stayError" class="err" role="alert"></p><button class="btn btn-primary" id="staySubmit" type="submit">Publish place</button>
+</form></dialog>
 <dialog id="dlgItem" aria-label="Item details"><div class="dlg" id="itemBody"></div></dialog>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -2068,22 +2098,73 @@ $("#assignmentCreateBtn").addEventListener("click",function(){if(!me()){ui.pendi
 document.addEventListener("click",async function(event){var contact=event.target.closest("[data-assignment-contact]");if(contact){var userId=contact.getAttribute("data-assignment-contact");try{if(!me()){openAuth("login","Log in to chat with this student.");return;}await loadConversations();var chat=directChats.find(function(c){return c.starterId===userId||c.receiverId===userId;});if(chat){goToView("#messages");await openDirectChat(chat.id);return;}var pending=directRequests.find(function(r){return r.senderId===me().id&&r.receiverId===userId&&r.status==="pending";});if(!pending){await api("/messages/requests",{method:"POST",body:JSON.stringify({userId:userId})});}goToView("#messages");await loadConversations();toast("Chat request sent. Chat opens after approval.");}catch(error){toast(error.message)}return;}var del=event.target.closest("[data-assignment-delete]");if(del&&confirm("Delete this assignment post?")){try{await api("/assignments/"+encodeURIComponent(del.getAttribute("data-assignment-delete")),{method:"DELETE"});await loadAssignmentPosts();toast("Assignment post deleted.")}catch(error){toast(error.message)}}});
 $("#assignmentForm").addEventListener("submit",async function(event){event.preventDefault();$("#assignmentError").textContent="";var button=$("#assignmentSubmit");button.disabled=true;button.textContent="Publishing...";try{var form=new FormData();var category="Assignment";form.append("category",category);form.append("description",$("#assignmentDescription").value.trim());var file=$("#assignmentSample").files[0];if(!file)throw new Error("Please upload a photo or PDF of your writing.");if(file.size>5*1024*1024)throw new Error("Sample must be 5 MB or smaller.");form.append("sample",file);await api("/assignments",{method:"POST",body:form});$("#dlgAssignment").close();await loadAssignmentPosts();toast("Your assignment post has been published.")}catch(error){$("#assignmentError").textContent=error.message}finally{button.disabled=false;button.textContent="Publish post"}});
 
-function showView(space, messages, help, assignments) {
+
+/* Hostel, PG and flat listings */
+var stayData=[],stayFilter='ALL',stayFiles=[];
+async function loadStays(){
+  var box=$('#stayListings');if(!box)return;
+  if(!me()){box.innerHTML='<div class="stay-empty">Log in to explore places listed by students of your college.</div>';return}
+  box.innerHTML='<div class="stay-empty">Loading accommodation...</div>';
+  try{var data=await api('/stays');stayData=data.stays||[];renderStays()}
+  catch(error){box.innerHTML='<div class="stay-empty">Could not load places. <button class="btn btn-sm" data-action="retry-stays">Try again</button></div>'}
+}
+function renderStays(){
+  var box=$('#stayListings');if(!box)return;
+  var rows=stayData.filter(function(s){return stayFilter==='ALL'||s.type===stayFilter});
+  if(!rows.length){box.innerHTML='<div class="stay-empty">No '+(stayFilter==='ALL'?'accommodation':stayFilter.toLowerCase()+' listings')+' yet. Be the first to list a place.</div>';return}
+  box.innerHTML=rows.map(function(s){
+    var cover=s.photos&&s.photos[0]?'<img src="'+esc(s.photos[0])+'" alt="'+esc(s.title)+'" loading="lazy">':'<span class="stay-cover-placeholder">⌂</span>';
+    var rentUnit=s.priceUnit==='BED'?'per bed / month':'whole place / month';
+    return '<article class="stay-card"><div class="stay-cover">'+cover+'</div><div class="stay-card-body"><span class="stay-type">'+esc(s.type)+'</span><h2>'+esc(s.title)+'</h2><p class="stay-meta">⌖ '+esc(s.address)+'</p><p class="stay-meta">About '+Number(s.distanceKm).toFixed(1)+' km from Integral University</p><p class="stay-meta">'+s.vacantRooms+' vacant room(s) · '+s.vacantBeds+' bed(s) available</p><div class="stay-price">'+inr(s.price)+' <small style="font-size:11px;color:var(--muted);font-weight:500">'+rentUnit+'</small></div><p class="stay-meta">Owner: <strong>'+esc(s.ownerName)+'</strong></p><div class="stay-actions"><button class="btn" data-action="stay-details" data-id="'+esc(s.id)+'">View details</button>'+(s.contactPhone?'<a class="btn btn-primary" href="tel:'+esc(s.contactPhone)+'">Call owner</a>':'<button class="btn" disabled>Call unavailable</button>')+'</div></div></article>';
+  }).join('');
+}
+function openStayForm(){
+ if(!me()){openAuth('login','Log in to list your PG, hostel or flat.');return}
+ $('#stayForm').reset();stayFiles=[];$('#stayPreviews').innerHTML='';$('#stayError').textContent='';updateStayFormFields();$('#dlgStay').showModal();
+}
+function updateStayFormFields(){
+ var type=$('#stayType').value,unit=$('#stayPriceUnit');
+ if(type==='FLAT'){unit.value='ROOM';unit.disabled=true;$('#stayBedFields').hidden=true;$('#stayTotalBeds').value=0;$('#stayVacantBeds').value=0}
+ else{unit.disabled=false;$('#stayBedFields').hidden=unit.value!=='BED';if(unit.value==='BED'){if(Number($('#stayTotalBeds').value)<1)$('#stayTotalBeds').value=1;if(Number($('#stayVacantBeds').value)<0)$('#stayVacantBeds').value=0}}
+}
+$('#stayType').addEventListener('change',updateStayFormFields);
+$('#stayPriceUnit').addEventListener('change',function(){updateStayFormFields()});
+$('#stayPhotos').addEventListener('change',function(){
+ var files=Array.from(this.files||[]),box=$('#stayPreviews');box.innerHTML='';stayFiles=[];
+ if(files.length>5){this.value='';$('#stayError').textContent='You can upload up to 5 photos.';return}
+ for(var file of files){if(!/^image\/(jpeg|png|webp|gif)$/.test(file.type)||file.size>5*1024*1024){this.value='';$('#stayError').textContent='Use JPEG, PNG, WebP or GIF photos up to 5 MB each.';return}}
+ stayFiles=files;files.forEach(function(file,i){var tile=document.createElement('div');tile.className='photo-preview-tile';var img=document.createElement('img');img.src=URL.createObjectURL(file);img.alt='Place photo '+(i+1);tile.appendChild(img);var small=document.createElement('small');small.textContent=i===0?'Cover':'Photo '+(i+1);tile.appendChild(small);box.appendChild(tile)});$('#stayError').textContent='';
+});
+$('#stayForm').addEventListener('submit',async function(e){
+ e.preventDefault();var err=$('#stayError'),button=$('#staySubmit');
+ var type=$('#stayType').value,unit=$('#stayPriceUnit').value,totalRooms=Number($('#stayTotalRooms').value),vacantRooms=Number($('#stayVacantRooms').value),totalBeds=type==='FLAT'?0:Number($('#stayTotalBeds').value),vacantBeds=type==='FLAT'?0:Number($('#stayVacantBeds').value);
+ if(!$('#stayTitle').value.trim()||!$('#stayAddress').value.trim())return err.textContent='Enter the listing name and full address.';
+ if(vacantRooms>totalRooms||vacantBeds>totalBeds)return err.textContent='Available rooms or beds cannot exceed the total.';
+ if(type!=='FLAT'&&unit==='BED'&&totalBeds<1)return err.textContent='Enter the total number of beds.';
+ var fd=new FormData();fd.append('type',type);fd.append('title',$('#stayTitle').value.trim());fd.append('address',$('#stayAddress').value.trim());fd.append('distanceKm',$('#stayDistance').value);fd.append('price',$('#stayPrice').value);fd.append('priceUnit',unit);fd.append('totalRooms',String(totalRooms));fd.append('vacantRooms',String(vacantRooms));fd.append('totalBeds',String(totalBeds));fd.append('vacantBeds',String(vacantBeds));fd.append('contactPhone',$('#stayPhone').value.trim());fd.append('description',$('#stayDescription').value.trim());stayFiles.forEach(function(file){fd.append('photos',file)});
+ button.disabled=true;button.textContent='Publishing...';
+ try{await api('/stays',{method:'POST',body:fd});$('#dlgStay').close();await loadStays();toast('Your place has been listed.')}
+ catch(error){err.textContent=error.message}
+ finally{button.disabled=false;button.textContent='Publish place'}
+});
+
+function showView(space, messages, help, assignments, stays) {
   messages=!!messages; help=!!help; assignments=!!assignments;
-  var previousView=document.querySelector('#viewMsgs:not([hidden]),#viewSpace:not([hidden]),#viewHelp:not([hidden]),#viewAssignments:not([hidden]),#viewBrowse:not([hidden])');
-  var nextView=space?$('#viewSpace'):messages?$('#viewMsgs'):help?$('#viewHelp'):assignments?$('#viewAssignments'):$('#viewBrowse');
+  var previousView=document.querySelector('#viewStays:not([hidden]),#viewMsgs:not([hidden]),#viewSpace:not([hidden]),#viewHelp:not([hidden]),#viewAssignments:not([hidden]),#viewBrowse:not([hidden])');
+  var nextView=stays?$('#viewStays'):space?$('#viewSpace'):messages?$('#viewMsgs'):help?$('#viewHelp'):assignments?$('#viewAssignments'):$('#viewBrowse');
   var previousName=previousView&&previousView.id||'viewBrowse',nextName=nextView&&nextView.id||'viewBrowse';
-  var viewOrder={viewBrowse:0,viewMsgs:1,viewSpace:2,viewHelp:3,viewAssignments:4};
+  var viewOrder={viewBrowse:0,viewStays:1,viewMsgs:2,viewSpace:3,viewHelp:4,viewAssignments:5};
   var slideClass=viewOrder[nextName]>=viewOrder[previousName]?'view-slide-in-right':'view-slide-in-left';
   if(!messages)stopChatAutoRefresh();
-  $('#viewBrowse').hidden=space||messages||help||assignments; $('#viewSpace').hidden=!space; $('#viewMsgs').hidden=!messages; $('#viewHelp').hidden=!help; $('#viewAssignments').hidden=!assignments;
+  $('#viewBrowse').hidden=space||messages||help||assignments||stays; $('#viewSpace').hidden=!space; $('#viewMsgs').hidden=!messages; $('#viewHelp').hidden=!help; $('#viewAssignments').hidden=!assignments; $('#viewStays').hidden=!stays;
   if(previousName!==nextName&&nextView){nextView.classList.remove('view-slide-in-left','view-slide-in-right');void nextView.offsetWidth;nextView.classList.add(slideClass);nextView.addEventListener('animationend',function(){nextView.classList.remove('view-slide-in-left','view-slide-in-right')},{once:true});}
   if(messages)markNavNotificationsSeen('messages'); if(space)markNavNotificationsSeen('space');
-  ['navBrowse','navSpace','navMessages','navHelp','navAssignments'].forEach(function(id){var nav=$('#'+id);if(nav)nav.removeAttribute('aria-current')});
+  ['navBrowse','navSpace','navMessages','navHelp','navAssignments','navStays'].forEach(function(id){var nav=$('#'+id);if(nav)nav.removeAttribute('aria-current')});
   if(space){$('#navSpace').setAttribute('aria-current','page');renderSpace();}
   else if(messages){$('#navMessages').setAttribute('aria-current','page');if(me()){if(!conversations.length)$('#conversationList').innerHTML='<div class="chat-empty">Your conversations will appear here.</div>';if(!activeConversationId&&!activeDirectChatId){$('#chatHeader').textContent='Select a conversation';$('#chatMessages').innerHTML='<p class="chat-placeholder">Your messages will appear here when you select a conversation.</p>';$('#chatForm').hidden=true;}loadConversations().catch(function(error){$('#conversationList').innerHTML='<p class="chat-placeholder">Could not load conversations. Please try again.</p>';toast(error.message);});}}
   else if(help){$('#navHelp').setAttribute('aria-current','page');}
   else if(assignments){$('#navAssignments').setAttribute('aria-current','page');loadAssignmentPosts();}
+  else if(stays){$('#navStays').setAttribute('aria-current','page');loadStays();}
   else{$('#navBrowse').setAttribute('aria-current','page');renderBrowse();}
   window.scrollTo(0,0);
 }
@@ -2115,6 +2196,7 @@ function route() {
   var messages = location.hash === '#messages';
   var help = location.hash === '#help';
   var assignments = location.hash === '#assignments';
+  var stays = location.hash === '#stays';
 
   if (space && !me()) {
     ui.pending = space ? 'space' : 'messages';
@@ -2123,7 +2205,7 @@ function route() {
     return;
   }
 
-  showView(space, messages, help, assignments);
+  showView(space, messages, help, assignments, stays);
 }
 
 function openAuth(mode,hint){
@@ -2267,6 +2349,7 @@ $('#lPhoto').addEventListener('change',function(){var files=Array.from(this.file
 $('#listForm').addEventListener('submit',async function(e){e.preventDefault();var title=$('#lTitle').value.trim(),price=Number($('#lPrice').value),dep=Number($('#lDep').value||0),loc=$('#lLoc').value.trim(),err=function(m){$('#listErr').textContent=m};if(title.length<3)return err('Give the item a name of at least 3 characters.');if(!(price>=1&&price<=5000))return err('Enter a daily rent between ₹1 and ₹5,000.');if(!(dep>=0&&dep<=20000))return err('Deposit must be between ₹0 and ₹20,000.');if(loc.length<2)return err('Tell borrowers where to pick it up.');try{var fd=new FormData();fd.append('title',title);fd.append('cat',$('#lCat').value);fd.append('cond',$('#lCond').value);fd.append('price',String(price));fd.append('deposit',String(dep));fd.append('loc',loc);fd.append('desc',$('#lDesc').value.trim());ui.photoFiles.forEach(function(file){fd.append('photos',file)});await api('/items',{method:'POST',body:fd});$('#dlgList').close();ui.tab='listings';await refresh();toast('Your item is now listed.');if(location.hash==='#my-space')renderSpace()}catch(ex){err(ex.message)}});
 async function actionRequest(path,success){try{await api(path,{method:'PATCH'});await refresh();toast(success||'Updated.')}catch(e){toast(e.message)}}
 
+$('#stayCreateBtn').addEventListener('click',openStayForm);
 document.addEventListener('click', async function(e) {
   var target = e.target;
   if (target && target.tagName === 'DIALOG' && target.open) {
@@ -2283,6 +2366,8 @@ document.addEventListener('click', async function(e) {
   switch (a) {
     case 'retry-messages': loadConversations().catch(function(error){toast(error.message)}); break;
     case 'retry-assignments': loadAssignmentPosts().catch(function(error){toast(error.message)}); break;
+    case 'retry-stays': loadStays(); break;
+    case 'stay-details': { var stay=stayData.find(function(x){return x.id===id}); if(stay){var mapUrl='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(stay.address);var gallery=stay.photos&&stay.photos.length?stay.photos.map(function(p){return '<img class="stay-detail-photo" src="'+esc(p)+'" alt="'+esc(stay.title)+'">'}).join(''):'<div class="stay-empty">No photos uploaded yet.</div>';var body='<div class="dlg-head"><h2 class="stay-detail-title">'+esc(stay.title)+'</h2><button type="button" class="x" data-action="close">&times;</button></div>'+gallery+'<p class="stay-type">'+esc(stay.type)+'</p><p class="stay-meta">'+esc(stay.address)+'</p><p class="stay-meta">Approx. '+Number(stay.distanceKm).toFixed(1)+' km from Integral University</p><div class="stay-owner"><strong>Owner: '+esc(stay.ownerName)+'</strong><p class="stay-meta">'+stay.vacantRooms+' vacant room(s) · '+stay.vacantBeds+' available bed(s)</p></div><p class="stay-price">'+inr(stay.price)+' / month '+(stay.priceUnit==='BED'?'per bed':'whole place')+'</p><p class="stay-meta">'+esc(stay.description||'No additional details provided.')+'</p><div class="stay-actions"><a class="btn" href="'+mapUrl+'" target="_blank" rel="noopener">Open in Maps</a>'+(stay.contactPhone?'<a class="btn btn-primary" href="tel:'+esc(stay.contactPhone)+'">Call owner</a>':'')+'</div>';$('#itemBody').innerHTML=body;$('#dlgItem').showModal();}} break;
     case 'retry-active-chat': if(activeDirectChatId)openDirectChat(activeDirectChatId);else if(activeConversationId)openConversation(activeConversationId); break;
     case 'open-login':
       openAuth('login');
@@ -2411,6 +2496,7 @@ document.addEventListener('click', async function(e) {
       renderGrid();
       break;
 
+    case 'open-stay-create': openStayForm(); break;
     case 'scroll-grid':
       $('#browse-grid').scrollIntoView({
         behavior: 'smooth',
@@ -2563,7 +2649,7 @@ document.addEventListener('click',function(event){
   var link=event.target.closest('a[href^="#"]');
   if(!link)return;
   var hash=link.getAttribute('href');
-  if(hash==='#browse'||hash==='#messages'||hash==='#my-space'||hash==='#help'||hash==='#assignments'){
+  if(hash==='#browse'||hash==='#messages'||hash==='#my-space'||hash==='#help'||hash==='#assignments'||hash==='#stays'){
     event.preventDefault();
     goToView(hash);
   }
@@ -2637,6 +2723,7 @@ async function reconnectCampusRent(){
 window.addEventListener('offline',showNetworkOffline);
 window.addEventListener('online',reconnectCampusRent);
 $('#networkRetry').addEventListener('click',reconnectCampusRent);
+document.addEventListener('click',function(e){var filter=e.target.closest('[data-stay-filter]');if(filter){stayFilter=filter.getAttribute('data-stay-filter');document.querySelectorAll('[data-stay-filter]').forEach(function(b){b.classList.toggle('active',b===filter)});renderStays()}});
 if(!navigator.onLine)showNetworkOffline();
 
 (async function init(){
@@ -2662,6 +2749,7 @@ if(!navigator.onLine)showNetworkOffline();
     }
   }
   route();
+  if(location.hash==='#stays')loadStays();
   await refreshNavNotifications();
   window.setInterval(refreshNavNotifications,15000);
 })();
