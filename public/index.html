@@ -124,7 +124,7 @@ a{color:inherit}
 /* top bar */
 .top{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;width:100%;z-index:100;background:rgba(12,12,9,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .top .wrap{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px;min-height:60px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:1.2rem;font-variation-settings:"wdth" 118;letter-spacing:-.01em}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:1.2rem;font-variation-settings:"wdth" 118;letter-spacing:-.01em}.brand-campus{color:var(--fg)}.brand-rent{color:var(--yellow)}
 .nav{display:flex;gap:4px}
 .nav a{padding:8px 10px;text-decoration:none;font-weight:600;color:var(--muted);border-bottom:2px solid transparent}
 .nav a[aria-current="page"]{color:var(--fg);border-bottom-color:var(--yellow)}
@@ -1137,7 +1137,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <div class="wrap">
     <a class="brand" href="#browse" aria-label="CampusRent home">
       <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="4" fill="#ffd60a"/><rect x="5" y="5" width="18" height="7" fill="#141200"/><rect x="5" y="15" width="7" height="7" fill="#141200"/><rect x="16" y="15" width="7" height="7" fill="#141200"/></svg>
-      CampusRent
+      <span class="brand-campus">Campus</span><span class="brand-rent">Rent</span>
     </a>
     <nav class="nav" aria-label="Main">
   <a id="navBrowse" href="#browse">Home</a>
