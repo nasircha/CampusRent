@@ -54,7 +54,7 @@ router.post('/', requireAuth, upload.array('photos', 5), async (req, res, next) 
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
     const photos = await Promise.all((req.files || []).map(uploadPhoto));
     const stay = await prisma.accommodation.create({
-      data: { ...parsed.data, photos, college: req.user.college, ownerId: req.user.id },
+      data: { ...parsed.data, photos, college: req.user.college, ownerId: req.user.id, status: 'pending' },
       include: { owner: { select: { id: true, name: true } } }
     });
     res.status(201).json({ stay: formatStay(stay) });
