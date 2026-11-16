@@ -180,9 +180,16 @@ textarea{min-height:84px;resize:vertical}
 
 /* filters */
 .tools{display:grid;gap:12px;padding-top:8px;padding-bottom:18px}
-.search{display:flex;gap:8px;flex-wrap:wrap}
-.search input{flex:1 1 240px;min-width:0}
-.search select{flex:0 0 auto;width:auto;min-width:170px}
+.search{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search-field{position:relative;display:flex;align-items:center;flex:1 1 300px;min-width:0;min-height:48px;background:var(--surface);border:1px solid var(--line);border-radius:7px;transition:border-color .18s,box-shadow .18s}
+.search-field:focus-within{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,214,10,.10)}
+.search-icon{display:grid;place-items:center;width:44px;flex:0 0 44px;color:var(--muted);font-size:25px;line-height:1}
+.search-field input{width:100%;min-width:0;height:46px;padding:0 8px 0 0;border:0!important;background:transparent!important;box-shadow:none!important;outline:0!important;font-size:15px}
+.search-field input::-webkit-search-cancel-button{-webkit-appearance:none}
+.search-clear{width:34px;height:34px;flex:0 0 34px;margin-right:6px;border:0;border-radius:5px;background:transparent;color:var(--muted);font-size:23px;line-height:1;cursor:pointer}
+.search-clear:hover{background:var(--surface-2);color:var(--fg)}
+.search select{flex:0 0 auto;width:auto;min-width:170px;min-height:48px;border-radius:7px}
+.search-clear[hidden]{display:none!important}
 .keys{display:flex;flex-wrap:wrap;gap:8px}
 .key{font:600 13px/1 var(--font-body);padding:9px 12px;border:1px solid var(--line);border-bottom-width:3px;background:var(--surface);color:var(--fg);border-radius:4px;cursor:pointer}
 .key:hover{border-color:var(--yellow)}
@@ -1254,7 +1261,11 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
 
     <div class="wrap tools" id="browse-grid">
       <div class="search">
-        <input id="q" type="search" placeholder="Search calculators, pens, drafters..." aria-label="Search items">
+        <div class="search-field">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="q" type="search" placeholder="Search items, categories or students..." aria-label="Search items" autocomplete="off">
+          <button type="button" id="clearSearch" class="search-clear" aria-label="Clear search" hidden>&times;</button>
+        </div>
         <select id="sort" aria-label="Sort items">
           <option value="new">Newest first</option>
           <option value="low">Price: low to high</option>
@@ -1837,7 +1848,7 @@ function renderHeader(){var u=me(),a=$('#authArea');if(u){a.innerHTML='<button t
 function visibleItems(){var u=me();var college=function(v){return String(v||'').trim().toLowerCase().replace(/\\s+/g,' ')};var myCollege=college(u&&u.college);return state.items.filter(function(i){if(i.status==='paused')return false;if(u&&u.isAdmin)return true;if(!myCollege)return true;return college(i.ownerCollege)===myCollege})}
 function renderReadout(){var v=visibleItems(),out=v.filter(function(i){return i.status==='rented'}).length;$('#rdOpen').textContent=v.length;$('#rdOut').textContent=out}
 function renderKeys(){var v=visibleItems(),html='<button class="key" data-action="key" data-cat="all" aria-pressed="'+(ui.cat==='all')+'">All<span class="n">'+v.length+'</span></button>';CATS.forEach(function(c){var n=v.filter(function(i){return i.cat===c.id}).length;html+='<button class="key" data-action="key" data-cat="'+c.id+'" aria-pressed="'+(ui.cat===c.id)+'">'+esc(c.label)+'<span class="n">'+n+'</span></button>'});$('#keys').innerHTML=html}
-function renderGrid(){var q=ui.q.trim().toLowerCase(),list=visibleItems().filter(function(i){if(ui.cat!=='all'&&i.cat!==ui.cat)return false;if(!q)return true;return (i.title+' '+(i.desc||'')+' '+i.loc+' '+catLabel(i.cat)).toLowerCase().indexOf(q)>-1});list.sort(function(a,b){return ui.sort==='low'?a.price-b.price:ui.sort==='high'?b.price-a.price:new Date(b.createdAt)-new Date(a.createdAt)});$('#count').textContent=list.length+(list.length===1?' item':' items');if(!list.length){$('#grid').innerHTML='<li style="grid-column:1/-1"><div class="empty"><p>No items match your search.</p><button class="btn btn-sm" data-action="clear-filters">Clear filters</button></div></li>';return}$('#grid').innerHTML=list.map(function(i){return '<li><button class="card" data-action="open-item" data-id="'+i.id+'"><span class="img">'+imgHtml(i)+'</span><span class="body"><span class="t">'+esc(i.title)+'</span><span class="m">'+esc(catLabel(i.cat))+' &middot; '+esc(i.cond)+' &middot; '+esc(i.loc)+'</span><span class="m">Listed by <strong>'+esc(i.ownerName||'CampusRent user')+'</strong></span><span class="item-rating-summary">★ '+(Number(i.ratingAverage)||0).toFixed(1)+' <span>('+Number(i.ratingCount||0)+' ratings · '+Number(i.usersUsedCount||0)+' used)</span></span><span class="foot"><span class="lcd">'+inr(i.price)+'/day</span>'+statusPill(i)+'</span></span></button></li>'}).join('')}
+function renderGrid(){var q=String(ui.q||'').trim().toLowerCase().replace(/\s+/g,' '),list=visibleItems().filter(function(i){if(ui.cat!=='all'&&i.cat!==ui.cat)return false;if(!q)return true;var searchable=[i.title,i.desc,i.loc,catLabel(i.cat),i.cond,i.ownerName].join(' ').toLowerCase().replace(/\s+/g,' ');return searchable.indexOf(q)>-1});list.sort(function(a,b){return ui.sort==='low'?a.price-b.price:ui.sort==='high'?b.price-a.price:new Date(b.createdAt)-new Date(a.createdAt)});$('#count').textContent=list.length+(list.length===1?' item':' items');var clear=$('#clearSearch');if(clear)clear.hidden=!String(ui.q||'').length;if(!list.length){$('#grid').innerHTML='<li style="grid-column:1/-1"><div class="empty"><p>No items found. Try another keyword or clear your filters.</p><button class="btn btn-sm" data-action="clear-filters">Clear search and filters</button></div></li>';return}$('#grid').innerHTML=list.map(function(i){return '<li><button class="card" data-action="open-item" data-id="'+i.id+'"><span class="img">'+imgHtml(i)+'</span><span class="body"><span class="t">'+esc(i.title)+'</span><span class="m">'+esc(catLabel(i.cat))+' &middot; '+esc(i.cond)+' &middot; '+esc(i.loc)+'</span><span class="m">Listed by <strong>'+esc(i.ownerName||'CampusRent user')+'</strong></span><span class="item-rating-summary">★ '+(Number(i.ratingAverage)||0).toFixed(1)+' <span>('+Number(i.ratingCount||0)+' ratings · '+Number(i.usersUsedCount||0)+' used)</span></span><span class="foot"><span class="lcd">'+inr(i.price)+'/day</span>'+statusPill(i)+'</span></span></button></li>'}).join('')}
 function renderBrowse(){renderReadout();renderKeys();renderGrid()}
 
 function openItem(id) {
@@ -2422,7 +2433,7 @@ case 'tab':
   }
 });
 
-$('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){var btn=document.querySelector('[data-action="rent"]');if(btn){var it=itemById(btn.getAttribute('data-id'));if(it)updateSum(it)}}});$('#q').addEventListener('input',function(){ui.q=this.value;renderGrid()});$('#sort').addEventListener('change',function(){ui.sort=this.value;renderGrid()});window.addEventListener('storage', function(e) {
+$('#itemBody').addEventListener('input',function(e){if(e.target.id==='iDays'){var btn=document.querySelector('[data-action="rent"]');if(btn){var it=itemById(btn.getAttribute('data-id'));if(it)updateSum(it)}}});$('#q').addEventListener('input',function(){ui.q=this.value;renderGrid()});$('#clearSearch').addEventListener('click',function(){ui.q='';$('#q').value='';renderGrid();$('#q').focus()});$('#sort').addEventListener('change',function(){ui.sort=this.value;renderGrid()});window.addEventListener('storage', function(e) {
   if (e.key !== TOKEN_KEY || e.newValue !== null) return;
   token = '';
   stopChatAutoRefresh();
