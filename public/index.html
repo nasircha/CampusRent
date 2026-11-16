@@ -1561,6 +1561,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <div class="field"><label for="stayOwnerName">Owner name</label><input id="stayOwnerName" maxlength="80" placeholder="Enter owner name" required></div>
   <div class="field"><label for="stayFacilities">Facilities</label><textarea id="stayFacilities" maxlength="600" placeholder="e.g. Wi-Fi, water cooler, washing machine, food, parking..."></textarea></div>
   <div class="field"><label for="stayGateTiming">Gate timing</label><select id="stayGateTiming"><option value="">Select gate timing</option><option value="No time restriction">No time restriction</option><option value="Gate closes at 10 PM">Gate closes at 10 PM</option><option value="Gate closes at 11 PM">Gate closes at 11 PM</option><option value="Gate closes at 12 AM">Gate closes at 12 AM</option><option value="Gate closes at 1 AM">Gate closes at 1 AM</option><option value="Other / ask owner">Other / ask owner</option></select></div>
+  <div class="field"><label for="stayPhotos">Photos <span class="muted">(up to 5, optional)</span></label><input id="stayPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple><small class="hint">Add up to 5 photos of the hostel, rooms or facilities. Max 5 MB each.</small><div id="stayPhotoPreviews" class="photo-previews"></div></div>
   <p id="stayError" class="err" role="alert"></p><button class="btn btn-primary" id="staySubmit" type="submit">Submit for approval</button>
 </form></dialog>
 <dialog id="dlgItem" aria-label="Item details"><div class="dlg" id="itemBody"></div></dialog>
@@ -2134,7 +2135,7 @@ function renderStays(){
 }
 function openStayForm(){
  if(!me()){openAuth('login','Log in to list your PG, hostel or flat.');return}
- $('#stayForm').reset();$('#stayError').textContent='';$('#dlgStay').showModal();
+ $('#stayForm').reset();$('#stayError').textContent='';$('#stayPhotoPreviews').innerHTML='';$('#dlgStay').showModal();
 }
 $('#stayForm').addEventListener('submit',async function(e){
  e.preventDefault();var err=$('#stayError'),button=$('#staySubmit');
@@ -2143,7 +2144,12 @@ $('#stayForm').addEventListener('submit',async function(e){
  if(address.length<3)return err.textContent='Enter the location.';
  if(ownerName.length<2)return err.textContent='Enter the owner name.';
  var details={ownerName:ownerName,facilities:$('#stayFacilities').value.trim(),gateTiming:$('#stayGateTiming').value};
+ var photos=Array.from($('#stayPhotos').files||[]);
+ if(photos.length>5)return err.textContent='You can upload a maximum of 5 photos.';
+ if(photos.some(function(file){return !/^image\/(jpeg|png|webp|gif)$/.test(file.type)}))return err.textContent='Upload JPEG, PNG, WebP or GIF images only.';
+ if(photos.some(function(file){return file.size>5*1024*1024}))return err.textContent='Each photo must be 5 MB or smaller.';
  var fd=new FormData();fd.append('type',$('#stayType').value);fd.append('title',title);fd.append('address',address);fd.append('ownerName',ownerName);fd.append('facilities',details.facilities);fd.append('gateTiming',details.gateTiming);
+ photos.forEach(function(file){fd.append('photos',file)});
  button.disabled=true;button.textContent='Submitting...';
  try{await api('/stays',{method:'POST',body:fd});$('#dlgStay').close();await loadStays();toast('Submitted for admin approval. It will appear after approval.')}
  catch(error){err.textContent=error.message}
