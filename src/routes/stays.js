@@ -16,22 +16,10 @@ const upload = multer({
 const input = z.object({
   type: z.enum(['PG', 'HOSTEL', 'FLAT']),
   title: z.string().trim().min(3).max(80),
-  address: z.string().trim().min(5).max(180),
-  distanceKm: z.coerce.number().min(0.1).max(100),
-  price: z.coerce.number().int().min(500).max(500000),
-  priceUnit: z.enum(['BED', 'ROOM']),
-  totalRooms: z.coerce.number().int().min(1).max(100),
-  vacantRooms: z.coerce.number().int().min(0).max(100),
-  totalBeds: z.coerce.number().int().min(0).max(200),
-  vacantBeds: z.coerce.number().int().min(0).max(200),
-  description: z.string().trim().max(800).optional().default(''),
-  contactPhone: z.string().trim().min(7).max(20)
-}).superRefine((v, ctx) => {
-  if (v.vacantRooms > v.totalRooms) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Vacant rooms cannot exceed total rooms.', path: ['vacantRooms'] });
-  if (v.vacantBeds > v.totalBeds) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Vacant beds cannot exceed total beds.', path: ['vacantBeds'] });
-  if (v.type === 'FLAT' && v.priceUnit !== 'ROOM') ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Flat rent must be set per month for the whole flat.', path: ['priceUnit'] });
-  if (v.type !== 'FLAT' && v.priceUnit === 'BED' && v.totalBeds < 1) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Enter the total number of beds.', path: ['totalBeds'] });
-  if (v.contactPhone && !/^[+0-9() -]{7,20}$/.test(v.contactPhone)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Enter a valid contact number.', path: ['contactPhone'] });
+  address: z.string().trim().min(3).max(180),
+  ownerName: z.string().trim().min(2).max(80),
+  facilities: z.string().trim().max(600).optional().default(''),
+  gateTiming: z.string().trim().max(80).optional().default('')
 });
 
 router.get('/', requireAuth, async (req, res, next) => {
@@ -54,10 +42,10 @@ router.post('/', requireAuth, upload.array('photos', 5), async (req, res, next) 
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
     const photos = await Promise.all((req.files || []).map(uploadPhoto));
     const stay = await prisma.accommodation.create({
-      data: { ...parsed.data, photos, college: req.user.college, ownerId: req.user.id, status: 'pending' },
+      data: { type: parsed.data.type, title: parsed.data.title, address: parsed.data.address, distanceKm: 0, price: 0, priceUnit: 'ROOM', totalRooms: 1, vacantRooms: 1, totalBeds: 0, vacantBeds: 0, contactPhone: '', description: '', photos: [], college: req.user.college, ownerId: req.user.id, status: 'pending' },
       include: { owner: { select: { id: true, name: true } } }
     });
-    res.status(201).json({ stay: formatStay(stay) });
+    res.status(201).json({ stay: { ...formatStay(stay), ownerName: parsed.data.ownerName, facilities: parsed.data.facilities, gateTiming: parsed.data.gateTiming } });
   } catch (error) { next(error); }
 });
 
@@ -91,12 +79,14 @@ async function uploadPhoto(file) {
 }
 
 function formatStay(s) {
+  let extra = {};
+  try { extra = s.description ? JSON.parse(s.description) : {}; } catch (_) {}
   return {
     id: s.id, type: s.type, title: s.title, address: s.address, distanceKm: s.distanceKm,
     price: s.price, priceUnit: s.priceUnit, totalRooms: s.totalRooms, vacantRooms: s.vacantRooms,
     totalBeds: s.totalBeds, vacantBeds: s.vacantBeds, description: s.description,
     contactPhone: s.contactPhone, photos: s.photos || [], college: s.college, status: s.status,
-    ownerId: s.ownerId, ownerName: s.owner && s.owner.name || '', createdAt: s.createdAt
+    facilities: extra.facilities || '', gateTiming: extra.gateTiming || '', ownerId: s.ownerId, ownerName: extra.ownerName || s.owner && s.owner.name || '', createdAt: s.createdAt
   };
 }
 module.exports = router;
