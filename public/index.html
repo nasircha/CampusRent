@@ -2037,7 +2037,7 @@ async function loadAssignmentPosts(){
     renderAssignmentPosts();
   }).catch(function(error){
     if(!assignmentPostsLoaded&&!assignmentPosts.length){
-      box.innerHTML='<div class="assignment-empty">Could not load posts. Open Assignments again to retry.</div>';
+      box.innerHTML='<div class="assignment-empty">Could not load posts. <button class="btn btn-sm" type="button" data-action="retry-assignments">Try again</button></div>';
     }
   }).finally(function(){assignmentPostsLoading=null});
   return assignmentPostsLoading;
@@ -2277,6 +2277,7 @@ document.addEventListener('click', async function(e) {
 
   switch (a) {
     case 'retry-messages': loadConversations().catch(function(error){toast(error.message)}); break;
+    case 'retry-assignments': loadAssignmentPosts().catch(function(error){toast(error.message)}); break;
     case 'retry-active-chat': if(activeDirectChatId)openDirectChat(activeDirectChatId);else if(activeConversationId)openConversation(activeConversationId); break;
     case 'open-login':
       openAuth('login');
