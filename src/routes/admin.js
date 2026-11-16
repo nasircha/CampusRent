@@ -40,4 +40,36 @@ router.get('/activity', requireAuth, requireAdmin, async (_req, res, next) => {
   } catch (error) { next(error); }
 });
 
+
+router.get('/stays', requireAuth, requireAdmin, async (_req, res, next) => {
+  try {
+    const stays = await prisma.accommodation.findMany({
+      where: { status: { in: ['pending', 'available', 'rejected'] } },
+      include: { owner: { select: { id: true, name: true, email: true } } },
+      orderBy: [{ status: 'asc' }, { createdAt: 'desc' }]
+    });
+    res.json({ stays: stays.map(s => ({
+      id: s.id, type: s.type, title: s.title, address: s.address, distanceKm: s.distanceKm,
+      price: s.price, priceUnit: s.priceUnit, totalRooms: s.totalRooms, vacantRooms: s.vacantRooms,
+      totalBeds: s.totalBeds, vacantBeds: s.vacantBeds, description: s.description,
+      contactPhone: s.contactPhone, photos: s.photos || [], college: s.college, status: s.status,
+      ownerId: s.ownerId, ownerName: s.owner?.name || '', ownerEmail: s.owner?.email || '', createdAt: s.createdAt
+    })) });
+  } catch (error) { next(error); }
+});
+
+router.patch('/stays/:id', requireAuth, requireAdmin, async (req, res, next) => {
+  try {
+    const decision = String(req.body?.decision || '');
+    if (!['approve', 'reject'].includes(decision)) return res.status(400).json({ error: 'Choose approve or reject.' });
+    const stay = await prisma.accommodation.findUnique({ where: { id: req.params.id } });
+    if (!stay) return res.status(404).json({ error: 'Accommodation listing not found.' });
+    const updated = await prisma.accommodation.update({
+      where: { id: stay.id },
+      data: { status: decision === 'approve' ? 'available' : 'rejected' }
+    });
+    res.json({ ok: true, status: updated.status });
+  } catch (error) { next(error); }
+});
+
 module.exports = router;
