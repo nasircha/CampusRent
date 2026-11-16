@@ -1562,7 +1562,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <div class="two"><div class="field"><label for="stayPriceUnit">Rent charged</label><select id="stayPriceUnit"><option value="BED">Per bed / month</option><option value="ROOM">Whole room / flat per month</option></select></div><div class="field"><label for="stayPrice">Monthly rent (₹)</label><input id="stayPrice" type="number" min="500" max="500000" placeholder="3500" required></div></div>
   <div class="two"><div class="field"><label for="stayTotalRooms">Total rooms</label><input id="stayTotalRooms" type="number" min="1" max="100" value="1" required></div><div class="field"><label for="stayVacantRooms">Vacant rooms</label><input id="stayVacantRooms" type="number" min="0" max="100" value="1" required></div></div>
   <div class="two" id="stayBedFields"><div class="field"><label for="stayTotalBeds">Total beds</label><input id="stayTotalBeds" type="number" min="0" max="200" value="1"></div><div class="field"><label for="stayVacantBeds">Available beds</label><input id="stayVacantBeds" type="number" min="0" max="200" value="1"></div></div>
-  <div class="field"><label for="stayPhone">Owner contact number</label><input id="stayPhone" type="tel" maxlength="20" placeholder="+91 98765 43210"></div>
+  <div class="field"><label for="stayPhone">Owner contact number</label><input id="stayPhone" type="tel" maxlength="20" placeholder="+91 98765 43210" required></div>
   <div class="field"><label for="stayDescription">Details (optional)</label><textarea id="stayDescription" maxlength="800" placeholder="Facilities, food, rules, furnished/unfurnished..."></textarea></div>
   <div class="field"><label for="stayPhotos">Photos (up to 5, optional)</label><input id="stayPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple><div id="stayPreviews" class="photo-previews"></div></div>
   <p id="stayError" class="err" role="alert"></p><button class="btn btn-primary" id="staySubmit" type="submit">Publish place</button>
@@ -2124,8 +2124,11 @@ function openStayForm(){
 }
 function updateStayFormFields(){
  var type=$('#stayType').value,unit=$('#stayPriceUnit');
- if(type==='FLAT'){unit.value='ROOM';unit.disabled=true;$('#stayBedFields').hidden=true;$('#stayTotalBeds').value=0;$('#stayVacantBeds').value=0}
- else{unit.disabled=false;$('#stayBedFields').hidden=unit.value!=='BED';if(unit.value==='BED'){if(Number($('#stayTotalBeds').value)<1)$('#stayTotalBeds').value=1;if(Number($('#stayVacantBeds').value)<0)$('#stayVacantBeds').value=0}}
+ if(type==='FLAT'){unit.value='ROOM';unit.disabled=true}
+ else{unit.disabled=false}
+ var showBeds=type!=='FLAT'&&unit.value==='BED';$('#stayBedFields').hidden=!showBeds;
+ if(!showBeds){$('#stayTotalBeds').value=0;$('#stayVacantBeds').value=0}
+ else{if(Number($('#stayTotalBeds').value)<1)$('#stayTotalBeds').value=1;if(Number($('#stayVacantBeds').value)>Number($('#stayTotalBeds').value))$('#stayVacantBeds').value=$('#stayTotalBeds').value}
 }
 $('#stayType').addEventListener('change',updateStayFormFields);
 $('#stayPriceUnit').addEventListener('change',function(){updateStayFormFields()});
