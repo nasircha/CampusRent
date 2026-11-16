@@ -113,7 +113,7 @@
 .conversation-item{display:flex!important;align-items:center!important;gap:11px!important;width:100%!important;min-height:72px!important;margin:0 0 7px!important;padding:11px 12px!important;text-align:left!important;border:1px solid transparent!important;border-radius:13px!important;background:transparent!important;color:#f5f5f7!important;transition:background .16s,border-color .16s!important}
 .conversation-item:hover{background:#22232b!important;border-color:#373844!important}
 .conversation-item.active{background:linear-gradient(100deg,rgba(255,214,10,.16),rgba(255,214,10,.045))!important;border:1px solid rgba(255,214,10,.42)!important;box-shadow:inset 3px 0 0 var(--yellow)!important}
-.conversation-avatar{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;border-radius:50%;background:linear-gradient(145deg,#6b70ff,#4a4fd0);color:#fff;font-size:17px;font-weight:800}
+.conversation-avatar{display:grid;place-items:center;flex:0 0 43px;width:43px;min-width:43px;max-width:43px;height:43px;min-height:43px;max-height:43px;aspect-ratio:1/1;overflow:hidden;border-radius:50%;background:linear-gradient(145deg,#6b70ff,#4a4fd0);color:#fff;font-size:17px;font-weight:800}
 .conversation-item:nth-child(3n) .conversation-avatar{background:linear-gradient(145deg,#e879c7,#a83b91)}
 .conversation-item:nth-child(4n) .conversation-avatar{background:linear-gradient(145deg,#7edb88,#329d55)}
 .conversation-copy{display:grid;gap:3px;min-width:0;flex:1}
@@ -167,7 +167,7 @@
 
 /* Messages contrast and profile photo controls */
 .inbox-tab.active{background:#242630!important;border-color:var(--yellow)!important;color:#fff!important}.inbox-tab.active b{color:var(--yellow)!important}
-.profile-photo-field{display:flex;align-items:center;gap:15px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}.profile-photo-preview{display:grid;place-items:center;flex:0 0 76px;width:76px;height:76px;border-radius:4px;overflow:hidden;background:#343643;color:#fff;font-size:28px;font-weight:800}.profile-photo-preview img{width:100%;height:100%;object-fit:cover}.profile-photo-controls{display:grid;gap:7px;min-width:0}.profile-photo-controls label{font-weight:700;font-size:13px}.profile-photo-controls input{max-width:100%;font-size:12px}.profile-photo-controls small{color:var(--muted);font-size:11px}.who .avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:4px}.conversation-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}.conversation-avatar{overflow:hidden}
+.profile-photo-field{display:flex;align-items:center;gap:15px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}.profile-photo-preview{display:grid;place-items:center;flex:0 0 64px;width:64px;min-width:64px;max-width:64px;height:64px;min-height:64px;max-height:64px;aspect-ratio:1/1;border-radius:4px;overflow:hidden;background:#343643;color:#fff;font-size:24px;font-weight:800}.profile-photo-preview img{display:block;width:64px;height:64px;max-width:64px;max-height:64px;object-fit:cover;object-position:center}.profile-photo-controls{display:grid;gap:7px;min-width:0}.profile-photo-controls label{font-weight:700;font-size:13px}.profile-photo-controls input{max-width:100%;font-size:12px}.profile-photo-controls small{color:var(--muted);font-size:11px}.who .avatar img{display:block;width:30px;height:30px;max-width:30px;max-height:30px;object-fit:cover;object-position:center;border-radius:4px}.conversation-avatar img{display:block;width:43px;height:43px;max-width:43px;max-height:43px;object-fit:cover;object-position:center;border-radius:50%}.conversation-avatar{overflow:hidden}
 </style></head><body>
 <div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
   <div class="loader-card">
@@ -221,7 +221,7 @@ a{color:inherit}
 .nav a:hover{color:var(--fg)}
 .auth{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .who{display:flex;align-items:center;gap:8px;font-weight:600}
-.avatar{width:30px;height:30px;border-radius:4px;background:var(--yellow);color:var(--ink);display:grid;place-items:center;font-weight:800}
+.avatar{display:grid;place-items:center;flex:0 0 30px;width:30px;min-width:30px;max-width:30px;height:30px;min-height:30px;max-height:30px;aspect-ratio:1/1;overflow:hidden;border-radius:4px;background:var(--yellow);color:var(--ink);font-weight:800}
 .who .nm{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:560px){.who .nm{display:none}}
 
@@ -1474,7 +1474,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <form id="profileForm" class="dlg" novalidate>
     <div class="dlg-head"><h2 id="profileTitle">Your profile</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
     <p class="hint">Your account details.</p>
-    <div class="profile-photo-field"><div id="profilePhotoPreview" class="profile-photo-preview">S</div><div class="profile-photo-controls"><label for="profilePhotoInput">Profile photo</label><input id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><small>Choose a photo up to 5 MB. You can change it anytime.</small></div></div>
+    <div class="profile-photo-field"><div id="profilePhotoPreview" class="profile-photo-preview">S</div><div class="profile-photo-controls"><label for="profilePhotoInput">Profile photo</label><input id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><small>Square avatar · max 2 MB. Large photos are automatically fitted.</small></div></div>
     <div class="field"><label for="profileName">Display Name</label><input id="profileName" name="name" autocomplete="name" maxlength="80" required></div>
     <div class="field"><label for="profileCollege">College or University</label><input id="profileCollege" type="text" readonly aria-readonly="true" placeholder="Not added"></div>
     <div class="field"><label for="profileEmail">Logged-in Email</label><input id="profileEmail" type="email" readonly aria-readonly="true"></div>
@@ -2156,7 +2156,7 @@ $('#forgotPasswordBtn').addEventListener('click',function(e){
   $('#authErr').textContent='';
 });
 async function afterAuth(isNewSignup){await refresh();var p=ui.pending;ui.pending=null;$('#authForm').reset();$('#dlgAuth').close();toast('Welcome, '+me().name.split(' ')[0]+'.');if(p==='space'){if(location.hash==='#my-space')route();else goToView('my-space')}else if(p==='list')openList();else if(p&&p.item)openItem(p.item);else if(location.hash==='#my-space')route();if(isNewSignup){if(!$('#dlgWelcome').open)$('#dlgWelcome').showModal()}}
-$('#profilePhotoInput').addEventListener('change',function(){var file=this.files&&this.files[0],preview=$('#profilePhotoPreview');if(!file){preview.innerHTML=me()&&me().profilePhoto?'<img src="'+esc(me().profilePhoto)+'" alt="Profile photo">':esc((me()&&me().name||'S').charAt(0).toUpperCase());return;}if(file.size>5*1024*1024){this.value='';$('#profileErr').textContent='Photo must be smaller than 5 MB.';return;}var reader=new FileReader();reader.onload=function(){preview.innerHTML='<img src="'+reader.result+'" alt="Selected profile photo">'};reader.readAsDataURL(file);});
+$('#profilePhotoInput').addEventListener('change',function(){var file=this.files&&this.files[0],preview=$('#profilePhotoPreview');if(!file){preview.innerHTML=me()&&me().profilePhoto?'<img src="'+esc(me().profilePhoto)+'" alt="Profile photo">':esc((me()&&me().name||'S').charAt(0).toUpperCase());return;}if(file.size>5*1024*1024){this.value='';$('#profileErr').textContent='Photo must be smaller than 2 MB.';return;}var reader=new FileReader();reader.onload=function(){preview.innerHTML='<img src="'+reader.result+'" alt="Selected profile photo">'};reader.readAsDataURL(file);});
 $('#profileForm').addEventListener('submit',async function(e){
   e.preventDefault();var name=$('#profileName').value.trim(),photo=$('#profilePhotoInput').files&&$('#profilePhotoInput').files[0];$('#profileErr').textContent='';
   if(name.length<2)return $('#profileErr').textContent='Name must be at least 2 characters.';
