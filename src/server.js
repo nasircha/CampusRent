@@ -26,6 +26,7 @@ app.use('/api/items', require('./routes/items'));
 app.use('/api/ratings', require('./routes/ratings'));
 app.use('/api/rentals', require('./routes/rentals'));
 app.use('/api/messages', require('./routes/messages'));
+app.use('/api/assignments', require('./routes/assignments'));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), { maxAge: '7d', immutable: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.get('*path', (_req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));

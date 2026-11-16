@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Assignments | CampusRent</title>
+<style>
+:root{color-scheme:dark;--bg:#111217;--panel:#1b1c23;--line:#343640;--fg:#f5f5f5;--muted:#a7a8b1;--yellow:#ffd60a;--red:#ff7777}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}a{color:var(--yellow)}button,input,select,textarea{font:inherit}.top{border-bottom:1px solid var(--line);background:#15161c}.wrap{width:min(1080px,calc(100% - 32px));margin:auto}.top .wrap{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-weight:800;font-size:21px;text-decoration:none;color:var(--fg)}.brand span{color:var(--yellow)}nav{display:flex;gap:18px;flex-wrap:wrap}nav a{color:var(--fg);text-decoration:none;font-size:14px}nav a:hover,nav a.active{color:var(--yellow)}main{padding:36px 0 70px}.intro{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}.eyebrow{color:var(--yellow);font-size:12px;font-weight:750;letter-spacing:.12em;text-transform:uppercase}h1{font-size:clamp(28px,5vw,42px);line-height:1.12;margin:7px 0 10px}.intro p,.muted{color:var(--muted)}.intro p{margin:0;max-width:640px}.btn{border:1px solid var(--line);background:#24252d;color:var(--fg);padding:10px 15px;border-radius:9px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.btn.primary{background:var(--yellow);color:#171717;border-color:var(--yellow);font-weight:750}.btn:disabled{opacity:.55;cursor:not-allowed}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}.filter{background:#202129;border:1px solid var(--line);border-radius:9px;color:var(--fg);padding:9px 13px;cursor:pointer}.filter.active{border-color:var(--yellow);color:var(--yellow)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.post{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}.post-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.tag{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--yellow);font-weight:750}.format{font-size:12px;color:var(--muted)}h2{font-size:19px;line-height:1.3;margin:10px 0 5px}.subject{font-size:13px;color:var(--muted)}.description{white-space:pre-wrap;overflow-wrap:anywhere;margin:13px 0}.byline{border-top:1px solid var(--line);padding-top:12px;color:var(--muted);font-size:13px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.sample{font-size:13px}.empty{grid-column:1/-1;text-align:center;padding:42px 15px;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}dialog{border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--fg);width:min(560px,calc(100% - 24px));padding:0;max-height:90vh}dialog::backdrop{background:#000a}.dlg{padding:22px}.dlg-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.dlg-head h2{margin:0 0 14px}.x{background:none;border:0;color:var(--muted);font-size:25px;cursor:pointer}.field{margin:13px 0}.field label{display:block;font-weight:650;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;background:#111217;color:var(--fg)}.field textarea{min-height:105px;resize:vertical}.hint{font-size:12px;color:var(--muted)}.err{color:var(--red);min-height:22px}.foot{margin-top:45px;border-top:1px solid var(--line);padding:20px 0;color:var(--muted);font-size:13px}
+@media(max-width:700px){.top .wrap{align-items:flex-start;padding:13px 0;flex-direction:column;gap:8px}nav{gap:13px}.intro{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="brand" href="/">Campus<span>Rent</span></a><nav><a href="/">Home</a><a href="/#messages">Messages</a><a href="/#my-space">My space</a><a class="active" href="/assignments.html">Assignments</a><a href="/help.html">Help</a></nav></div></header>
+<main class="wrap">
+<section class="intro"><div><div class="eyebrow">Student community</div><h1>Assignments</h1><p>Find a student who can help with handwritten or typed assignment work, or share your writing skills with others. Connect through CampusRent Messages and discuss the details together.</p></div><button class="btn primary" id="createBtn">Create a post</button></section>
+<div class="toolbar"><button class="filter active" data-filter="all">All posts</button><button class="filter" data-filter="request">Help wanted</button><button class="filter" data-filter="offer">Writing help offered</button></div>
+<section id="posts" class="grid" aria-live="polite"><div class="empty">Loading assignment posts...</div></section>
+<p class="hint">CampusRent only helps students connect. Any arrangements are discussed directly between students. Do not share private or sensitive information in sample files.</p>
+</main>
+<footer class="foot"><div class="wrap">CampusRent · Developed by Nasir Hussain · <a href="/help.html">Help Centre</a></div></footer>
+<dialog id="createDialog"><form class="dlg" id="createForm">
+<div class="dlg-head"><h2>Create an assignment post</h2><button class="x" type="button" data-close aria-label="Close">×</button></div>
+<div class="field"><label for="kind">What do you want to do?</label><select id="kind" required><option value="request">I need assignment help</option><option value="offer">I can write assignments</option></select></div>
+<div class="field"><label for="format">Work type</label><select id="format" required><option value="handwritten">Handwritten</option><option value="typed">Typed</option><option value="both">Both</option></select></div>
+<div class="field"><label for="title">Title</label><input id="title" maxlength="90" required placeholder="e.g. Need help with Engineering Maths assignment"></div>
+<div class="field"><label for="subject">Subject</label><input id="subject" maxlength="60" required placeholder="e.g. Engineering Mathematics"></div>
+<div class="field"><label for="description">Details</label><textarea id="description" maxlength="1200" required placeholder="Describe the kind of help or writing service you are looking for/offering."></textarea></div>
+<div class="field" id="sampleField"><label for="sample">Sample photo or PDF <span class="muted" id="sampleRequired">(required for writing offers)</span></label><input id="sample" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"><p class="hint">Upload a handwriting demo photo or a typed-work PDF. Maximum 5 MB. Avoid personal details.</p></div>
+<p class="err" id="error" role="alert"></p><button class="btn primary" type="submit" id="submitBtn">Publish post</button>
+</form></dialog>
+<script>
+(function(){
+'use strict';
+const API='/api',TOKEN_KEY='campusrent.token';
+const $=s=>document.querySelector(s);
+let posts=[],filter='all';window.currentUserId='';
+async function api(path,options){
+ options=options||{};const headers=options.headers||{};const token=localStorage.getItem(TOKEN_KEY)||'';if(token)headers.Authorization='Bearer '+token;
+ if(options.body&&!(options.body instanceof FormData))headers['Content-Type']='application/json';
+ const response=await fetch(API+path,Object.assign({},options,{headers}));let data={};try{data=await response.json()}catch(_){}
+ if(!response.ok)throw new Error(data.error||'Request failed.');return data;
+}
+function esc(value){return String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function formatLabel(value){return value==='handwritten'?'Handwritten':value==='typed'?'Typed':'Handwritten & typed';}
+function render(){
+ const list=posts.filter(p=>filter==='all'||p.kind===filter);
+ if(!list.length){$('#posts').innerHTML='<div class="empty">No posts here yet. Be the first to create one.</div>';return;}
+ $('#posts').innerHTML=list.map(p=>{
+ const own=(localStorage.getItem(TOKEN_KEY)||'')&&window.currentUserId===p.userId;
+ const sample=p.sampleUrl?'<a class="sample" href="'+esc(p.sampleUrl)+'" target="_blank" rel="noopener">View sample: '+esc(p.sampleName||'Open sample')+'</a>':'';
+ return '<article class="post"><div class="post-top"><span class="tag">'+(p.kind==='request'?'Help wanted':'Writing help offered')+'</span><span class="format">'+formatLabel(p.format)+'</span></div><h2>'+esc(p.title)+'</h2><div class="subject">'+esc(p.subject)+'</div><p class="description">'+esc(p.description)+'</p>'+sample+'<div class="byline">Posted by <strong>'+esc(p.userName)+'</strong>'+(p.college?' · '+esc(p.college):'')+'</div><div class="actions">'+(own?'<button class="btn" data-delete="'+esc(p.id)+'">Delete my post</button>':'<button class="btn primary" data-contact="'+esc(p.userId)+'">Contact through Messages</button>')+'</div></article>';
+ }).join('');
+}
+async function load(){try{const data=await api('/assignments');posts=data.posts||[];try{const profile=await api('/auth/me');window.currentUserId=profile.user&&profile.user.id||'';}catch(_){window.currentUserId='';}render()}catch(error){$('#posts').innerHTML='<div class="empty">'+esc(error.message)+'</div>';}}
+$('#kind').addEventListener('change',()=>{$('#sample').required=$('#kind').value==='offer';$('#sampleRequired').textContent=$('#kind').value==='offer'?'(required for writing offers)':'(optional)';});
+$('#createBtn').addEventListener('click',()=>{if(!localStorage.getItem(TOKEN_KEY)){location.href='/?signup=1';return;}$('#error').textContent='';$('#createForm').reset();$('#sample').required=$('#kind').value==='offer';$('#createDialog').showModal();});
+document.querySelectorAll('[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{filter=btn.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===btn));render();}));
+document.addEventListener('click',async e=>{
+ const close=e.target.closest('[data-close]');if(close){$('#createDialog').close();return;}
+ const contact=e.target.closest('[data-contact]');if(contact){try{await api('/messages/requests',{method:'POST',body:JSON.stringify({userId:contact.dataset.contact})});alert('Message request sent. The student must approve it before you can chat.');}catch(error){alert(error.message+' Please log in and use a verified Gmail account.');}return;}
+ const del=e.target.closest('[data-delete]');if(del&&confirm('Delete this assignment post?')){try{await api('/assignments/'+encodeURIComponent(del.dataset.delete),{method:'DELETE'});await load();}catch(error){alert(error.message);}}
+});
+$('#createForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('#error').textContent='';const btn=$('#submitBtn');btn.disabled=true;btn.textContent='Publishing...';
+ try{
+ const fd=new FormData();['kind','format','title','subject','description'].forEach(id=>fd.append(id,$('#'+id).value.trim()));
+ const file=$('#sample').files[0];if(file){if(file.size>5*1024*1024)throw new Error('Sample must be 5 MB or smaller.');fd.append('sample',file);}
+ await api('/assignments',{method:'POST',body:fd});$('#createDialog').close();await load();alert('Your assignment post has been published.');
+ }catch(error){$('#error').textContent=error.message;}finally{btn.disabled=false;btn.textContent='Publish post';}
+});
+load();
+})();
+</script>
+</body></html>
