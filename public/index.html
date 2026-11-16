@@ -102,7 +102,7 @@
 .direct-search input:focus{border-color:#ffd60a!important;box-shadow:0 0 0 3px rgba(255,214,10,.1)!important}
 .inbox-tabs{display:flex;gap:8px;padding:11px 13px 9px;border-bottom:1px solid rgba(255,255,255,.06)}
 .inbox-tab{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:35px;padding:7px 11px;border:1px solid #30313c;border-radius:999px;background:#20212a;color:#c8c9d1;font:700 11px var(--font-body);white-space:nowrap}
-.inbox-tab.active{background:var(--yellow);border-color:var(--yellow);color:#171500}
+.inbox-tab.active{background:#242630!important;border-color:var(--yellow)!important;color:#fff!important;box-shadow:inset 0 0 0 1px rgba(255,214,10,.14)}
 .inbox-tab b{font:700 10px var(--font-mono);opacity:.8}
 .inbox-tab.request-inbox-trigger{width:auto;min-height:35px;margin:0;padding:7px 11px;border-radius:999px;background:#20212a;color:#d7d8df;border-color:#30313c}
 .inbox-tab.request-inbox-trigger:hover{border-color:var(--yellow);color:var(--yellow)}
@@ -164,6 +164,10 @@
  .inbox-tabs{gap:6px;padding:9px}
  .inbox-tab{padding:6px 9px;font-size:10px}
 }
+
+/* Messages contrast and profile photo controls */
+.inbox-tab.active{background:#242630!important;border-color:var(--yellow)!important;color:#fff!important}.inbox-tab.active b{color:var(--yellow)!important}
+.profile-photo-field{display:flex;align-items:center;gap:15px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}.profile-photo-preview{display:grid;place-items:center;flex:0 0 76px;width:76px;height:76px;border-radius:50%;overflow:hidden;background:#343643;color:#fff;font-size:28px;font-weight:800}.profile-photo-preview img{width:100%;height:100%;object-fit:cover}.profile-photo-controls{display:grid;gap:7px;min-width:0}.profile-photo-controls label{font-weight:700;font-size:13px}.profile-photo-controls input{max-width:100%;font-size:12px}.profile-photo-controls small{color:var(--muted);font-size:11px}.who .avatar img,.conversation-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}.conversation-avatar{overflow:hidden}
 </style></head><body>
 <div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
   <div class="loader-card">
@@ -1470,12 +1474,13 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <form id="profileForm" class="dlg" novalidate>
     <div class="dlg-head"><h2 id="profileTitle">Your profile</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
     <p class="hint">Your account details.</p>
+    <div class="profile-photo-field"><div id="profilePhotoPreview" class="profile-photo-preview">S</div><div class="profile-photo-controls"><label for="profilePhotoInput">Profile photo</label><input id="profilePhotoInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><small>Choose a photo up to 5 MB. You can change it anytime.</small></div></div>
     <div class="field"><label for="profileName">Display Name</label><input id="profileName" name="name" autocomplete="name" maxlength="80" required></div>
     <div class="field"><label for="profileCollege">College or University</label><input id="profileCollege" type="text" readonly aria-readonly="true" placeholder="Not added"></div>
     <div class="field"><label for="profileEmail">Logged-in Email</label><input id="profileEmail" type="email" readonly aria-readonly="true"></div>
     <p id="profileRole" class="hint" role="status" hidden></p>
     <p id="profileErr" class="err" role="alert"></p>
-    <div class="logout-actions"><button type="button" class="btn btn-danger" data-action="logout">Log out</button><button type="button" class="btn" data-action="close">Cancel</button><button type="submit" class="btn btn-primary" id="profileSave">Save name</button></div>
+    <div class="logout-actions"><button type="button" class="btn btn-danger" data-action="logout">Log out</button><button type="button" class="btn" data-action="close">Cancel</button><button type="submit" class="btn btn-primary" id="profileSave">Save profile</button></div>
   </form>
 </dialog>
 
@@ -1710,7 +1715,8 @@ function renderConversations() {
     var badge=x.unread?'<span class="unread-badge">'+x.unread+'</span>':'';
     var preview=x.last?x.last.body:(x.archived?'Rental returned · choose item to message again':'You are connected');
     var initial=String(x.other&&x.other.name||'S').trim().charAt(0).toUpperCase()||'S';
-    return '<button class="conversation-item '+(active?'active':'')+'" data-action="'+(x.type==='rental'?'open-conversation':'open-direct-chat')+'" data-id="'+esc(x.id)+'"><span class="conversation-avatar" aria-hidden="true">'+esc(initial)+'</span><span class="conversation-copy"><strong>'+esc(x.other.name)+' '+badge+'</strong><span>'+esc(x.title)+'</span><small>'+esc(preview)+'</small></span></button>';
+    var avatar=x.other&&x.other.profilePhoto?'<img src="'+esc(x.other.profilePhoto)+'" alt="">':esc(initial);
+    return '<button class="conversation-item '+(active?'active':'')+'" data-action="'+(x.type==='rental'?'open-conversation':'open-direct-chat')+'" data-id="'+esc(x.id)+'"><span class="conversation-avatar" aria-hidden="true">'+avatar+'</span><span class="conversation-copy"><strong>'+esc(x.other.name)+' '+badge+'</strong><span>'+esc(x.title)+'</span><small>'+esc(preview)+'</small></span></button>';
   }).join('');
   list.scrollTop=previousScroll;
 }
@@ -1922,7 +1928,8 @@ var toastTimer=null;function toast(msg){var t=$('#toast');t.textContent=msg;t.cl
 function phSvg(cat){return '<svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[cat]||ICONS.other)+'</svg>'}
 function imgHtml(it){var photos=it&&it.photos&&it.photos.length?it.photos:(it&&it.photo?[it.photo]:[]);if(photos.length)return '<img src="'+esc(photos[0])+'" alt="" loading="lazy">';return '<span class="ph">'+phSvg(it?it.cat:'other')+'</span>'}
 function statusPill(it){if(it.status==='rented')return '<span class="pill">Rented out</span>';if(it.status==='paused')return '<span class="pill">Paused</span>';return '<span class="pill ok">Available</span>'}
-function renderHeader(){var u=me(),a=$('#authArea');if(u){a.innerHTML='<button type="button" class="who" data-action="edit-profile" title="Your profile"><span class="avatar" aria-hidden="true">'+esc(u.name.charAt(0).toUpperCase())+'</span><span class="nm">'+esc(u.name)+'</span></button><button class="btn btn-sm btn-primary" data-action="open-list">List an item</button>'}else a.innerHTML='<button class="btn btn-sm" data-action="open-login">Log in</button><button class="btn btn-sm btn-primary" data-action="open-signup">Sign up</button>'}
+function avatarMarkup(user,cls){var name=String(user&&user.name||'Student'),photo=user&&user.profilePhoto;return '<span class="'+(cls||'avatar')+'">'+(photo?'<img src="'+esc(photo)+'" alt="">':esc(name.trim().charAt(0).toUpperCase()||'S'))+'</span>'}
+function renderHeader(){var u=me(),a=$('#authArea');if(u){a.innerHTML='<button type="button" class="who" data-action="edit-profile" title="Your profile">'+avatarMarkup(u,'avatar')+'<span class="nm">'+esc(u.name)+'</span></button><button class="btn btn-sm btn-primary" data-action="open-list">List an item</button>'}else a.innerHTML='<button class="btn btn-sm" data-action="open-login">Log in</button><button class="btn btn-sm btn-primary" data-action="open-signup">Sign up</button>'}
 function visibleItems(){var u=me();var college=function(v){return String(v||'').trim().toLowerCase().replace(/\\s+/g,' ')};var myCollege=college(u&&u.college);return state.items.filter(function(i){if(i.status==='paused')return false;if(u&&u.isAdmin)return true;if(!myCollege)return true;return college(i.ownerCollege)===myCollege})}
 function renderReadout(){var v=visibleItems(),out=v.filter(function(i){return i.status==='rented'}).length;$('#rdOpen').textContent=v.length;$('#rdOut').textContent=out}
 function renderKeys(){var v=visibleItems(),html='<button class="key" data-action="key" data-cat="all" aria-pressed="'+(ui.cat==='all')+'">All<span class="n">'+v.length+'</span></button>';CATS.forEach(function(c){var n=v.filter(function(i){return i.cat===c.id}).length;html+='<button class="key" data-action="key" data-cat="'+c.id+'" aria-pressed="'+(ui.cat===c.id)+'">'+esc(c.label)+'<span class="n">'+n+'</span></button>'});$('#keys').innerHTML=html}
@@ -2152,18 +2159,14 @@ $('#forgotPasswordBtn').addEventListener('click',function(e){
   $('#authErr').textContent='';
 });
 async function afterAuth(isNewSignup){await refresh();var p=ui.pending;ui.pending=null;$('#authForm').reset();$('#dlgAuth').close();toast('Welcome, '+me().name.split(' ')[0]+'.');if(p==='space'){if(location.hash==='#my-space')route();else goToView('my-space')}else if(p==='list')openList();else if(p&&p.item)openItem(p.item);else if(location.hash==='#my-space')route();if(isNewSignup){if(!$('#dlgWelcome').open)$('#dlgWelcome').showModal()}}
+$('#profilePhotoInput').addEventListener('change',function(){var file=this.files&&this.files[0],preview=$('#profilePhotoPreview');if(!file){preview.innerHTML=me()&&me().profilePhoto?'<img src="'+esc(me().profilePhoto)+'" alt="Profile photo">':esc((me()&&me().name||'S').charAt(0).toUpperCase());return;}if(file.size>5*1024*1024){this.value='';$('#profileErr').textContent='Photo must be smaller than 5 MB.';return;}var reader=new FileReader();reader.onload=function(){preview.innerHTML='<img src="'+reader.result+'" alt="Selected profile photo">'};reader.readAsDataURL(file);});
 $('#profileForm').addEventListener('submit',async function(e){
-  e.preventDefault();
-  var name=$('#profileName').value.trim();
-  $('#profileErr').textContent='';
+  e.preventDefault();var name=$('#profileName').value.trim(),photo=$('#profilePhotoInput').files&&$('#profilePhotoInput').files[0];$('#profileErr').textContent='';
   if(name.length<2)return $('#profileErr').textContent='Name must be at least 2 characters.';
+  if(photo&&photo.size>5*1024*1024)return $('#profileErr').textContent='Photo must be smaller than 5 MB.';
   var save=$('#profileSave');save.disabled=true;save.textContent='Saving...';
-  try{
-    var data=await api('/auth/me',{method:'PATCH',body:JSON.stringify({name:name})});
-    state.user=data.user;renderHeader();$('#dlgProfile').close();toast('Your name has been updated.');
-    if(location.hash==='#my-space')renderSpace();
-  }catch(ex){$('#profileErr').textContent=ex.message;}
-  finally{save.disabled=false;save.textContent='Save name';}
+  try{if(photo){var fd=new FormData();fd.append('photo',photo);var uploaded=await api('/auth/me/photo',{method:'POST',body:fd});state.user=uploaded.user;}var data=await api('/auth/me',{method:'PATCH',body:JSON.stringify({name:name})});state.user=data.user;renderHeader();$('#dlgProfile').close();toast('Profile updated successfully.');if(location.hash==='#my-space')renderSpace();}
+  catch(ex){$('#profileErr').textContent=ex.message;}finally{save.disabled=false;save.textContent='Save profile';}
 });
 $('#authForm').addEventListener('submit',async function(e){
   e.preventDefault();
@@ -2290,6 +2293,7 @@ document.addEventListener('click', async function(e) {
 
     case 'edit-profile':
       $('#profileName').value=me()?me().name:'';
+      $('#profilePhotoInput').value='';$('#profilePhotoPreview').innerHTML=me()&&me().profilePhoto?'<img src="'+esc(me().profilePhoto)+'" alt="Profile photo">':esc((me()&&me().name||'S').charAt(0).toUpperCase());
       $('#profileCollege').value=me()&&me().college?me().college:'Not added';
       $('#profileEmail').value=me()?me().email:'';
       $('#profileErr').textContent='';
@@ -2301,6 +2305,7 @@ document.addEventListener('click', async function(e) {
       api('/auth/me').then(function(data){
         state.user=data.user;
         $('#profileName').value=data.user.name||'';
+        $('#profilePhotoPreview').innerHTML=data.user.profilePhoto?'<img src="'+esc(data.user.profilePhoto)+'" alt="Profile photo">':esc((data.user.name||'S').charAt(0).toUpperCase());
         $('#profileCollege').value=data.user.college&&data.user.college.trim()?data.user.college:'Not added';
         $('#profileEmail').value=data.user.email||'';
         var owner=String(data.user.email||'').trim().toLowerCase()==='mdnasirhussain121@gmail.com';
