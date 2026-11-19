@@ -1459,7 +1459,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
    <div class="quick-print-art"><div class="quick-print-paper">PRINT<br><strong>READY.</strong><small>FAST LANE · CAMPUS</small></div><div class="quick-print-printer"><i></i><b></b><span></span></div></div>
   </section>
   <div class="quick-print-intro"><div><p class="help-kicker">YOUR CAMPUS PRINT DESK</p><h2>Less waiting.<br>More doing.</h2></div><p>Compare normal and priority rates before calling the shop. Quick Print costs a little extra for faster service.</p></div>
-  <section id="quickPrintListingSection"><div class="stay-section-head"><div><p class="help-kicker">APPROVED LOCAL SHOPS</p><h2>Find your printer<span>.</span></h2><p>Call the shop directly to confirm file format, price and pickup time.</p></div><button class="btn btn-primary" type="button" data-action="open-quick-shop-form">＋ List your shop</button></div><div id="quickPrintListings" class="quick-print-grid"><div class="stay-empty">Loading print shops...</div></div></section>
+  <section id="quickPrintListingSection"><div class="stay-section-head"><div><p class="help-kicker">APPROVED LOCAL SHOPS</p><h2>Find your printer<span>.</span></h2><p>Message the shop on WhatsApp to confirm file format, price and pickup time.</p></div><button class="btn btn-primary" type="button" data-action="open-quick-shop-form">＋ List your shop</button></div><div id="quickPrintListings" class="quick-print-grid"><div class="stay-empty">Loading print shops...</div></div></section>
   <p class="stay-footnote">Only admin-approved print shops appear here. Prices and turnaround times are provided by shop owners; confirm before placing an order.</p>
  </div>
 </section>
@@ -2275,7 +2275,11 @@ function renderQuickPrint(){
  if(!quickPrintData.length){box.innerHTML='<div class="quick-print-empty"><div style="font-size:34px;color:var(--yellow);margin-bottom:8px">▤</div><strong style="display:block;color:var(--fg);font-size:18px;margin-bottom:7px">No approved print shops yet</strong><p>Know a printer near campus? Add their details and help students skip the queue.</p><button class="btn btn-primary" style="margin-top:14px" data-action="open-quick-shop-form">＋ List a print shop</button></div>';return}
  box.innerHTML=quickPrintData.map(function(s){
   var mine=me()&&s.ownerId===me().id;
-  return '<article class="quick-print-card"><span class="stay-type">QUICK PRINT · APPROVED</span><h3>'+esc(s.title)+'</h3><p class="qp-location">⌖ '+esc(s.address)+'</p><div class="qp-rates"><div class="qp-rate"><small>Normal print / page</small><strong>'+inr(s.normalRate)+'</strong></div><div class="qp-rate quick"><small>Priority print / page</small><strong>'+inr(s.quickRate)+'</strong></div></div><div class="qp-card-foot"><span>◷ About '+esc(String(s.etaMinutes))+' minutes</span><span>☎ '+esc(s.phone)+'</span></div><div class="qp-actions"><a class="btn btn-primary" href="tel:'+encodeURIComponent(s.phone)+'">Call printer</a>'+(mine?'<button class="btn btn-danger" data-action="delete-quick-print" data-id="'+esc(s.id)+'">Remove</button>':'')+'</div></article>';
+  var waPhone=String(s.phone||'').replace(/\\D/g,'');
+  if(waPhone.length===10)waPhone='91'+waPhone;
+  else if(waPhone.length===11&&waPhone.charAt(0)==='0')waPhone=waPhone.slice(1);
+  var waUrl='https://wa.me/'+waPhone+'?text='+encodeURIComponent('Hi, I found your print shop on CampusRent. I need printing. Please share the details and availability.');
+  return '<article class="quick-print-card"><span class="stay-type">QUICK PRINT · APPROVED</span><h3>'+esc(s.title)+'</h3><p class="qp-location">⌖ '+esc(s.address)+'</p><div class="qp-rates"><div class="qp-rate"><small>Normal print / page</small><strong>'+inr(s.normalRate)+'</strong></div><div class="qp-rate quick"><small>Priority print / page</small><strong>'+inr(s.quickRate)+'</strong></div></div><div class="qp-card-foot"><span>◷ About '+esc(String(s.etaMinutes))+' minutes</span><span>☎ '+esc(s.phone)+'</span></div><div class="qp-actions"><a class="btn btn-primary" href="'+waUrl+'" target="_blank" rel="noopener noreferrer">WhatsApp printer ↗</a>'+(mine?'<button class="btn btn-danger" data-action="delete-quick-print" data-id="'+esc(s.id)+'">Remove</button>':'')+'</div></article>';
  }).join('');
 }
 $('#quickPrintForm').addEventListener('submit',async function(e){
