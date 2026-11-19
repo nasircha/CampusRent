@@ -2247,7 +2247,7 @@ function renderAdminQuickPrint(){
 
 function showView(space, messages, help, assignments, stays, quickPrint) {
   messages=!!messages; help=!!help; assignments=!!assignments;
-  var previousView=document.querySelector('#viewStays:not([hidden]),#viewMsgs:not([hidden]),#viewSpace:not([hidden]),#viewHelp:not([hidden]),#viewAssignments:not([hidden]),#viewBrowse:not([hidden])');
+  var previousView=document.querySelector('#viewStays:not([hidden]),#viewMsgs:not([hidden]),#viewSpace:not([hidden]),#viewHelp:not([hidden]),#viewAssignments:not([hidden]),#viewQuickPrint:not([hidden]),#viewBrowse:not([hidden])');
   var nextView=quickPrint?$('#viewQuickPrint'):stays?$('#viewStays'):space?$('#viewSpace'):messages?$('#viewMsgs'):help?$('#viewHelp'):assignments?$('#viewAssignments'):$('#viewBrowse');
   var previousName=previousView&&previousView.id||'viewBrowse',nextName=nextView&&nextView.id||'viewBrowse';
   var viewOrder={viewBrowse:0,viewStays:1,viewMsgs:2,viewSpace:3,viewHelp:4,viewAssignments:5,viewQuickPrint:6};
@@ -2262,6 +2262,7 @@ function showView(space, messages, help, assignments, stays, quickPrint) {
   else if(help){$('#navHelp').setAttribute('aria-current','page');}
   else if(assignments){$('#navAssignments').setAttribute('aria-current','page');loadAssignmentPosts();}
   else if(stays){$('#navStays').setAttribute('aria-current','page');loadStays();}
+  else if(quickPrint){$('#navQuickPrint').setAttribute('aria-current','page');loadQuickPrint();}
   else{$('#navBrowse').setAttribute('aria-current','page');renderBrowse();}
   window.scrollTo(0,0);
 }
