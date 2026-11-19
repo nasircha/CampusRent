@@ -186,6 +186,8 @@
 @media(max-width:390px){.stay-benefits{grid-template-columns:1fr}.stay-benefits>div{grid-column:auto}}
 .stay-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}.stay-card{overflow:hidden;border:1px solid #303137;border-radius:14px;background:#17181c}.stay-cover{height:190px;background:#24252d;display:grid;place-items:center;overflow:hidden}.stay-cover img{width:100%;height:100%;object-fit:cover}.stay-cover-placeholder{color:#d5ad58;font-size:42px}.stay-card-body{padding:15px}.stay-card h2{font-size:18px;margin:8px 0}.stay-type{color:#d9b65f;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.stay-meta{color:#a7a8b1;font-size:13px;margin-top:6px;line-height:1.5}.stay-price{font-size:20px;font-weight:850;color:#ffe082;margin-top:12px}.stay-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.stay-actions .btn{flex:1}.stay-empty{grid-column:1/-1;text-align:center;padding:35px 15px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}.stay-footnote{margin-top:20px;color:var(--muted);font-size:12px}.stay-detail-photo{width:100%;max-height:300px;object-fit:cover;border-radius:9px}.stay-detail-title{font-size:22px}.stay-owner{padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}#dlgStay{width:min(620px,calc(100% - 24px));max-height:92dvh}#dlgStay .dlg{padding:20px}@media(max-width:600px){.stay-grid{grid-template-columns:1fr}.stay-cover{height:205px}.stay-toolbar{align-items:stretch}.stay-toolbar>#stayCreateBtn{width:100%}.stay-filters{overflow-x:auto;flex-wrap:nowrap}.stay-filter{white-space:nowrap}}
 
+
+.quick-print-page{padding:34px 0 60px}.quick-print-centre{max-width:1100px}.quick-print-hero{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:center;min-height:350px;padding:clamp(24px,5vw,54px);overflow:hidden;border:1px solid #383629;border-radius:18px;background:radial-gradient(circle at 80% 20%,rgba(255,214,10,.17),transparent 38%),linear-gradient(130deg,#191a20,#101116)}.quick-print-hero h1{font-size:clamp(2.5rem,6vw,4.6rem);letter-spacing:-.055em;margin:12px 0}.quick-print-hero h1 span{color:var(--yellow)}.quick-print-hero p:not(.help-kicker){max-width:470px;color:var(--muted);font-size:16px;margin:0 0 22px}.quick-print-art{height:240px;position:relative;display:grid;place-items:center}.quick-print-paper{position:absolute;z-index:2;transform:rotate(-7deg);width:145px;height:185px;padding:25px 16px;background:#f3f0e4;color:#17160e;font:700 22px var(--font-mono);box-shadow:0 20px 50px #0008}.quick-print-paper strong{color:#a68a00}.quick-print-paper small{display:block;margin-top:35px;font-size:8px;letter-spacing:.1em}.quick-print-printer{position:absolute;right:8%;bottom:15px;width:230px;height:110px;border-radius:15px;background:linear-gradient(145deg,#45464d,#202127);box-shadow:0 25px 45px #0008}.quick-print-printer i{position:absolute;left:24px;right:24px;top:-28px;height:48px;border-radius:5px;background:#d8d6ce}.quick-print-printer b{position:absolute;left:28px;right:28px;top:25px;height:9px;background:#111}.quick-print-printer span{position:absolute;right:18px;bottom:15px;width:9px;height:9px;border-radius:50%;background:var(--yellow);box-shadow:0 0 16px var(--yellow)}.quick-print-intro{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:end;padding:52px 0 30px}.quick-print-intro h2{font-size:clamp(2rem,4vw,3rem)}.quick-print-intro>p{max-width:460px;color:var(--muted);line-height:1.7}.quick-print-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}.quick-print-card{padding:19px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#202127,#17181e);min-width:0}.quick-print-card h3{font-size:20px;margin:9px 0 5px}.quick-print-card .qp-location{color:var(--muted);font-size:13px}.qp-rates{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:15px 0}.qp-rate{padding:12px;border-radius:9px;background:#2a2b31}.qp-rate.quick{background:#38321a;border:1px solid #62551a}.qp-rate small{display:block;color:var(--muted);font-size:11px}.qp-rate.quick small,.qp-rate.quick strong{color:var(--yellow)}.qp-rate strong{display:block;font-size:23px;margin-top:3px}.qp-card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px}.qp-actions{display:flex;gap:8px;margin-top:15px}.qp-actions .btn{flex:1;text-align:center}.quick-print-empty{grid-column:1/-1;padding:38px 18px;text-align:center;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}@media(max-width:700px){.quick-print-page{padding-top:18px}.quick-print-hero{grid-template-columns:1fr;min-height:0;padding:25px 20px}.quick-print-art{height:185px}.quick-print-printer{right:6%;transform:scale(.82);transform-origin:right bottom}.quick-print-paper{transform:rotate(-7deg) scale(.85)}.quick-print-intro{grid-template-columns:1fr;gap:12px;padding:36px 0 22px}.quick-print-grid{grid-template-columns:1fr}.qp-card-foot{align-items:flex-start;flex-direction:column}}
 </style></head><body>
 <div id="appLoader" role="status" aria-live="polite" aria-label="Loading CampusRent">
   <div class="loader-card">
@@ -1316,6 +1318,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
     <nav class="nav" aria-label="Main">
   <a id="navBrowse" href="#browse">Home</a>
   <a id="navStays" href="#stays">Hostel &amp; Flats</a>
+  <a id="navQuickPrint" href="#quick-print">Quick Print</a>
   <a id="navMessages" href="#messages">Messages<span class="nav-alert-badge" id="messagesNavBadge" hidden></span></a>
   <a id="navAssignments" href="#assignments">Assignments</a>
   <a id="navHelp" href="#help">Help</a>
@@ -1407,6 +1410,17 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
    <p class="stay-footnote">Listings are reviewed by the CampusRent admin team before they appear. Confirm facilities and house rules with the owner before visiting.</p>
   </div>
  </section>
+<section id="viewQuickPrint" class="space quick-print-page" hidden>
+ <div class="wrap quick-print-centre">
+  <section class="quick-print-hero">
+   <div><p class="help-kicker">CAMPUS SERVICES · INTEGRAL UNIVERSITY</p><h1>Skip the queue.<br><span>Print it faster.</span></h1><p>Find nearby print shops offering priority printing for practical files, assignments and notes.</p><button class="btn btn-primary" type="button" data-action="scroll-quick-shops">Explore print shops ↗</button></div>
+   <div class="quick-print-art"><div class="quick-print-paper">PRINT<br><strong>READY.</strong><small>FAST LANE · CAMPUS</small></div><div class="quick-print-printer"><i></i><b></b><span></span></div></div>
+  </section>
+  <div class="quick-print-intro"><div><p class="help-kicker">YOUR CAMPUS PRINT DESK</p><h2>Less waiting.<br>More doing.</h2></div><p>Compare normal and priority rates before calling the shop. Quick Print costs a little extra for faster service.</p></div>
+  <section id="quickPrintListingSection"><div class="stay-section-head"><div><p class="help-kicker">APPROVED LOCAL SHOPS</p><h2>Find your printer<span>.</span></h2><p>Call the shop directly to confirm file format, price and pickup time.</p></div><button class="btn btn-primary" type="button" data-action="open-quick-shop-form">＋ List your shop</button></div><div id="quickPrintListings" class="quick-print-grid"><div class="stay-empty">Loading print shops...</div></div></section>
+  <p class="stay-footnote">Only admin-approved print shops appear here. Prices and turnaround times are provided by shop owners; confirm before placing an order.</p>
+ </div>
+</section>
     <section id="viewMsgs" class="messages-view" hidden>
     <div class="wrap">
       <div class="messages-page-heading"><div><h1>Messages</h1><p>Stay connected with students and manage your conversations.</p></div></div>
@@ -1571,6 +1585,16 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   </form>
 </dialog>
 
+<dialog id="dlgQuickPrint"><form class="dlg" id="quickPrintForm" novalidate>
+ <div class="dlg-head"><h2>List your print shop</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
+ <p class="muted" style="margin-bottom:14px">Your shop will appear after admin approval.</p>
+ <div class="field"><label for="qpTitle">Shop name</label><input id="qpTitle" maxlength="80" placeholder="e.g. Campus Quick Xerox" required></div>
+ <div class="field"><label for="qpAddress">Shop location</label><input id="qpAddress" maxlength="180" placeholder="Near main gate, landmark or full address" required></div>
+ <div class="field"><label for="qpPhone">Phone number</label><input id="qpPhone" type="tel" maxlength="20" placeholder="Contact number" required></div>
+ <div class="two"><div class="field"><label for="qpNormal">Normal print (₹ / page)</label><input id="qpNormal" type="number" min="1" max="100" value="2" required></div><div class="field"><label for="qpQuick">Quick Print (₹ / page)</label><input id="qpQuick" type="number" min="1" max="150" value="3" required></div></div>
+ <div class="field"><label for="qpEta">Estimated quick-print time</label><select id="qpEta"><option value="5">About 5 minutes</option><option value="10" selected>About 10 minutes</option><option value="15">About 15 minutes</option><option value="20">About 20 minutes</option><option value="30">About 30 minutes</option></select></div>
+ <p id="quickPrintError" class="err" role="alert"></p><button class="btn btn-primary" id="quickPrintSubmit" type="submit">Submit for approval</button>
+ </form></dialog>
 <dialog id="dlgStay"><form class="dlg" id="stayForm" novalidate>
   <div class="dlg-head"><h2>List your place</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
   <div class="field"><label for="stayType">Type</label><select id="stayType"><option value="HOSTEL">Hostel</option><option value="PG">PG</option><option value="FLAT">Flat</option></select></div>
@@ -2080,7 +2104,7 @@ function renderAdminActivity(){var panel=$('#adminActivityPanel');if(!panel||!ad
 function renderAdminActivityKeep(q,kind){renderAdminActivityWithFilters(q,kind)}
 function renderAdminActivityWithFilters(q,kind){var panel=$('#adminActivityPanel');if(!panel||!adminActivityData)return;var d=adminActivityData,s=d.summary||{},term=(q||'').trim().toLowerCase(),rows=(d.activities||[]).filter(function(a){return(kind==='all'||a.event===kind)&&(!term||(a.name+' '+a.email+' '+a.college).toLowerCase().includes(term))}),users=(d.users||[]).filter(function(u){return !term||(u.name+' '+u.email+' '+u.college).toLowerCase().includes(term)});panel.innerHTML='<div class="stats"><div class="readout"><div class="row"><span class="k">Registered users</span><span class="v">'+(s.totalUsers||0)+'</span></div></div><div class="readout"><div class="row"><span class="k">Verified emails</span><span class="v">'+(s.verifiedUsers||0)+'</span></div></div><div class="readout"><div class="row"><span class="k">Currently logged in</span><span class="v">'+(s.loggedInNow||0)+'</span></div></div><div class="readout"><div class="row"><span class="k">Currently logged out</span><span class="v">'+(s.loggedOut||0)+'</span></div></div><div class="readout"><div class="row"><span class="k">Signups tracked</span><span class="v">'+(s.totalSignups||0)+'</span></div></div></div><div class="sec-head" style="margin-top:22px"><h2>User accounts</h2><span class="muted">'+users.length+' shown</span></div><div class="search" style="margin:12px 0"><input id="activitySearch" placeholder="Search name, email or college" value="'+esc(q||'')+'"><select id="activityKind"><option value="all" '+(kind==='all'?'selected':'')+'>All activity</option><option value="signup" '+(kind==='signup'?'selected':'')+'>Signups</option><option value="login" '+(kind==='login'?'selected':'')+'>Logins</option><option value="logout" '+(kind==='logout'?'selected':'')+'>Logouts</option></select></div><div style="overflow-x:auto"><table class="activity-table" style="width:100%;border-collapse:collapse;min-width:760px"><thead><tr><th align="left">Name / Email</th><th align="left">College</th><th align="left">Joined</th><th align="left">Live status</th><th align="left">Last activity</th><th align="left">Last login</th><th align="left">Email status</th></tr></thead><tbody>'+users.map(function(u){var online=u.presence==='logged_in';return '<tr><td>'+esc(u.name)+'<br><small>'+esc(u.email)+'</small></td><td>'+esc(u.college||'—')+'</td><td>'+new Date(u.createdAt).toLocaleString('en-IN')+'</td><td><span class="activity-status '+(online?'online':'offline')+'">'+(online?'● Logged in':'● Logged out')+'</span></td><td>'+(u.lastActivityAt?new Date(u.lastActivityAt).toLocaleString('en-IN'):'—')+'</td><td>'+(u.lastLoginAt?new Date(u.lastLoginAt).toLocaleString('en-IN'):'—')+'</td><td>'+(u.emailVerified?'Verified':'Unverified')+'</td></tr>'}).join('')+'</tbody></table></div><div class="sec-head" style="margin-top:24px"><h2>Recent activity</h2><span class="muted">'+rows.length+' shown</span></div><div style="overflow-x:auto"><table class="activity-table" style="width:100%;border-collapse:collapse;min-width:600px"><thead><tr><th align="left">Activity</th><th align="left">User</th><th align="left">College</th><th align="left">Date & time</th></tr></thead><tbody>'+rows.map(function(a){return '<tr><td><strong>'+({signup:'SIGN UP',login:'LOGIN',logout:'LOG OUT'}[a.event]||esc(a.event))+'</strong></td><td>'+esc(a.name)+'<br><small>'+esc(a.email)+'</small></td><td>'+esc(a.college||'—')+'</td><td>'+new Date(a.createdAt).toLocaleString('en-IN')+'</td></tr>'}).join('')+'</tbody></table></div>';var search=panel.querySelector('#activitySearch'),filter=panel.querySelector('#activityKind');search.addEventListener('input',function(){renderAdminActivityKeep(this.value,filter.value)});filter.addEventListener('change',function(){renderAdminActivityKeep(search.value,this.value)})}
 
-function renderSpace(){var u=me();if(!u)return;var isPlatformOwner=String(u.email||'').trim().toLowerCase()==='mdnasirhussain121@gmail.com';var mine=state.items.filter(function(i){return i.ownerId===u.id}),incoming=state.rentals.filter(function(r){return r.ownerId===u.id}),outgoing=state.rentals.filter(function(r){return r.renterId===u.id}),out=incoming.filter(function(r){return r.status==='accepted'}).length,pend=incoming.filter(function(r){return r.status==='pending'}).length;var h='<div class="sec-head"><h1>Hi, '+esc(u.name.split(' ')[0])+'</h1><button class="btn btn-primary" data-action="open-list">List an item</button></div><div class="stats"><div class="readout"><div class="row"><span class="k">Total added items</span><span class="v">'+mine.length+'</span></div></div><div class="readout"><div class="row"><span class="k">Out on rent</span><span class="v">'+out+'</span></div></div></div><div class="tabs" role="tablist">'+tabBtn('listings','My listings',mine.length,false)+tabBtn('requests','Requests to me',incoming.length,pend>0)+tabBtn('rentals','My rentals',outgoing.length,false)+(isPlatformOwner?tabBtn('admin','Admin review',state.items.length,false)+tabBtn('stayApproval','Hostel approval','NEW',false)+tabBtn('activity','User activity','NEW',false):'')+'</div>';h+=ui.tab==='admin'&&isPlatformOwner?adminListingsHtml(state.items):ui.tab==='stayApproval'&&isPlatformOwner?'<div id="adminStaysPanel" class="empty">Loading accommodation approvals...</div>':ui.tab==='activity'&&isPlatformOwner?'<div id="adminActivityPanel" class="empty">Loading user activity...</div>':ui.tab==='listings'?listingsHtml(mine):ui.tab==='requests'?requestsHtml(incoming):rentalsHtml(outgoing);$('#spaceBody').innerHTML=h;if(ui.tab==='stayApproval'&&isPlatformOwner){loadAdminStays()}if(ui.tab==='activity'&&isPlatformOwner){if(adminActivityData)renderAdminActivity();loadAdminActivity();startAdminActivityLive()}else stopAdminActivityLive()}
+function renderSpace(){var u=me();if(!u)return;var isPlatformOwner=String(u.email||'').trim().toLowerCase()==='mdnasirhussain121@gmail.com';var mine=state.items.filter(function(i){return i.ownerId===u.id}),incoming=state.rentals.filter(function(r){return r.ownerId===u.id}),outgoing=state.rentals.filter(function(r){return r.renterId===u.id}),out=incoming.filter(function(r){return r.status==='accepted'}).length,pend=incoming.filter(function(r){return r.status==='pending'}).length;var h='<div class="sec-head"><h1>Hi, '+esc(u.name.split(' ')[0])+'</h1><button class="btn btn-primary" data-action="open-list">List an item</button></div><div class="stats"><div class="readout"><div class="row"><span class="k">Total added items</span><span class="v">'+mine.length+'</span></div></div><div class="readout"><div class="row"><span class="k">Out on rent</span><span class="v">'+out+'</span></div></div></div><div class="tabs" role="tablist">'+tabBtn('listings','My listings',mine.length,false)+tabBtn('requests','Requests to me',incoming.length,pend>0)+tabBtn('rentals','My rentals',outgoing.length,false)+(isPlatformOwner?tabBtn('admin','Admin review',state.items.length,false)+tabBtn('stayApproval','Hostel approval','NEW',false)+tabBtn('printApproval','Quick Print review','NEW',false)+tabBtn('activity','User activity','NEW',false):'')+'</div>';h+=ui.tab==='admin'&&isPlatformOwner?adminListingsHtml(state.items):ui.tab==='stayApproval'&&isPlatformOwner?'<div id="adminStaysPanel" class="empty">Loading accommodation approvals...</div>':ui.tab==='printApproval'&&isPlatformOwner?'<div id="adminQuickPrintPanel" class="empty">Loading print shop approvals...</div>':ui.tab==='activity'&&isPlatformOwner?'<div id="adminActivityPanel" class="empty">Loading user activity...</div>':ui.tab==='listings'?listingsHtml(mine):ui.tab==='requests'?requestsHtml(incoming):rentalsHtml(outgoing);$('#spaceBody').innerHTML=h;if(ui.tab==='stayApproval'&&isPlatformOwner){loadAdminStays()}if(ui.tab==='printApproval'&&isPlatformOwner){loadAdminQuickPrint()}if(ui.tab==='activity'&&isPlatformOwner){if(adminActivityData)renderAdminActivity();loadAdminActivity();startAdminActivityLive()}else stopAdminActivityLive()}
 
 var assignmentPosts=[];
 var assignmentPostsLoaded=false;
@@ -2176,18 +2200,63 @@ $('#stayForm').addEventListener('submit',async function(e){
  finally{button.disabled=false;button.textContent='Submit for approval'}
 });
 
-function showView(space, messages, help, assignments, stays) {
+var quickPrintData=[],adminQuickPrintData=[];
+async function loadQuickPrint(){
+ var box=$('#quickPrintListings');if(!box)return;
+ if(!me()){box.innerHTML='<div class="quick-print-empty">Log in to see print shops listed for your college.</div>';return}
+ box.innerHTML='<div class="quick-print-empty">Finding approved print shops...</div>';
+ try{var data=await api('/quick-print');quickPrintData=data.shops||[];renderQuickPrint()}
+ catch(error){box.innerHTML='<div class="quick-print-empty">Could not load print shops. <button class="btn btn-sm" data-action="retry-quick-print">Try again</button></div>'}
+}
+function renderQuickPrint(){
+ var box=$('#quickPrintListings');if(!box)return;
+ if(!quickPrintData.length){box.innerHTML='<div class="quick-print-empty"><div style="font-size:34px;color:var(--yellow);margin-bottom:8px">▤</div><strong style="display:block;color:var(--fg);font-size:18px;margin-bottom:7px">No approved print shops yet</strong><p>Know a printer near campus? Add their details and help students skip the queue.</p><button class="btn btn-primary" style="margin-top:14px" data-action="open-quick-shop-form">＋ List a print shop</button></div>';return}
+ box.innerHTML=quickPrintData.map(function(s){
+  var mine=me()&&s.ownerId===me().id;
+  return '<article class="quick-print-card"><span class="stay-type">QUICK PRINT · APPROVED</span><h3>'+esc(s.title)+'</h3><p class="qp-location">⌖ '+esc(s.address)+'</p><div class="qp-rates"><div class="qp-rate"><small>Normal print / page</small><strong>'+inr(s.normalRate)+'</strong></div><div class="qp-rate quick"><small>Priority print / page</small><strong>'+inr(s.quickRate)+'</strong></div></div><div class="qp-card-foot"><span>◷ About '+esc(String(s.etaMinutes))+' minutes</span><span>☎ '+esc(s.phone)+'</span></div><div class="qp-actions"><a class="btn btn-primary" href="tel:'+encodeURIComponent(s.phone)+'">Call printer</a>'+(mine?'<button class="btn btn-danger" data-action="delete-quick-print" data-id="'+esc(s.id)+'">Remove</button>':'')+'</div></article>';
+ }).join('');
+}
+$('#quickPrintForm').addEventListener('submit',async function(e){
+ e.preventDefault();var err=$('#quickPrintError'),button=$('#quickPrintSubmit');
+ var normal=Number($('#qpNormal').value),quick=Number($('#qpQuick').value);
+ if($('#qpTitle').value.trim().length<3)return err.textContent='Enter a shop name.';
+ if($('#qpAddress').value.trim().length<3)return err.textContent='Enter the shop location.';
+ if($('#qpPhone').value.trim().length<8)return err.textContent='Enter a valid phone number.';
+ if(!(normal>=1&&normal<=100))return err.textContent='Enter a valid normal print rate.';
+ if(!(quick>normal&&quick<=150))return err.textContent='Quick Print rate must be higher than normal rate.';
+ button.disabled=true;button.textContent='Submitting...';
+ try{await api('/quick-print',{method:'POST',body:JSON.stringify({title:$('#qpTitle').value.trim(),address:$('#qpAddress').value.trim(),phone:$('#qpPhone').value.trim(),normalRate:normal,quickRate:quick,etaMinutes:Number($('#qpEta').value)})});$('#dlgQuickPrint').close();toast('Shop submitted for admin approval.');}
+ catch(error){err.textContent=error.message}
+ finally{button.disabled=false;button.textContent='Submit for approval'}
+});
+async function loadAdminQuickPrint(){
+ var panel=$('#adminQuickPrintPanel');if(!panel)return;
+ panel.innerHTML='<div class="empty">Loading print shop approvals...</div>';
+ try{var data=await api('/admin/quick-print');adminQuickPrintData=data.shops||[];renderAdminQuickPrint()}
+ catch(error){panel.innerHTML='<div class="empty">Could not load print shop approvals: '+esc(error.message)+' <button class="btn btn-sm" data-action="retry-admin-quick-print">Try again</button></div>'}
+}
+function renderAdminQuickPrint(){
+ var panel=$('#adminQuickPrintPanel');if(!panel)return;
+ if(!adminQuickPrintData.length){panel.innerHTML='<div class="empty">No print shop submissions yet.</div>';return}
+ panel.innerHTML=adminQuickPrintData.map(function(s){
+  var status=s.status==='available'?'Approved':s.status==='rejected'?'Rejected':'Pending approval';
+  var actions=s.status==='pending'?'<button class="btn btn-sm btn-primary" data-action="approve-quick-print" data-id="'+esc(s.id)+'">Approve</button><button class="btn btn-sm btn-danger" data-action="reject-quick-print" data-id="'+esc(s.id)+'">Reject</button>':s.status==='rejected'?'<button class="btn btn-sm btn-primary" data-action="approve-quick-print" data-id="'+esc(s.id)+'">Approve</button>':'<button class="btn btn-sm btn-danger" data-action="reject-quick-print" data-id="'+esc(s.id)+'">Revoke approval</button>';
+  return '<article class="quick-print-card" style="margin:12px 0"><span class="stay-type">'+status+'</span><h3>'+esc(s.title)+'</h3><p class="qp-location">'+esc(s.address)+'</p><p class="qp-location">Phone: '+esc(s.phone)+' · College: '+esc(s.college)+'</p><p class="qp-location">Normal: '+inr(s.normalRate)+' / page · Quick: '+inr(s.quickRate)+' / page · ETA: '+esc(String(s.etaMinutes))+' min</p><p class="qp-location">Owner: '+esc(s.ownerName)+' ('+esc(s.ownerEmail)+')</p><div class="stay-actions">'+actions+'</div></article>';
+ }).join('');
+}
+
+function showView(space, messages, help, assignments, stays, quickPrint) {
   messages=!!messages; help=!!help; assignments=!!assignments;
   var previousView=document.querySelector('#viewStays:not([hidden]),#viewMsgs:not([hidden]),#viewSpace:not([hidden]),#viewHelp:not([hidden]),#viewAssignments:not([hidden]),#viewBrowse:not([hidden])');
-  var nextView=stays?$('#viewStays'):space?$('#viewSpace'):messages?$('#viewMsgs'):help?$('#viewHelp'):assignments?$('#viewAssignments'):$('#viewBrowse');
+  var nextView=quickPrint?$('#viewQuickPrint'):stays?$('#viewStays'):space?$('#viewSpace'):messages?$('#viewMsgs'):help?$('#viewHelp'):assignments?$('#viewAssignments'):$('#viewBrowse');
   var previousName=previousView&&previousView.id||'viewBrowse',nextName=nextView&&nextView.id||'viewBrowse';
-  var viewOrder={viewBrowse:0,viewStays:1,viewMsgs:2,viewSpace:3,viewHelp:4,viewAssignments:5};
+  var viewOrder={viewBrowse:0,viewStays:1,viewMsgs:2,viewSpace:3,viewHelp:4,viewAssignments:5,viewQuickPrint:6};
   var slideClass=viewOrder[nextName]>=viewOrder[previousName]?'view-slide-in-right':'view-slide-in-left';
   if(!messages)stopChatAutoRefresh();
-  $('#viewBrowse').hidden=space||messages||help||assignments||stays; $('#viewSpace').hidden=!space; $('#viewMsgs').hidden=!messages; $('#viewHelp').hidden=!help; $('#viewAssignments').hidden=!assignments; $('#viewStays').hidden=!stays;
+  $('#viewBrowse').hidden=space||messages||help||assignments||stays||quickPrint; $('#viewSpace').hidden=!space; $('#viewMsgs').hidden=!messages; $('#viewHelp').hidden=!help; $('#viewAssignments').hidden=!assignments; $('#viewStays').hidden=!stays; $('#viewQuickPrint').hidden=!quickPrint;
   if(previousName!==nextName&&nextView){nextView.classList.remove('view-slide-in-left','view-slide-in-right');void nextView.offsetWidth;nextView.classList.add(slideClass);nextView.addEventListener('animationend',function(){nextView.classList.remove('view-slide-in-left','view-slide-in-right')},{once:true});}
   if(messages)markNavNotificationsSeen('messages'); if(space)markNavNotificationsSeen('space');
-  ['navBrowse','navMessages','navHelp','navAssignments','navStays'].forEach(function(id){var nav=$('#'+id);if(nav)nav.removeAttribute('aria-current')});
+  ['navBrowse','navQuickPrint','navMessages','navHelp','navAssignments','navStays'].forEach(function(id){var nav=$('#'+id);if(nav)nav.removeAttribute('aria-current')});
   if(space){$('#navSpace').setAttribute('aria-current','page');renderSpace();}
   else if(messages){$('#navMessages').setAttribute('aria-current','page');if(me()){if(!conversations.length)$('#conversationList').innerHTML='<div class="chat-empty">Your conversations will appear here.</div>';if(!activeConversationId&&!activeDirectChatId){$('#chatHeader').textContent='Select a conversation';$('#chatMessages').innerHTML='<p class="chat-placeholder">Your messages will appear here when you select a conversation.</p>';$('#chatForm').hidden=true;}loadConversations().catch(function(error){$('#conversationList').innerHTML='<p class="chat-placeholder">Could not load conversations. Please try again.</p>';toast(error.message);});}}
   else if(help){$('#navHelp').setAttribute('aria-current','page');}
@@ -2225,6 +2294,7 @@ function route() {
   var help = location.hash === '#help';
   var assignments = location.hash === '#assignments';
   var stays = location.hash === '#stays';
+  var quickPrint = location.hash === '#quick-print';
 
   if (space && !me()) {
     ui.pending = space ? 'space' : 'messages';
@@ -2233,7 +2303,7 @@ function route() {
     return;
   }
 
-  showView(space, messages, help, assignments, stays);
+  showView(space, messages, help, assignments, stays, quickPrint);
 }
 
 function openAuth(mode,hint){
@@ -2530,6 +2600,10 @@ document.addEventListener('click', async function(e) {
       break;
 
     case 'scroll-stay-listings': $('#stayListingSection').scrollIntoView({behavior:'smooth',block:'start'}); break;
+    case 'scroll-quick-shops': $('#quickPrintListingSection').scrollIntoView({behavior:'smooth',block:'start'}); break;
+    case 'open-quick-shop-form': if(!me()){openAuth('login','Log in to list your print shop.');break;} $('#quickPrintForm').reset();$('#quickPrintError').textContent='';$('#dlgQuickPrint').showModal();break;
+    case 'retry-quick-print': loadQuickPrint(); break;
+    case 'delete-quick-print': if(!confirm('Remove your print shop listing?'))break; try{await api('/quick-print/'+encodeURIComponent(id),{method:'DELETE'});await loadQuickPrint();toast('Print shop removed.')}catch(error){toast(error.message)} break;
     case 'open-stay-create': openStayForm(); break;
     case 'scroll-grid':
       $('#browse-grid').scrollIntoView({
@@ -2604,6 +2678,11 @@ case 'tab':
       break;
     case 'retry-admin-stays':
       loadAdminStays();
+      break;
+    case 'retry-admin-quick-print': loadAdminQuickPrint(); break;
+    case 'approve-quick-print':
+    case 'reject-quick-print':
+      try{await api('/admin/quick-print/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({decision:a==='approve-quick-print'?'approve':'reject'})});await loadAdminQuickPrint();toast(a==='approve-quick-print'?'Print shop approved and published.':'Print shop rejected.')}catch(error){toast(error.message)}
       break;
     case 'approve-stay':
     case 'reject-stay':
@@ -2694,7 +2773,7 @@ document.addEventListener('click',function(event){
   var link=event.target.closest('a[href^="#"]');
   if(!link)return;
   var hash=link.getAttribute('href');
-  if(hash==='#browse'||hash==='#messages'||hash==='#my-space'||hash==='#help'||hash==='#assignments'||hash==='#stays'){
+  if(hash==='#browse'||hash==='#messages'||hash==='#my-space'||hash==='#help'||hash==='#assignments'||hash==='#stays'||hash==='#quick-print'){
     event.preventDefault();
     goToView(hash);
   }
@@ -2795,6 +2874,7 @@ if(!navigator.onLine)showNetworkOffline();
   }
   route();
   if(location.hash==='#stays')loadStays();
+  if(location.hash==='#quick-print')loadQuickPrint();
   await refreshNavNotifications();
   window.setInterval(refreshNavNotifications,15000);
 })();
