@@ -6,7 +6,7 @@ const { requireAuth } = require('../middleware/auth');
 const shopInput = z.object({
   title: z.string().trim().min(3).max(80),
   address: z.string().trim().min(3).max(180),
-  phone: z.string().trim().regex(/^[+0-9()\\-\\s]{8,20}$/, 'Enter a valid phone number.'),
+  phone: z.string().trim().regex(/^[+0-9() -]{8,20}$/, 'Enter a valid phone number.'),
   normalRate: z.coerce.number().int().min(1).max(100),
   quickRate: z.coerce.number().int().min(1).max(150),
   etaMinutes: z.coerce.number().int().min(1).max(240).default(10)
