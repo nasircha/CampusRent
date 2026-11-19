@@ -44,7 +44,7 @@ router.get('/activity', requireAuth, requireAdmin, async (_req, res, next) => {
 router.get('/stays', requireAuth, requireAdmin, async (_req, res, next) => {
   try {
     const stays = await prisma.accommodation.findMany({
-      where: { status: { in: ['pending', 'available', 'rejected'] } },
+      where: { type: { not: 'PRINT_SHOP' }, status: { in: ['pending', 'available', 'rejected'] } },
       include: { owner: { select: { id: true, name: true, email: true } } },
       orderBy: [{ status: 'asc' }, { createdAt: 'desc' }]
     });
@@ -73,3 +73,41 @@ router.patch('/stays/:id', requireAuth, requireAdmin, async (req, res, next) => 
 });
 
 module.exports = router;
+
+
+router.get('/quick-print', requireAuth, requireAdmin, async (_req, res, next) => {
+  try {
+    const shops = await prisma.accommodation.findMany({
+      where: { type: 'PRINT_SHOP', status: { in: ['pending', 'available', 'rejected'] } },
+      include: { owner: { select: { id: true, name: true, email: true } } },
+      orderBy: [{ status: 'asc' }, { createdAt: 'desc' }]
+    });
+    res.json({ shops: shops.map(formatPrintShop) });
+  } catch (error) { next(error); }
+});
+
+router.patch('/quick-print/:id', requireAuth, requireAdmin, async (req, res, next) => {
+  try {
+    const decision = String(req.body?.decision || '');
+    if (!['approve', 'reject'].includes(decision)) return res.status(400).json({ error: 'Choose approve or reject.' });
+    const shop = await prisma.accommodation.findFirst({ where: { id: req.params.id, type: 'PRINT_SHOP' } });
+    if (!shop) return res.status(404).json({ error: 'Print shop listing not found.' });
+    const updated = await prisma.accommodation.update({
+      where: { id: shop.id },
+      data: { status: decision === 'approve' ? 'available' : 'rejected' }
+    });
+    res.json({ ok: true, status: updated.status });
+  } catch (error) { next(error); }
+});
+
+function formatPrintShop(shop) {
+  let details = {};
+  try { details = shop.description ? JSON.parse(shop.description) : {}; } catch (_) {}
+  return {
+    id: shop.id, title: shop.title, address: shop.address, phone: shop.contactPhone,
+    normalRate: shop.price, quickRate: Number(shop.distanceKm), etaMinutes: details.etaMinutes || 10,
+    photos: shop.photos || [], college: shop.college, status: shop.status,
+    ownerId: shop.ownerId, ownerName: details.ownerName || shop.owner?.name || '',
+    ownerEmail: shop.owner?.email || '', createdAt: shop.createdAt
+  };
+}
