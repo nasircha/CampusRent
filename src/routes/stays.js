@@ -27,7 +27,7 @@ router.get('/', requireAuth, async (req, res, next) => {
     const college = String(req.user.college || '').trim();
     if (!college) return res.json({ stays: [] });
     const stays = await prisma.accommodation.findMany({
-      where: { college, status: 'available' },
+      where: { college, status: 'available', type: { not: 'PRINT_SHOP' } },
       include: { owner: { select: { id: true, name: true } } },
       orderBy: { createdAt: 'desc' }
     });
