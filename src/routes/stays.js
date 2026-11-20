@@ -42,11 +42,12 @@ router.post('/', requireAuth, upload.array('photos', 5), async (req, res, next) 
     if (!String(req.user.college || '').trim()) return res.status(400).json({ error: 'Add your college to your account before listing a place.' });
     const parsed = input.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
-    if (parsed.data.contactPhone && !/^(?:\\+?91[-\\s]?)?[6-9]\\d{9}$/.test(parsed.data.contactPhone)) return res.status(400).json({ error: 'Enter a valid Indian mobile number.' });
+    const contactPhone = normalizeIndianPhone(parsed.data.contactPhone);
+    if (parsed.data.contactPhone && !contactPhone) return res.status(400).json({ error: 'Enter a valid 10-digit Indian mobile number.' });
     if (parsed.data.mapLink && !/^https:\/\/(?:maps\.app\.goo\.gl|(?:www\.)?google\.com\/maps|maps\.google\.com)\//i.test(parsed.data.mapLink)) return res.status(400).json({ error: 'Enter a valid Google Maps share link.' });
     const photos = await Promise.all((req.files || []).map(uploadPhoto));
     const stay = await prisma.accommodation.create({
-      data: { type: parsed.data.type, title: parsed.data.title, address: parsed.data.address, distanceKm: 0, price: 0, priceUnit: 'ROOM', totalRooms: 1, vacantRooms: 1, totalBeds: 0, vacantBeds: 0, contactPhone: '', description: JSON.stringify({ ownerName: parsed.data.ownerName, facilities: parsed.data.facilities, gateTiming: parsed.data.gateTiming, mapLink: parsed.data.mapLink }), contactPhone: parsed.data.contactPhone, photos, college: req.user.college, ownerId: req.user.id, status: 'pending' },
+      data: { type: parsed.data.type, title: parsed.data.title, address: parsed.data.address, distanceKm: 0, price: 0, priceUnit: 'ROOM', totalRooms: 1, vacantRooms: 1, totalBeds: 0, vacantBeds: 0, contactPhone: '', description: JSON.stringify({ ownerName: parsed.data.ownerName, facilities: parsed.data.facilities, gateTiming: parsed.data.gateTiming, mapLink: parsed.data.mapLink }), contactPhone, photos, college: req.user.college, ownerId: req.user.id, status: 'pending' },
       include: { owner: { select: { id: true, name: true } } }
     });
     res.status(201).json({ stay: { ...formatStay(stay), ownerName: parsed.data.ownerName, facilities: parsed.data.facilities, gateTiming: parsed.data.gateTiming } });
@@ -59,7 +60,8 @@ router.patch('/:id', requireAuth, upload.array('photos', 5), async (req, res, ne
     if (!stay || stay.ownerId !== req.user.id || stay.type === 'PRINT_SHOP') return res.status(404).json({ error: 'Listing not found.' });
     const parsed = input.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
-    if (parsed.data.contactPhone && !/^(?:\\+?91[-\\s]?)?[6-9]\\d{9}$/.test(parsed.data.contactPhone)) return res.status(400).json({ error: 'Enter a valid Indian mobile number.' });
+    const contactPhone = normalizeIndianPhone(parsed.data.contactPhone);
+    if (parsed.data.contactPhone && !contactPhone) return res.status(400).json({ error: 'Enter a valid 10-digit Indian mobile number.' });
     if (parsed.data.mapLink && !/^https:\/\/(?:maps\.app\.goo\.gl|(?:www\.)?google\.com\/maps|maps\.google\.com)\//i.test(parsed.data.mapLink)) return res.status(400).json({ error: 'Enter a valid Google Maps share link.' });
     let keptPhotos = [];
     try { keptPhotos = JSON.parse(String(req.body.keepPhotos || '[]')); } catch (_) { return res.status(400).json({ error: 'Invalid existing photo list.' }); }
@@ -71,7 +73,7 @@ router.patch('/:id', requireAuth, upload.array('photos', 5), async (req, res, ne
       where: { id: stay.id },
       data: {
         type: parsed.data.type, title: parsed.data.title, address: parsed.data.address,
-        contactPhone: parsed.data.contactPhone, photos,
+        contactPhone, photos,
         description: JSON.stringify({ ownerName: parsed.data.ownerName, facilities: parsed.data.facilities, gateTiming: parsed.data.gateTiming, mapLink: parsed.data.mapLink })
       },
       include: { owner: { select: { id: true, name: true } } }
@@ -88,6 +90,13 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
     res.json({ ok: true });
   } catch (error) { next(error); }
 });
+
+function normalizeIndianPhone(value) {
+  const digits = String(value || '').replace(/\\D/g, '');
+  const local = digits.length === 12 && digits.startsWith('91') ? digits.slice(2)
+    : digits.length === 11 && digits.startsWith('0') ? digits.slice(1) : digits;
+  return /^[6-9][0-9]{9}$/.test(local) ? local : '';
+}
 
 async function uploadPhoto(file) {
   const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
