@@ -2241,6 +2241,19 @@ function renderStays(){
     return '<article class="stay-card"><div class="stay-cover">'+cover+'</div><div class="stay-card-body"><span class="stay-type">'+esc(s.type)+'</span><h2>'+esc(s.title)+'</h2><p class="stay-meta">⌖ '+esc(s.address)+'</p><p class="stay-meta">Owner: <strong>'+esc(s.ownerName||'Not provided')+'</strong></p>'+tags+gate+'<div class="stay-actions"><button class="btn btn-primary" data-action="stay-details" data-id="'+esc(s.id)+'">View details</button>'+(s.ownerId===me().id?'<button class="btn btn-sm" data-action="edit-stay" data-id="'+esc(s.id)+'">Edit listing</button><button class="btn btn-danger" data-action="delete-stay" data-id="'+esc(s.id)+'">Remove</button>':'')+'</div></div></article>';
   }).join('');
 }
+async function compressStayPhoto(file){
+ if(!window.createImageBitmap)throw new Error('This browser cannot resize photos. Please use JPG or PNG photos.');
+ var bitmap;
+ try{bitmap=await createImageBitmap(file)}catch(_){throw new Error('This photo format is not supported. Please convert it to JPG or PNG and try again.')}
+ var maxSide=1400,scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
+ var canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+ var ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();
+ var blob=await new Promise(function(resolve){canvas.toBlob(resolve,'image/jpeg',0.76)});
+ if(!blob)throw new Error('Could not prepare this photo. Please choose another image.');
+ if(blob.size>850000){blob=await new Promise(function(resolve){canvas.toBlob(resolve,'image/jpeg',0.58)})}
+ if(!blob||blob.size>1000000)throw new Error('One photo is too large to process. Please choose a smaller photo.');
+ return new File([blob],file.name.replace(/\\.[^.]+$/,'')+'.jpg',{type:'image/jpeg'});
+}
 var editingStayId=null;
 function openStayForm(){
  if(!me()){openAuth('login','Log in to list your PG, hostel or flat.');return}
@@ -2268,16 +2281,21 @@ $('#stayForm').addEventListener('submit',async function(e){
  var details={ownerName:ownerName,facilities:$('#stayFacilities').value.trim(),gateTiming:$('#stayGateTiming').value};
  var photos=Array.from($('#stayPhotos').files||[]);
  if(photos.length>5)return err.textContent='You can upload a maximum of 5 photos.';
- if(photos.some(function(file){return !/^image\/(jpeg|png|webp|gif)$/.test(file.type)}))return err.textContent='Upload JPEG, PNG, WebP or GIF images only.';
- if(photos.some(function(file){return file.size>5*1024*1024}))return err.textContent='Each photo must be 5 MB or smaller.';
+ if(photos.some(function(file){return !/^image\/(jpeg|png|webp)$/.test(file.type)}))return err.textContent='Please choose JPG, PNG or WebP photos.';
  var kept=editingStayId?Array.from(document.querySelectorAll('[data-stay-keep]:checked')).map(function(el){return el.value}):[];
  if(kept.length+photos.length>5)return err.textContent='Keep or add up to 5 photos in total.';
- var fd=new FormData();fd.append('type',$('#stayType').value);fd.append('title',title);fd.append('address',address);fd.append('mapLink',mapLink);fd.append('contactPhone',contactPhone);fd.append('ownerName',ownerName);fd.append('facilities',details.facilities);fd.append('gateTiming',details.gateTiming);
- if(editingStayId)fd.append('keepPhotos',JSON.stringify(kept));
- photos.forEach(function(file){fd.append('photos',file)});
- button.disabled=true;button.textContent=editingStayId?'Saving...':'Submitting...';
- try{if(editingStayId){await api('/stays/'+encodeURIComponent(editingStayId),{method:'PATCH',body:fd});$('#dlgStay').close();await loadStays();toast('Your listing has been updated.')}else{await api('/stays',{method:'POST',body:fd});$('#dlgStay').close();await loadStays();toast('Submitted for admin approval. It will appear after approval.')}}
- catch(error){err.textContent=error.message}
+ button.disabled=true;button.textContent='Preparing photos...';
+ try{
+  var compressed=[];
+  for(var photo of photos){compressed.push(await compressStayPhoto(photo))}
+  var totalBytes=compressed.reduce(function(sum,file){return sum+file.size},0);
+  if(totalBytes>3900000)throw new Error('Photos are still too large. Please choose fewer or smaller photos.');
+  var fd=new FormData();fd.append('type',$('#stayType').value);fd.append('title',title);fd.append('address',address);fd.append('mapLink',mapLink);fd.append('contactPhone',contactPhone);fd.append('ownerName',ownerName);fd.append('facilities',details.facilities);fd.append('gateTiming',details.gateTiming);
+  if(editingStayId)fd.append('keepPhotos',JSON.stringify(kept));
+  compressed.forEach(function(file){fd.append('photos',file,file.name)});
+  button.textContent=editingStayId?'Saving...':'Uploading...';
+  if(editingStayId){await api('/stays/'+encodeURIComponent(editingStayId),{method:'PATCH',body:fd});$('#dlgStay').close();await loadStays();toast('Your listing has been updated.')}else{await api('/stays',{method:'POST',body:fd});$('#dlgStay').close();await loadStays();toast('Submitted for admin approval. It will appear after approval.')}
+ }catch(error){err.textContent=error.message||'Photo upload failed. Please try again.'}
  finally{button.disabled=false;button.textContent=editingStayId?'Save changes':'Submit for approval'}
 });
 
