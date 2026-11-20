@@ -53,6 +53,33 @@ router.post('/', requireAuth, upload.array('photos', 5), async (req, res, next) 
   } catch (error) { next(error); }
 });
 
+router.patch('/:id', requireAuth, upload.array('photos', 5), async (req, res, next) => {
+  try {
+    const stay = await prisma.accommodation.findUnique({ where: { id: req.params.id } });
+    if (!stay || stay.ownerId !== req.user.id || stay.type === 'PRINT_SHOP') return res.status(404).json({ error: 'Listing not found.' });
+    const parsed = input.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error.issues[0].message });
+    if (parsed.data.contactPhone && !/^(?:\\+?91[-\\s]?)?[6-9]\\d{9}$/.test(parsed.data.contactPhone)) return res.status(400).json({ error: 'Enter a valid Indian mobile number.' });
+    if (parsed.data.mapLink && !/^https:\/\/(?:maps\.app\.goo\.gl|(?:www\.)?google\.com\/maps|maps\.google\.com)\//i.test(parsed.data.mapLink)) return res.status(400).json({ error: 'Enter a valid Google Maps share link.' });
+    let keptPhotos = [];
+    try { keptPhotos = JSON.parse(String(req.body.keepPhotos || '[]')); } catch (_) { return res.status(400).json({ error: 'Invalid existing photo list.' }); }
+    if (!Array.isArray(keptPhotos) || keptPhotos.some(url => typeof url !== 'string' || !(stay.photos || []).includes(url))) return res.status(400).json({ error: 'Invalid existing photo selection.' });
+    if (keptPhotos.length + (req.files || []).length > 5) return res.status(400).json({ error: 'You can keep or add up to 5 photos in total.' });
+    const newPhotos = await Promise.all((req.files || []).map(uploadPhoto));
+    const photos = [...keptPhotos, ...newPhotos];
+    const updated = await prisma.accommodation.update({
+      where: { id: stay.id },
+      data: {
+        type: parsed.data.type, title: parsed.data.title, address: parsed.data.address,
+        contactPhone: parsed.data.contactPhone, photos,
+        description: JSON.stringify({ ownerName: parsed.data.ownerName, facilities: parsed.data.facilities, gateTiming: parsed.data.gateTiming, mapLink: parsed.data.mapLink })
+      },
+      include: { owner: { select: { id: true, name: true } } }
+    });
+    res.json({ stay: formatStay(updated) });
+  } catch (error) { next(error); }
+});
+
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
     const stay = await prisma.accommodation.findUnique({ where: { id: req.params.id } });
