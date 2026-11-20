@@ -1657,7 +1657,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
  <p id="quickPrintError" class="err" role="alert"></p><button class="btn btn-primary" id="quickPrintSubmit" type="submit">Submit for approval</button>
  </form></dialog>
 <dialog id="dlgStay"><form class="dlg" id="stayForm" novalidate>
-  <div class="dlg-head"><h2>List your place</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
+  <div class="dlg-head"><h2 id="stayFormTitle">List your place</h2><button type="button" class="x" data-action="close" aria-label="Close">&times;</button></div>
   <div class="field"><label for="stayType">Type</label><select id="stayType"><option value="HOSTEL">Hostel</option><option value="PG">PG</option><option value="FLAT">Flat</option></select></div>
   <div class="field"><label for="stayTitle">Hostel / PG / Flat name</label><input id="stayTitle" maxlength="80" placeholder="e.g. Sunrise Boys Hostel" required></div>
   <div class="field"><label for="stayAddress">Full location / address</label><input id="stayAddress" maxlength="180" placeholder="Area, landmark or full address" required></div>
@@ -1666,7 +1666,7 @@ dialog::backdrop{background:rgba(0,0,0,.72)}
   <div class="field"><label for="stayContactPhone">WhatsApp / contact number</label><input id="stayContactPhone" type="tel" maxlength="18" placeholder="10-digit mobile number" required></div>
   <div class="field"><label for="stayFacilities">Facilities</label><textarea id="stayFacilities" maxlength="600" placeholder="e.g. Wi-Fi, water cooler, washing machine, food, parking..."></textarea></div>
   <div class="field"><label for="stayGateTiming">Gate timing</label><select id="stayGateTiming"><option value="">Select gate timing</option><option value="No time restriction">No time restriction</option><option value="Gate closes at 10 PM">Gate closes at 10 PM</option><option value="Gate closes at 11 PM">Gate closes at 11 PM</option><option value="Gate closes at 12 AM">Gate closes at 12 AM</option><option value="Gate closes at 1 AM">Gate closes at 1 AM</option><option value="Other / ask owner">Other / ask owner</option></select></div>
-  <div class="field"><label for="stayPhotos">Photos <span class="muted">(up to 5, optional)</span></label><input id="stayPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple><small class="hint">Add up to 5 photos of the hostel, rooms or facilities. Max 5 MB each.</small><div id="stayPhotoPreviews" class="photo-previews"></div></div>
+  <div class="field"><label for="stayPhotos">Photos <span class="muted">(up to 5, optional)</span></label><input id="stayPhotos" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple><small class="hint">Add up to 5 photos of the hostel, rooms or facilities. Max 5 MB each.</small><div id="stayPhotoPreviews" class="photo-previews"></div><div id="stayExistingPhotos" class="photo-previews"></div></div>
   <p id="stayError" class="err" role="alert"></p><button class="btn btn-primary" id="staySubmit" type="submit">Submit for approval</button>
 </form></dialog>
 <dialog id="dlgItem" aria-label="Item details"><div class="dlg" id="itemBody"></div></dialog>
@@ -2238,12 +2238,21 @@ function renderStays(){
     var facilities=String(s.facilities||'').split(/[,\\n]/).map(function(x){return x.trim()}).filter(Boolean).slice(0,3);
     var tags=facilities.length?'<div class="stay-facility-tags">'+facilities.map(function(x){return '<span>'+esc(x)+'</span>'}).join('')+'</div>':'';
     var gate=s.gateTiming?'<p class="stay-gate-note">◷ '+esc(s.gateTiming)+'</p>':'';
-    return '<article class="stay-card"><div class="stay-cover">'+cover+'</div><div class="stay-card-body"><span class="stay-type">'+esc(s.type)+'</span><h2>'+esc(s.title)+'</h2><p class="stay-meta">⌖ '+esc(s.address)+'</p><p class="stay-meta">Owner: <strong>'+esc(s.ownerName||'Not provided')+'</strong></p>'+tags+gate+'<div class="stay-actions"><button class="btn btn-primary" data-action="stay-details" data-id="'+esc(s.id)+'">View details</button>'+(s.ownerId===me().id?'<button class="btn btn-danger" data-action="delete-stay" data-id="'+esc(s.id)+'">Remove</button>':'')+'</div></div></article>';
+    return '<article class="stay-card"><div class="stay-cover">'+cover+'</div><div class="stay-card-body"><span class="stay-type">'+esc(s.type)+'</span><h2>'+esc(s.title)+'</h2><p class="stay-meta">⌖ '+esc(s.address)+'</p><p class="stay-meta">Owner: <strong>'+esc(s.ownerName||'Not provided')+'</strong></p>'+tags+gate+'<div class="stay-actions"><button class="btn btn-primary" data-action="stay-details" data-id="'+esc(s.id)+'">View details</button>'+(s.ownerId===me().id?'<button class="btn btn-sm" data-action="edit-stay" data-id="'+esc(s.id)+'">Edit listing</button><button class="btn btn-danger" data-action="delete-stay" data-id="'+esc(s.id)+'">Remove</button>':'')+'</div></div></article>';
   }).join('');
 }
+var editingStayId=null;
 function openStayForm(){
  if(!me()){openAuth('login','Log in to list your PG, hostel or flat.');return}
- $('#stayForm').reset();$('#stayError').textContent='';$('#stayPhotoPreviews').innerHTML='';$('#dlgStay').showModal();
+ editingStayId=null;$('#stayForm').reset();$('#stayError').textContent='';$('#stayPhotoPreviews').innerHTML='';$('#stayExistingPhotos').innerHTML='';$('#stayFormTitle').textContent='List your place';$('#staySubmit').textContent='Submit for approval';$('#dlgStay').showModal();
+}
+function openStayEdit(id){
+ var s=stayData.find(function(x){return x.id===id});
+ if(!s||!me()||s.ownerId!==me().id)return;
+ editingStayId=s.id;$('#stayForm').reset();$('#stayType').value=s.type;$('#stayTitle').value=s.title;$('#stayAddress').value=s.address;$('#stayMapLink').value=s.mapLink||'';$('#stayOwnerName').value=s.ownerName||'';$('#stayContactPhone').value=s.contactPhone||'';$('#stayFacilities').value=s.facilities||'';$('#stayGateTiming').value=s.gateTiming||'';
+ $('#stayError').textContent='';$('#stayPhotoPreviews').innerHTML='';
+ $('#stayExistingPhotos').innerHTML=(s.photos||[]).map(function(url,i){return '<label class="stay-edit-photo"><input type="checkbox" data-stay-keep checked value="'+esc(url)+'"><img src="'+esc(url)+'" alt="Current listing photo '+(i+1)+'"><span>Keep photo '+(i+1)+'</span></label>'}).join('');
+ $('#stayFormTitle').textContent='Edit your listing';$('#staySubmit').textContent='Save changes';$('#dlgStay').showModal();
 }
 $('#stayForm').addEventListener('submit',async function(e){
  e.preventDefault();var err=$('#stayError'),button=$('#staySubmit');
@@ -2259,12 +2268,15 @@ $('#stayForm').addEventListener('submit',async function(e){
  if(photos.length>5)return err.textContent='You can upload a maximum of 5 photos.';
  if(photos.some(function(file){return !/^image\/(jpeg|png|webp|gif)$/.test(file.type)}))return err.textContent='Upload JPEG, PNG, WebP or GIF images only.';
  if(photos.some(function(file){return file.size>5*1024*1024}))return err.textContent='Each photo must be 5 MB or smaller.';
+ var kept=editingStayId?Array.from(document.querySelectorAll('[data-stay-keep]:checked')).map(function(el){return el.value}):[];
+ if(kept.length+photos.length>5)return err.textContent='Keep or add up to 5 photos in total.';
  var fd=new FormData();fd.append('type',$('#stayType').value);fd.append('title',title);fd.append('address',address);fd.append('mapLink',mapLink);fd.append('contactPhone',contactPhone);fd.append('ownerName',ownerName);fd.append('facilities',details.facilities);fd.append('gateTiming',details.gateTiming);
+ if(editingStayId)fd.append('keepPhotos',JSON.stringify(kept));
  photos.forEach(function(file){fd.append('photos',file)});
- button.disabled=true;button.textContent='Submitting...';
- try{await api('/stays',{method:'POST',body:fd});$('#dlgStay').close();await loadStays();toast('Submitted for admin approval. It will appear after approval.')}
+ button.disabled=true;button.textContent=editingStayId?'Saving...':'Submitting...';
+ try{if(editingStayId){await api('/stays/'+encodeURIComponent(editingStayId),{method:'PATCH',body:fd});$('#dlgStay').close();await loadStays();toast('Your listing has been updated.')}else{await api('/stays',{method:'POST',body:fd});$('#dlgStay').close();await loadStays();toast('Submitted for admin approval. It will appear after approval.')}}
  catch(error){err.textContent=error.message}
- finally{button.disabled=false;button.textContent='Submit for approval'}
+ finally{button.disabled=false;button.textContent=editingStayId?'Save changes':'Submit for approval'}
 });
 
 var quickPrintData=[],adminQuickPrintData=[];
@@ -2538,6 +2550,7 @@ document.addEventListener('click', async function(e) {
     case 'retry-assignments': loadAssignmentPosts().catch(function(error){toast(error.message)}); break;
     case 'retry-stays': loadStays(); break;
     case 'create-stay': openStayForm(); break;
+    case 'edit-stay': openStayEdit(id); break;
     case 'delete-stay':
       if(!confirm('Remove your accommodation listing?'))break;
       try{await api('/stays/'+encodeURIComponent(id),{method:'DELETE'});await loadStays();toast('Your listing has been removed.')}catch(error){toast(error.message)}
