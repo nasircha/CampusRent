@@ -2260,8 +2260,10 @@ $('#stayForm').addEventListener('submit',async function(e){
  if(title.length<3)return err.textContent='Enter a place name of at least 3 characters.';
  if(address.length<3)return err.textContent='Enter the location.';
  if(ownerName.length<2)return err.textContent='Enter the owner name.';
- var contactPhone=$('#stayContactPhone').value.trim(),mapLink=$('#stayMapLink').value.trim();
- if(!/^(?:\+?91[-\s]?)?[6-9]\d{9}$/.test(contactPhone))return err.textContent='Enter a valid Indian mobile number.';
+ var rawPhone=$('#stayContactPhone').value.trim(),phoneDigits=rawPhone.replace(/\D/g,'');
+ var contactPhone=phoneDigits.length===12&&phoneDigits.indexOf('91')===0?phoneDigits.slice(2):phoneDigits.length===11&&phoneDigits.charAt(0)==='0'?phoneDigits.slice(1):phoneDigits;
+ var mapLink=$('#stayMapLink').value.trim();
+ if(!/^[6-9]\d{9}$/.test(contactPhone))return err.textContent='Enter a valid 10-digit Indian mobile number. You can include +91 or spaces too.';
  if(mapLink&&!/^https:\/\/(?:maps\.app\.goo\.gl|(?:www\.)?google\.com\/maps|maps\.google\.com)\//i.test(mapLink))return err.textContent='Paste a valid Google Maps share link.';
  var details={ownerName:ownerName,facilities:$('#stayFacilities').value.trim(),gateTiming:$('#stayGateTiming').value};
  var photos=Array.from($('#stayPhotos').files||[]);
